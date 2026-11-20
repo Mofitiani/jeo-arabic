@@ -247,12 +247,28 @@ const SB_URL = "https://yewosqrrzxsqwqsicipz.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlld29zcXJyenhzcXdxc2ljaXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExOTc4NDAsImV4cCI6MjEwNjc3Mzg0MH0.P5uF8RCmLht_kQZMp6GNDRmZKAjeFEcYZWkfc-x9iws";
 const sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: false } });
 
-let ch = null;
+let ch = null, connArgs = null, connOK = false, retryTimer = null;
 function connect(room, key, h) {
-  ch = sb.channel("mws-" + room, { config: { broadcast: { self: false }, presence: { key } } });
-  for (const ev of ["join", "buzz", "wager", "fin", "ans", "hello", "state"]) ch.on("broadcast", { event: ev }, m => h.msg(ev, m.payload || {}));
-  ch.on("presence", { event: "sync" }, () => h.presence && h.presence(ch.presenceState()));
-  ch.subscribe(st => { if (st === "SUBSCRIBED") ch.track({ t: Date.now() }).catch(() => {}); h.status(st); });
+  connArgs = [room, key, h];
+  const c = sb.channel("mws-" + room, { config: { broadcast: { self: false }, presence: { key } } });
+  ch = c;
+  for (const ev of ["join", "buzz", "wager", "fin", "ans", "hello", "state"]) c.on("broadcast", { event: ev }, m => h.msg(ev, m.payload || {}));
+  c.on("presence", { event: "sync" }, () => h.presence && h.presence(c.presenceState()));
+  c.subscribe(st => {
+    if (c !== ch) return;                       // an old channel we already replaced
+    connOK = st === "SUBSCRIBED";
+    if (connOK) c.track({ t: Date.now() }).catch(() => {});
+    else if (st === "CHANNEL_ERROR" || st === "TIMED_OUT" || st === "CLOSED") { clearTimeout(retryTimer); retryTimer = setTimeout(reconnect, 2000); }
+    h.status(st);
+  });
+}
+// Drop the channel and join it again (after a network drop, or when a phone comes back from the background)
+function reconnect() {
+  if (!connArgs) return;
+  clearTimeout(retryTimer);
+  const old = ch; ch = null; connOK = false;
+  if (old) sb.removeChannel(old).catch(() => {});
+  connect(...connArgs);
 }
 const send = (event, payload) => { if (ch) ch.send({ type: "broadcast", event, payload }).catch(() => {}); };
 
@@ -324,14 +340,40 @@ function applyWrong(pid, note) {
 }
 function startAnswerTimer() {
   clearTimeout(T.timer);
-  const pid = T.winner; T.deadline = Date.now() + ANSWER_MS;
+  T.deadline = Date.now() + ANSWER_MS;
   T.timer = setTimeout(() => {
-    if (T.phase === "clue" && T.winner === pid && !T.answerText) {
+    const pid = T.winner;
+    if (T.phase === "clue" && pid && !T.answerText && !T.revealed) {
       T.attempts.push({ pid, text: "", v: "none" }); T.undo = null;
       applyWrong(pid, "انتهى الوقت"); drawOverlay(); pub();
     }
   }, ANSWER_MS + 300);
 }
+
+// The clue in progress is saved too, so reloading the host screen picks up where it left off
+const TKEY = "mws-host-turn-v1";
+function saveT() { store.set(TKEY, Object.assign({}, T, { online: null, timer: null })); }
+function restoreT() {
+  const s = store.get(TKEY);
+  if (!s || !s.phase || s.phase === "board") return;
+  Object.assign(T, s, { online: T.online, timer: null, undo: null });
+  if (T.phase === "clue" && T.winner && !T.answerText && !T.revealed) startAnswerTimer();
+}
+// A player who rejoins on a new phone or browser takes over their old seat
+function repid(a, b) {
+  const p = pf(a); if (p) p.pid = b;
+  if (G.control === a) G.control = b;
+  if (T.winner === a) T.winner = b;
+  if (T.wagerFor === a) T.wagerFor = b;
+  T.locked = T.locked.map(x => x === a ? b : x);
+  if (T.penalty[a]) T.penalty[b] = T.penalty[a];
+  T.attempts.forEach(x => { if (x.pid === a) x.pid = b; });
+  if (T.res && T.res.pid === a) T.res.pid = b;
+  if (T.final) for (const k of ["wagers", "answers", "marks", "verdict"]) {
+    const m = T.final[k]; if (m && a in m) { m[b] = m[a]; delete m[a]; }
+  }
+}
+const sameName = (x, y) => norm(x) === norm(y) && norm(x) !== "";
 
 function joinUrl() { return location.origin + location.pathname + "?room=" + G.room; }
 
@@ -363,6 +405,7 @@ function initHost() {
   </div>`;
   try { new QRCode($("#qr"), { text: joinUrl(), width: 208, height: 208, colorDark: "#081613", colorLight: "#eef0e6", correctLevel: QRCode.CorrectLevel.M }); } catch (e) { $("#qr").hidden = true; }
   renderBoard(); renderRail();
+  restoreT(); drawOverlay();
 
   $("#board").addEventListener("click", e => { const t = e.target.closest(".tile"); if (t && !t.disabled) openTile(t.dataset.k); });
   $("#rail").addEventListener("click", e => {
@@ -389,10 +432,12 @@ function initHost() {
     status: st => {
       const ok = st === "SUBSCRIBED";
       $("#hdot").classList.toggle("on", ok);
-      $("#hconn").textContent = ok ? "متصل · بانتظار اللاعبين" : (st === "CHANNEL_ERROR" || st === "TIMED_OUT" ? "تعذّر الاتصال، أعد تحميل الصفحة" : "جارٍ الاتصال…");
+      $("#hconn").textContent = ok ? "متصل · بانتظار اللاعبين" : (st === "CHANNEL_ERROR" || st === "TIMED_OUT" || st === "CLOSED" ? "انقطع الاتصال، جارٍ إعادة المحاولة…" : "جارٍ الاتصال…");
       if (ok) pub();
     }
   });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && !connOK) reconnect(); });
+  window.addEventListener("online", reconnect);
   setInterval(pub, 2000);
   setInterval(() => { const cd = document.getElementById("cd"); if (cd && T.deadline) cd.textContent = Math.max(0, Math.ceil((T.deadline - Date.now()) / 1000)); }, 250);
 }
@@ -443,8 +488,10 @@ function pub() {
     ansLeft: T.deadline ? Math.max(0, T.deadline - Date.now()) : 0,
     judging: T.phase === "clue" && !T.revealed && !!T.answerText,
     res: T.res,
+    lastWrong: (!T.isWager && T.armed && T.res && !T.res.ok && pf(T.res.pid)) ? pf(T.res.pid).name : "",
     final: T.final ? { stage: T.final.stage, w: Object.keys(T.final.wagers), a: Object.keys(T.final.answers) } : null
   });
+  saveT();
 }
 
 function hostMsg(ev, p) {
@@ -452,6 +499,13 @@ function hostMsg(ev, p) {
   const pid = String(p.pid || "").slice(0, 16); if (!pid) return;
   if (ev === "join") {
     const name = String(p.name || "").trim().slice(0, 24) || "لاعب";
+    // Same name as an existing player (or an explicit "I'm X" tap) means the same person coming back
+    let claim = String(p.claim || "");
+    if (!pf(claim)) { const m = G.players.find(x => x.pid !== pid && sameName(x.name, name)); claim = m ? m.pid : ""; }
+    if (claim && claim !== pid) {
+      G.players = G.players.filter(x => x.pid !== pid);   // drop a seat this phone may already have
+      repid(claim, pid);
+    }
     const pl = pf(pid);
     if (pl) pl.name = name; else G.players.push({ pid, name, score: 0 });
     saveG(); renderRail(); if (T.phase !== "board") drawOverlay(); return pub();
@@ -688,8 +742,20 @@ function initPlayer() {
   $("#app").innerHTML = `<div class="pl"><div class="plhead" id="plhead"></div><div class="center" id="plbody"></div><div class="center" id="plfoot"></div></div>`;
   document.addEventListener("pointerdown", e => { if (e.target.closest("#buzz")) { e.preventDefault(); tap(); } });
   document.addEventListener("submit", onPlayerSubmit);
-  document.addEventListener("click", e => { if (e.target.closest("#rename")) { editingName = true; renderPlayer(); } });
-  if (roomParam.length === 4 && P.name) startPlayerConn();
+  document.addEventListener("click", e => {
+    if (e.target.closest("#rename")) { editingName = true; renderPlayer(); }
+    const c = e.target.closest("[data-claim]");
+    if (c && S) {
+      const old = S.players.find(x => x.pid === c.dataset.claim); if (!old) return;
+      P.name = old.name; store.set(PKEY, P); editingName = false;
+      send("join", { pid: P.pid, name: P.name, claim: old.pid }); lastJoin = Date.now();
+      lastView = ""; renderPlayer();
+    }
+  });
+  // Coming back to the tab (after locking the phone or switching apps): reconnect if the host has gone quiet
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && ch && Date.now() - lastState > 4000) reconnect(); });
+  window.addEventListener("online", () => { if (ch) reconnect(); });
+  if (roomParam.length === 4) startPlayerConn();
   renderPlayer();
   setInterval(renderPlayer, 1500);
   setInterval(() => { const cd = document.getElementById("cdp"); if (cd && ansDeadline) cd.textContent = Math.max(0, Math.ceil((ansDeadline - Date.now()) / 1000)); }, 250);
@@ -706,7 +772,7 @@ function startPlayerConn() {
       if (!S.final) sentFin = {};
       if (!S.answering) sentAns = null;
       const me = S.players.find(x => x.pid === P.pid);
-      if (!me && Date.now() - lastJoin > 2000) { lastJoin = Date.now(); send("join", { pid: P.pid, name: P.name }); }
+      if (!me && P.name && !editingName && Date.now() - lastJoin > 2000) { lastJoin = Date.now(); send("join", { pid: P.pid, name: P.name }); }
       const iWin = S.phase === "clue" && S.winner === P.pid;
       if (iWin && !wasWinner && navigator.vibrate) navigator.vibrate([120, 60, 120]);
       wasWinner = iWin;
@@ -714,7 +780,7 @@ function startPlayerConn() {
     },
     status: st => {
       connState = st;
-      if (st === "SUBSCRIBED") { lastJoin = Date.now(); send("join", { pid: P.pid, name: P.name }); send("hello", {}); }
+      if (st === "SUBSCRIBED") { if (P.name && !editingName) { lastJoin = Date.now(); send("join", { pid: P.pid, name: P.name }); } send("hello", {}); }
       renderPlayer();
     }
   });
@@ -752,6 +818,7 @@ function onPlayerSubmit(e) {
     const n = inp.value.trim().slice(0, 24);
     if (!n) { err.textContent = "اكتب اسمك."; return; }
     P.name = n; store.set(PKEY, P); editingName = false;
+    lastJoin = Date.now();
     if (ch) send("join", { pid: P.pid, name: P.name }); else startPlayerConn();
     lastView = ""; renderPlayer(); return;
   }
@@ -801,7 +868,10 @@ function renderPlayer() {
 
   let key, html;
   if (roomParam.length !== 4) { key = "code"; html = formHTML("code", "انضم إلى اللعبة", "رمز الغرفة الظاهر على شاشة المضيف", "ABCD", "التالي", false); }
-  else if (!P.name || editingName) { key = "name"; html = formHTML("name", "ما اسمك؟", "يظهر اسمك على شاشة المضيف", "مثلًا: سارة", "انضم", false); }
+  else if (!P.name || editingName) {
+    key = "name";
+    html = formHTML("name", "ما اسمك؟", "يظهر اسمك على شاشة المضيف", "مثلًا: سارة", "انضم", false) + `<div class="pform" id="claims"></div>`;
+  }
   else if (!live) { key = "off"; html = buzzHTML("off", "بانتظار المضيف…", "تأكد أن شاشة المضيف مفتوحة"); }
   else if (S.phase === "over") {
     const ranked = [...S.players].sort((a, b) => b.score - a.score);
@@ -849,7 +919,7 @@ function renderPlayer() {
     else if (S.winner === P.pid) { key = "win"; html = buzzHTML("win", "دورك! أجب الآن", sub); }
     else if (S.winner) { key = "lost"; html = buzzHTML("lost", "سبقك " + esc(winner ? winner.name : ""), S.judging ? "يراجع المضيف إجابته" : "يكتب إجابته…"); }
     else if (pending) { key = "pending"; html = buzzHTML("pending", "…", sub); }
-    else if (S.armed) { key = "ready"; html = buzzHTML("ready", "اضغط!", sub); }
+    else if (S.armed) { key = "ready" + S.lastWrong; html = buzzHTML("ready", "اضغط!", S.lastWrong ? `أخطأ ${esc(S.lastWrong)} · دورك الآن` : sub); }
     else { key = "wait"; html = buzzHTML("wait", "استمع…", "لا تضغط قبل فتح الأزرار"); }
   }
   else { key = "idle"; html = buzzHTML("idle", "انتظر", "المضيف يختار السؤال"); }
@@ -858,6 +928,14 @@ function renderPlayer() {
   const isForm = ["code", "name", "w", "fw", "fa", "ans"].includes(key);
   if (key !== lastView || !isForm) body.innerHTML = html;
   lastView = key;
+  // "Rejoin as" buttons, refreshed without wiping a name being typed
+  const claims = document.getElementById("claims");
+  if (claims) {
+    const others = S ? S.players.filter(x => x.pid !== P.pid) : [];
+    const h = others.length ? `<p class="hint" style="text-align:center">كنت في اللعبة من قبل؟ عُد إلى مكانك ونقاطك:</p>
+      <div class="btns" style="justify-content:center">${others.map(x => `<button type="button" data-claim="${esc(x.pid)}">أنا ${esc(x.name)} (${fmt(x.score)})</button>`).join("")}</div>` : "";
+    if (claims.dataset.h !== h) { claims.innerHTML = h; claims.dataset.h = h; }
+  }
   foot.innerHTML = P.name && roomParam.length === 4 && !editingName ? `<button type="button" class="linkbtn" id="rename">تغيير الاسم</button>` : "";
 }
 
