@@ -227,6 +227,8 @@ button { cursor: pointer; }
 .rcard .rd { font-weight: 500; font-size: 17px; line-height: 1.6; }
 @media (max-width: 900px) { .reveal { grid-template-columns: 1fr 1fr; } }
 
+.voicehelp { flex-basis: 100%; max-width: 560px; padding: 8px 12px; background: var(--paper); border: 3px solid var(--wine); color: var(--wine); font-weight: 700; font-size: 14px; line-height: 1.6; }
+
 /* mic */
 .btn.mic { align-self: flex-start; }
 .micst { font-weight: 700; font-size: 14px; min-height: 1.4em; }
@@ -826,6 +828,9 @@ const COPY = {
 "voice.off": [
 "الصوت: مطفي"
 ],
+"voice.help": [
+"ما في صوت عربي على هالجهاز، فما رح نقرأ الأسئلة. افتح اللعبة بمتصفح Edge، أو ثبّت صوت عربي من إعدادات الجهاز."
+],
 "voice.none": [
 "ما في صوت عربي على هالجهاز"
 ],
@@ -996,19 +1001,28 @@ function applyBoard() {
 
 // ---------- Voice: the TV reads clues with the device's Arabic voice ----------
 let arVoice = null;
+// Only ever use an Arabic voice: a non-Arabic voice skips the Arabic letters and reads the punctuation ("dot dot").
+// Prefer natural-sounding voices (Edge's "Online (Natural)" ones), then Levantine accents.
 function pickVoice() {
   if (!window.speechSynthesis) return null;
-  const vs = speechSynthesis.getVoices();
-  arVoice = vs.find(v => /^ar[-_](SA|JO|PS|LB|SY|AE)/i.test(v.lang)) || vs.find(v => /^ar/i.test(v.lang)) || null;
+  const score = v => (/natural|online|neural|premium|enhanced/i.test(v.name) ? 4 : 0) + (/^ar[-_](JO|LB|SY|PS)/i.test(v.lang) ? 2 : 0) + (/^ar[-_]SA/i.test(v.lang) ? 1 : 0);
+  const ar = speechSynthesis.getVoices().filter(v => /^ar([-_]|$)/i.test(v.lang));
+  arVoice = ar.sort((a, b) => score(b) - score(a))[0] || null;
   return arVoice;
+}
+// Strip marks a voice may read aloud; full stops and ellipses become pauses (decimals like 1.44 are kept)
+function speakable(text) {
+  return String(text).replace(/[«»"“”()]/g, " ").replace(/…/g, "، ").replace(/(?<!\d)\.|\.(?!\d)/g, "، ").replace(/\s+/g, " ").trim();
 }
 if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = () => { pickVoice(); renderVoiceBtn(); }; }
 function speak(text, onend) {
   if (!G.voice || !window.speechSynthesis) return false;
+  if (!arVoice) pickVoice();
+  if (!arVoice) { renderVoiceBtn(); return false; }      // no Arabic voice: stay silent rather than read gibberish
   try {
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = arVoice ? arVoice.lang : "ar-SA"; if (arVoice) u.voice = arVoice;
+    const u = new SpeechSynthesisUtterance(speakable(text));
+    u.lang = arVoice.lang; u.voice = arVoice;
     u.rate = 0.95;
     if (onend) { let done = false; const fin = () => { if (!done) { done = true; onend(); } }; u.onend = fin; u.onerror = fin; }
     speechSynthesis.speak(u);
@@ -1021,7 +1035,9 @@ function renderVoiceBtn() {
   if (!window.speechSynthesis) { b.hidden = true; return; }
   b.textContent = G.voice ? t("voice.on") : t("voice.off");
   b.classList.toggle("sel", !!G.voice);
-  b.title = arVoice ? "" : t("voice.none");
+  b.title = arVoice ? arVoice.name : t("voice.none");
+  const h = document.getElementById("voiceHelp");
+  if (h) h.hidden = !(G.voice && !arVoice);
 }
 // Read the clue, then open the buzzers when the reading ends
 function readClue() {
@@ -1051,6 +1067,7 @@ function initHost() {
       <h1 class="extrude">${th("name.title")}</h1>
       <div class="hside">
         <button type="button" class="btn" id="voiceBtn"></button>
+        <div class="voicehelp" id="voiceHelp" role="status" hidden>${th("voice.help")}</div>
         <button type="button" class="btn dark" id="finalBtn">${th("board.final")}</button>
         <button type="button" class="btn" id="resetBtn">${th("board.newGame")}</button>
         <button type="button" class="codechip" id="codeChip" aria-label="${th("lobby.codeLabel")}">
