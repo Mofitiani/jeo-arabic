@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f2420">
+<title>ما وراء السطور</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Host: board on a TV or laptop with room code and QR. Players: one big buzzer per phone. Single dark malachite look. */
+:root {
+  --felt: #0f2420; --felt-deep: #081613; --tile: #17382f; --tile-hi: #21493d;
+  --gold: #d8b65f; --ink: #eef0e6; --muted: #9fb5a8; --good: #7fd1a0; --bad: #ee8f7b;
+  --line: rgba(216,182,95,.24);
+  --display: "Reem Kufi", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, "Noto Sans Arabic", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: radial-gradient(ellipse at 50% 0%, #1a3a32 0%, var(--felt) 45%, var(--felt-deep) 100%) fixed, var(--felt);
+  color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+[hidden] { display: none !important; }
+.wrap {
+  max-width: 1240px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px 40px; display: grid; gap: 18px;
+}
+header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(34px, 5vw, 54px); line-height: 1.1; margin: 0; color: var(--gold); }
+h1 small { display: block; font-family: var(--body); font-weight: 500; font-size: 14px; color: var(--muted); }
+.joinbox { display: flex; align-items: center; gap: 14px; background: rgba(0,0,0,.28); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+#qr { background: var(--ink); padding: 6px; border-radius: 6px; line-height: 0; }
+#qr img, #qr canvas { width: 104px; height: 104px; }
+.code { font-family: var(--display); font-weight: 700; font-size: 40px; line-height: 1; letter-spacing: .12em; color: var(--gold); direction: ltr; text-align: start; }
+.joinbox .small { font-size: 13px; color: var(--muted); }
+.joinbox .url { direction: ltr; unicode-bidi: isolate; color: var(--ink); word-break: break-all; }
+.conn { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--bad); display: inline-block; flex: none; }
+.dot.on { background: var(--good); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+button {
+  font: 600 15px/1.2 var(--body); color: var(--ink); background: transparent;
+  border: 1px solid var(--line); border-radius: 6px; padding: 9px 14px; cursor: pointer;
+}
+button:hover { border-color: var(--gold); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+button.primary { background: var(--gold); color: var(--felt-deep); border-color: var(--gold); }
+button.big { font-size: 20px; padding: 14px 22px; }
+button:disabled { opacity: .4; cursor: not-allowed; }
+button.ok { border-color: rgba(127,209,160,.5); color: var(--good); }
+button.ok.on, button.ok.big { background: var(--good); color: var(--felt-deep); }
+button.no { border-color: rgba(238,143,123,.5); color: var(--bad); }
+button.no.on, button.no.big { background: var(--bad); color: var(--felt-deep); }
+
+.board-scroll { overflow-x: auto; border-radius: 10px; }
+.board { display: grid; grid-template-columns: repeat(6, minmax(108px, 1fr)); gap: 6px; min-width: 680px; padding: 6px; background: #050e0c; border-radius: 10px; box-shadow: 0 20px 50px rgba(0,0,0,.45), inset 0 0 0 1px var(--line); }
+.cat { display: grid; place-items: center; text-align: center; min-height: 82px; padding: 8px 6px; font-family: var(--display); font-weight: 600; font-size: 19px; line-height: 1.3; background: var(--felt-deep); border-bottom: 2px solid var(--gold); text-wrap: balance; border-radius: 4px 4px 0 0; }
+.tile { height: 74px; border: 0; border-radius: 4px; background: linear-gradient(180deg, var(--tile-hi), var(--tile)); font-family: var(--display); font-weight: 700; font-size: 34px; color: var(--gold); text-shadow: 0 2px 0 rgba(0,0,0,.4); transition: transform .12s ease, filter .12s ease; }
+.tile:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.15); }
+.tile:disabled { background: rgba(255,255,255,.025); color: transparent; text-shadow: none; cursor: default; }
+
+.rail { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.player { background: rgba(0,0,0,.25); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 2px; min-width: 0; }
+.pname { font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 8px; min-width: 0; }
+.pname span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.score { font-family: var(--display); font-weight: 700; font-size: 38px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.score.neg { color: var(--bad); }
+.prow { display: flex; gap: 6px; align-items: center; justify-content: space-between; }
+.prow .mini { display: flex; gap: 4px; }
+.small-btn { padding: 5px 9px; font-size: 14px; }
+.empty { border: 1px dashed var(--line); border-radius: 8px; padding: 18px; color: var(--muted); }
+.hint { color: var(--muted); font-size: 14px; margin: 0; max-width: 72ch; line-height: 1.8; }
+.hint b { color: var(--ink); }
+
+.overlay { position: fixed; inset: 0; z-index: 20; background: rgba(3,10,8,.86); backdrop-filter: blur(3px); display: grid; place-items: center; overflow-y: auto;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.card { width: min(920px, 100%); background: linear-gradient(180deg, #1d4337, #122c25); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 30px 80px rgba(0,0,0,.6); padding: clamp(20px, 4vw, 40px); display: grid; gap: 20px; }
+.meta { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-weight: 600; font-size: 15px; color: var(--muted); }
+.meta .val { color: var(--gold); }
+.clue { font-family: var(--display); font-weight: 600; font-size: clamp(24px, 4vw, 42px); line-height: 1.55; text-wrap: balance; margin: 0; }
+.answer { border-top: 1px solid var(--line); padding-top: 16px; font-size: clamp(20px, 3vw, 28px); font-weight: 700; color: var(--gold); }
+.answer span { display: block; font-size: 13px; color: var(--muted); font-weight: 600; }
+.status { display: grid; gap: 12px; justify-items: start; }
+.buzzline { font-family: var(--display); font-weight: 700; font-size: clamp(26px, 4vw, 40px); line-height: 1.3; }
+.buzzline.win { color: var(--good); }
+.buzzline.live { color: var(--gold); animation: blink 1s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: .45; } }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.rows { display: grid; gap: 2px; width: 100%; }
+.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: space-between; padding: 8px 0; border-top: 1px solid rgba(255,255,255,.06); }
+.row .who { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.row .who em { font-style: normal; color: var(--muted); font-weight: 500; margin-inline-start: 8px; }
+.row .said { color: var(--gold); font-weight: 600; }
+.foot { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.badge { justify-self: start; font-family: var(--display); font-weight: 700; font-size: 22px; color: var(--felt-deep); background: var(--gold); padding: 4px 14px; border-radius: 4px; }
+.field { display: grid; gap: 6px; width: 100%; }
+.field label { font-weight: 600; font-size: 14px; color: var(--muted); }
+.field input, .field select { font: 600 20px var(--body); color: var(--ink); background: rgba(0,0,0,.3); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; width: 100%; }
+.err { color: var(--bad); font-size: 14px; margin: 0; min-height: 1.2em; }
+.wgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; width: 100%; }
+
+/* Player phone */
+.pl { min-height: 100svh; display: grid; grid-template-rows: auto 1fr auto; gap: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 14px 20px; }
+.plhead { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.plhead .nm { font-weight: 700; font-size: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plhead .score { font-size: 34px; }
+.center { display: grid; place-items: center; align-content: center; gap: 16px; text-align: center; }
+.buzz { width: min(80vw, 60svh, 440px); aspect-ratio: 1; border-radius: 50%; border: 0; display: grid; place-content: center; gap: 4px; padding: 20px;
+  font-family: var(--display); font-weight: 700; font-size: clamp(30px, 10vw, 54px); line-height: 1.2;
+  touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 12px 0 rgba(0,0,0,.4), inset 0 -8px 0 rgba(0,0,0,.18); transition: transform .05s, background-color .12s; }
+.buzz small { font-family: var(--body); font-size: 15px; font-weight: 600; opacity: .85; }
+.buzz:active { transform: translateY(6px); box-shadow: 0 6px 0 rgba(0,0,0,.4); }
+.b-off, .b-idle { background: #22413a; color: var(--muted); }
+.b-wait { background: #3b4a2c; color: #d9d2a4; }
+.b-ready { background: var(--gold); color: var(--felt-deep); animation: pulse .9s ease-in-out infinite; }
+.b-pending { background: #b89a4d; color: var(--felt-deep); }
+.b-win { background: var(--good); color: var(--felt-deep); }
+.b-lost, .b-locked { background: #3d2925; color: var(--bad); }
+.b-pen { background: var(--bad); color: var(--felt-deep); }
+@keyframes pulse { 50% { box-shadow: 0 12px 0 rgba(0,0,0,.4), 0 0 0 18px rgba(216,182,95,.18); } }
+@media (prefers-reduced-motion: reduce) { .b-ready, .buzzline.live { animation: none; } .tile { transition: none; } }
+.pform { width: min(420px, 100%); display: grid; gap: 12px; text-align: start; }
+.pform h2 { font-family: var(--display); font-size: 28px; margin: 0; color: var(--gold); text-align: center; }
+.linkbtn { background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: 14px; padding: 4px; }
+.big-msg { font-family: var(--display); font-size: clamp(26px, 8vw, 40px); line-height: 1.4; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="overlay" id="overlay" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const VALUES = [200, 400, 600, 800, 1000];
+const CATS = [
+  { name: "كلمات عربية في الإنجليزية", clues: [
+    ["كلمة إنجليزية لفرع من الرياضيات، أُخذت من عنوان كتاب الخوارزمي في «الجبر والمقابلة».", "ما هي Algebra؟"],
+    ["أصلها «الكُحل»، المسحوق الناعم لتكحيل العيون، ثم صارت تعني في الإنجليزية المادة المُسكِرة.", "ما هي Alcohol؟"],
+    ["رتبة بحرية رفيعة في الإنجليزية، يُرجَّح أنها مأخوذة من لقب «أمير البحر».", "ما هي Admiral؟"],
+    ["أعطت كلمة «صِفر» العربية الإنجليزيةَ كلمة zero، وأعطتها أيضًا هذه الكلمة التي تعني الرمز أو الشيفرة.", "ما هي Cipher؟"],
+    ["من الكلمة العربية «تعريف»، وصارت تعني في الإنجليزية جدول الرسوم الجمركية.", "ما هي Tariff؟"]
+  ]},
+  { name: "علماء العصر الذهبي", clues: [
+    ["من اسمه اشتُقّت كلمة «خوارزمية».", "من هو الخوارزمي؟"],
+    ["مؤلف «القانون في الطب» الذي دُرِّس في جامعات أوروبا قرونًا.", "من هو ابن سينا؟"],
+    ["عالم من البصرة شرح في «كتاب المناظر» أن الرؤية تحدث بدخول الضوء إلى العين.", "من هو ابن الهيثم؟"],
+    ["جرّاح أندلسي وضع موسوعة «التصريف لمن عجز عن التأليف» ورسم فيها أدوات الجراحة.", "من هو الزهراوي؟"],
+    ["طبيب دمشقي وصف الدورة الدموية الصغرى بين القلب والرئتين في القرن الثالث عشر.", "من هو ابن النفيس؟"]
+  ]},
+  { name: "بيت من الشعر", clues: [
+    ["صاحب البيت: «الخيلُ والليلُ والبيداءُ تعرفني ... والسيفُ والرمحُ والقرطاسُ والقلمُ».", "من هو المتنبي؟"],
+    ["بويع بلقب «أمير الشعراء» في القاهرة عام 1927.", "من هو أحمد شوقي؟"],
+    ["مطلع معلّقته: «قِفا نبكِ من ذكرى حبيبٍ ومنزلِ».", "من هو امرؤ القيس؟"],
+    ["قال في فتح عمّورية: «السيفُ أصدقُ إنباءً من الكتبِ».", "من هو أبو تمام؟"],
+    ["شاعر صعلوك جاهلي تُنسب إليه قصيدة «لاميّة العرب».", "من هو الشنفرى؟"]
+  ]},
+  { name: "مدن عريقة", clues: [
+    ["بناها الخليفة العباسي أبو جعفر المنصور مدوّرةً، وسمّاها «مدينة السلام».", "ما هي بغداد؟"],
+    ["عاصمة الأنباط المنحوتة في الصخر الوردي جنوب الأردن.", "ما هي البتراء؟"],
+    ["مدينة القوافل في بادية الشام التي حكمتها الملكة زنوبيا.", "ما هي تدمر؟"],
+    ["أسسها عقبة بن نافع نحو عام 670م في تونس لتكون قاعدة للفتح في المغرب.", "ما هي القيروان؟"],
+    ["أسّست جامع القرويين في فاس عام 859م.", "من هي فاطمة الفهرية؟"]
+  ]},
+  { name: "محطات تاريخية", clues: [
+    ["افتُتحت هذه القناة المصرية للملاحة عام 1869.", "ما هي قناة السويس؟"],
+    ["صلح عُقد سنة 6 للهجرة بين المسلمين وقريش، ونصّ على هدنة عشر سنين.", "ما هو صلح الحديبية؟"],
+    ["اتفاقية سرية عام 1916 بين بريطانيا وفرنسا لاقتسام المشرق العربي.", "ما هي اتفاقية سايكس بيكو؟"],
+    ["معركة عام 1260م في فلسطين أوقف فيها المماليك بقيادة قطز زحف المغول.", "ما هي معركة عين جالوت؟"],
+    ["معركة عام 1071م انتصر فيها السلطان السلجوقي ألب أرسلان على الإمبراطور البيزنطي وأسَره.", "ما هي معركة ملاذكرد؟"]
+  ]},
+  { name: "أدب وسينما", clues: [
+    ["أول أديب عربي ينال جائزة نوبل للآداب، عام 1988.", "من هو نجيب محفوظ؟"],
+    ["الملك الذي ظلت شهرزاد تروي له الحكايات في «ألف ليلة وليلة».", "من هو شهريار؟"],
+    ["روائي سوداني صاحب «موسم الهجرة إلى الشمال».", "من هو الطيب صالح؟"],
+    ["الجزء الأول من ثلاثية نجيب محفوظ، يليه «قصر الشوق» ثم «السكرية».", "ما هو «بين القصرين»؟"],
+    ["فيلم ليوسف شاهين عام 1997 عن الفيلسوف ابن رشد، عُرض في مهرجان كان.", "ما هو فيلم «المصير»؟"]
+  ]}
+];
+
+const FINAL = {
+  category: "رحّالة وجغرافيون",
+  clue: "رسم خريطة للعالم للملك النورماني روجر الثاني في صقلية، وألّف له كتاب «نزهة المشتاق في اختراق الآفاق».",
+  answer: "من هو الإدريسي؟"
+};
+
+// Other accepted answers per clue, same order as CATS (spelling variants, short forms)
+const ALTS = [
+  [["algebra", "الجبر"], ["alcohol", "الكحول"], ["admiral", "أدميرال", "اميرال"], ["cipher", "سايفر", "سيفر"], ["tariff", "تعريفة", "تعرفة"]],
+  [["الخوارزمي", "محمد بن موسى الخوارزمي"], ["ابن سينا"], ["ابن الهيثم", "الحسن بن الهيثم"], ["الزهراوي", "أبو القاسم الزهراوي"], ["ابن النفيس"]],
+  [["المتنبي", "أبو الطيب المتنبي"], ["أحمد شوقي", "شوقي"], ["امرؤ القيس", "امرئ القيس", "امرأ القيس"], ["أبو تمام", "ابو تمام"], ["الشنفرى", "الشنفري"]],
+  [["بغداد"], ["البتراء", "بترا"], ["تدمر", "بالميرا"], ["القيروان"], ["فاطمة الفهرية", "الفهرية"]],
+  [["قناة السويس", "السويس"], ["صلح الحديبية", "الحديبية"], ["سايكس بيكو", "سايكس-بيكو"], ["عين جالوت"], ["ملاذكرد", "منزكرت"]],
+  [["نجيب محفوظ", "محفوظ"], ["شهريار"], ["الطيب صالح"], ["بين القصرين"], ["المصير"]]
+];
+const FINAL_ALTS = ["الإدريسي", "الشريف الإدريسي"];
+
+// ---------- Fuzzy answer matching (Levenshtein on normalized Arabic/English) ----------
+const ANSWER_MS = 20000;
+function norm(s) {
+  s = String(s || "").toLowerCase()
+    .replace(/[ً-ٰٟـ]/g, "")                 // harakat, dagger alef, tatweel
+    .replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").replace(/ؤ/g, "و").replace(/ئ/g, "ي")
+    .replace(/[٠-٩]/g, d => d.charCodeAt(0) - 0x660)
+    .replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim()
+    .replace(/^(من|ما|مين|مين|شو|ايش|ماذا)\s+(هو|هي|هم|هما)\s+/, "")
+    .replace(/^(who|what|where)\s+(is|are|was|were)\s+/, "");
+  return s.split(" ").map(w => (/^(وال|ال)../.test(w) ? w.replace(/^(وال|ال)/, "") : w))
+    .filter(w => w && !["the", "a", "an"].includes(w)).join(" ");
+}
+function lev(a, b) {
+  if (a === b) return 0;
+  if (!a.length) return b.length; if (!b.length) return a.length;
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+// right: similarity >= 0.8 · close: 0.6–0.8 (host decides) · wrong: below
+function judge(text, official, alts) {
+  const a = norm(text).replace(/\s/g, "");
+  if (!a) return { v: "wrong", sim: 0 };
+  let best = 0;
+  for (const v of [official, ...(alts || [])]) {
+    const b = norm(v).replace(/\s/g, ""); if (!b) continue;
+    let sim = 1 - lev(a, b) / Math.max(a.length, b.length);
+    if (b.length >= 3 && a.includes(b) && a.length <= b.length + 8) sim = 1;
+    best = Math.max(best, sim);
+  }
+  return { v: best >= 0.8 ? "right" : best >= 0.6 ? "close" : "wrong", sim: best };
+}
+const VLABEL = { right: "✓ صحيحة", close: "؟ قريبة", wrong: "✗ خاطئة", none: "لم يُجب" };
+
+// ---------- Live connection (Supabase Realtime broadcast; no database tables used) ----------
+const SB_URL = "https://yewosqrrzxsqwqsicipz.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlld29zcXJyenhzcXdxc2ljaXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExOTc4NDAsImV4cCI6MjEwNjc3Mzg0MH0.P5uF8RCmLht_kQZMp6GNDRmZKAjeFEcYZWkfc-x9iws";
+const sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: false } });
+
+let ch = null;
+function connect(room, key, h) {
+  ch = sb.channel("mws-" + room, { config: { broadcast: { self: false }, presence: { key } } });
+  for (const ev of ["join", "buzz", "wager", "fin", "ans", "hello", "state"]) ch.on("broadcast", { event: ev }, m => h.msg(ev, m.payload || {}));
+  ch.on("presence", { event: "sync" }, () => h.presence && h.presence(ch.presenceState()));
+  ch.subscribe(st => { if (st === "SUBSCRIBED") ch.track({ t: Date.now() }).catch(() => {}); h.status(st); });
+}
+const send = (event, payload) => { if (ch) ch.send({ type: "broadcast", event, payload }).catch(() => {}); };
+
+// ---------- Helpers ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const num = n => String(Math.round(Math.abs(n))).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+const fmt = n => (n < 0 ? "−" : "") + num(n);
+const parseNum = s => {
+  const t = String(s).replace(/[٠-٩]/g, d => d.charCodeAt(0) - 0x660).replace(/[۰-۹]/g, d => d.charCodeAt(0) - 0x6F0).replace(/[^\d]/g, "");
+  return t === "" ? NaN : Number(t);
+};
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const rid = () => Math.random().toString(36).slice(2, 10);
+const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+const newCode = () => Array.from({ length: 4 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join("");
+const params = new URLSearchParams(location.search);
+const roomParam = (params.get("room") || "").toUpperCase().replace(/[^A-Z]/g, "").slice(0, 4);
+const IS_PLAYER = params.has("room") || params.has("join");
+
+// =====================================================================
+// HOST
+// =====================================================================
+const HKEY = "mws-host-v1";
+let G, T;
+
+function freshWagers() {
+  const all = [];
+  for (let c = 0; c < 6; c++) for (let r = 1; r < 5; r++) all.push(c + "-" + r);
+  const w = [];
+  while (w.length < 2) { const k = all[Math.floor(Math.random() * all.length)]; if (!w.some(x => x[0] === k[0])) w.push(k); }
+  return w;
+}
+const pf = pid => G.players.find(p => p.pid === pid);
+const maxFor = pid => Math.max((pf(pid) || { score: 0 }).score, 1000);
+const saveG = () => store.set(HKEY, G);
+function resetT() {
+  const online = T ? T.online : new Set();
+  if (T) clearTimeout(T.timer);
+  T = { phase: "board", key: null, isWager: false, armed: false, winner: null, locked: [], penalty: {}, revealed: false, result: "",
+        wagerFor: null, wagerInput: "", wagerAmt: 0, final: null, online,
+        answerText: "", judge: "", deadline: 0, timer: null, attempts: [], undo: null, res: null };
+}
+const curVal = () => T.isWager ? T.wagerAmt : VALUES[+T.key.split("-")[1]];
+const clueAns = () => { const [c, r] = T.key.split("-").map(Number); return [CATS[c].clues[r][1], ALTS[c][r]]; };
+function snapshot() {
+  return { scores: G.players.map(p => [p.pid, p.score]), control: G.control,
+    t: { armed: T.armed, winner: T.winner, locked: [...T.locked], revealed: T.revealed, result: T.result, res: T.res, answerText: T.answerText } };
+}
+function applyRight(pid, note) {
+  const p = pf(pid); if (!p) return; const val = curVal();
+  p.score += val; G.control = pid; T.revealed = true; T.armed = false; T.judge = ""; clearTimeout(T.timer);
+  T.result = `${esc(p.name)} +${num(val)}${note ? " · " + note : ""}`; T.res = { pid, ok: true, val };
+  saveG(); renderRail();
+}
+function applyWrong(pid, note) {
+  const p = pf(pid); if (!p) return; const val = curVal();
+  p.score -= val; T.judge = ""; clearTimeout(T.timer); T.res = { pid, ok: false, val };
+  if (T.isWager) { T.revealed = true; T.result = `${esc(p.name)} −${num(val)}${note ? " · " + note : ""}`; }
+  else {
+    T.locked.push(pid); T.winner = null; T.answerText = ""; T.deadline = 0;
+    const left = G.players.some(x => !T.locked.includes(x.pid));
+    T.armed = left; if (!left) T.revealed = true;
+  }
+  saveG(); renderRail();
+}
+function startAnswerTimer() {
+  clearTimeout(T.timer);
+  const pid = T.winner; T.deadline = Date.now() + ANSWER_MS;
+  T.timer = setTimeout(() => {
+    if (T.phase === "clue" && T.winner === pid && !T.answerText) {
+      T.attempts.push({ pid, text: "", v: "none" }); T.undo = null;
+      applyWrong(pid, "انتهى الوقت"); drawOverlay(); pub();
+    }
+  }, ANSWER_MS + 300);
+}
+
+function joinUrl() { return location.origin + location.pathname + "?room=" + G.room; }
+
+function initHost() {
+  G = store.get(HKEY);
+  if (!G || !G.room || !Array.isArray(G.players)) G = { room: newCode(), players: [], used: {}, wagers: freshWagers(), control: null, finalDone: false };
+  resetT(); saveG();
+  $("#app").innerHTML = `
+  <div class="wrap">
+    <header>
+      <h1>ما وراء السطور<small>ست فئات · أجب بصيغة سؤال · شاشة المضيف</small></h1>
+      <div class="joinbox">
+        <div id="qr" aria-label="رمز QR للانضمام"></div>
+        <div>
+          <div class="small">رمز الغرفة</div>
+          <div class="code" id="code">${G.room}</div>
+          <div class="small">امسح الرمز أو افتح <span class="url">${esc(joinUrl())}</span></div>
+          <div class="conn"><span class="dot" id="hdot"></span><span id="hconn">جارٍ الاتصال…</span></div>
+        </div>
+      </div>
+    </header>
+    <div class="actions">
+      <button id="finalBtn" type="button">الجولة الأخيرة</button>
+      <button id="resetBtn" type="button">لعبة جديدة</button>
+    </div>
+    <div class="board-scroll"><div class="board" id="board" aria-label="لوحة الأسئلة"></div></div>
+    <section class="rail" id="rail" aria-label="اللاعبون"></section>
+    <p class="hint">اختر خانة واقرأ الدليل بصوت عالٍ، ثم اضغط <b>افتح الأزرار</b>. أول من يضغط من هاتفه يكتب إجابته خلال 20 ثانية، والباقون يُقفلون. تُصحَّح الإجابة تلقائيًا مع تسامح في الأخطاء الإملائية، ويمكنك التراجع أو التصحيح يدويًا. من يضغط قبل فتح الأزرار يُقفل زره ربع ثانية. في اللوحة خانتان مخفيتان لـ<b>الرهان</b> يرسل فيهما اللاعب رهانه من هاتفه.</p>
+  </div>`;
+  try { new QRCode($("#qr"), { text: joinUrl(), width: 208, height: 208, colorDark: "#081613", colorLight: "#eef0e6", correctLevel: QRCode.CorrectLevel.M }); } catch (e) { $("#qr").hidden = true; }
+  renderBoard(); renderRail();
+
+  $("#board").addEventListener("click", e => { const t = e.target.closest(".tile"); if (t && !t.disabled) openTile(t.dataset.k); });
+  $("#rail").addEventListener("click", e => {
+    const t = e.target.closest("button"); if (!t) return;
+    if (t.dataset.adj) { const p = pf(t.dataset.adj); if (p) { p.score += +t.dataset.d; saveG(); renderRail(); pub(); } }
+    else if (t.dataset.rm) {
+      if (t.dataset.confirm) { G.players = G.players.filter(p => p.pid !== t.dataset.rm); saveG(); renderRail(); pub(); }
+      else { t.dataset.confirm = "1"; t.textContent = "احذف؟"; setTimeout(() => { if (t.isConnected) { delete t.dataset.confirm; t.textContent = "✕"; } }, 2500); }
+    }
+  });
+  $("#finalBtn").onclick = () => { if (G.finalDone) { T.phase = "over"; drawOverlay(); pub(); } else startFinal(); };
+  const rb = $("#resetBtn");
+  rb.onclick = () => {
+    if (rb.dataset.confirm) { newGame(); delete rb.dataset.confirm; rb.textContent = "لعبة جديدة"; }
+    else { rb.dataset.confirm = "1"; rb.textContent = "امسح النقاط واللوحة؟"; setTimeout(() => { delete rb.dataset.confirm; rb.textContent = "لعبة جديدة"; }, 3000); }
+  };
+  $("#overlay").addEventListener("click", hostAct);
+  $("#overlay").addEventListener("input", e => { if (e.target.id === "wAmt") T.wagerInput = e.target.value; });
+  $("#overlay").addEventListener("change", e => { if (e.target.id === "wWho") { T.wagerFor = e.target.value; T.wagerInput = ""; drawOverlay(); pub(); } });
+
+  connect(G.room, "host", {
+    msg: hostMsg,
+    presence: ps => { T.online = new Set(Object.keys(ps)); renderRail(); },
+    status: st => {
+      const ok = st === "SUBSCRIBED";
+      $("#hdot").classList.toggle("on", ok);
+      $("#hconn").textContent = ok ? "متصل · بانتظار اللاعبين" : (st === "CHANNEL_ERROR" || st === "TIMED_OUT" ? "تعذّر الاتصال، أعد تحميل الصفحة" : "جارٍ الاتصال…");
+      if (ok) pub();
+    }
+  });
+  setInterval(pub, 2000);
+  setInterval(() => { const cd = document.getElementById("cd"); if (cd && T.deadline) cd.textContent = Math.max(0, Math.ceil((T.deadline - Date.now()) / 1000)); }, 250);
+}
+
+function newGame() {
+  G.players.forEach(p => p.score = 0);
+  G.used = {}; G.wagers = freshWagers(); G.control = null; G.finalDone = false;
+  resetT(); saveG(); renderBoard(); renderRail(); drawOverlay(); pub();
+}
+
+function renderBoard() {
+  let h = CATS.map(c => `<div class="cat">${esc(c.name)}</div>`).join("");
+  for (let r = 0; r < 5; r++) for (let c = 0; c < 6; c++) {
+    const k = c + "-" + r, used = !!G.used[k];
+    h += `<button class="tile" type="button" data-k="${k}" ${used ? "disabled" : ""} aria-label="${esc(CATS[c].name)} ${VALUES[r]}">${used ? "" : num(VALUES[r])}</button>`;
+  }
+  $("#board").innerHTML = h;
+}
+
+function renderRail() {
+  if (!G.players.length) { $("#rail").innerHTML = `<div class="empty">لا يوجد لاعبون بعد. امسح رمز QR بالهاتف، أو افتح الرابط وأدخل الرمز <b>${G.room}</b>.</div>`; return; }
+  $("#rail").innerHTML = G.players.map(p => `
+    <div class="player">
+      <div class="pname"><span class="dot ${T.online.has(p.pid) ? "on" : ""}" title="${T.online.has(p.pid) ? "متصل" : "غير متصل"}"></span><span>${esc(p.name)}</span>${G.control === p.pid ? `<span style="color:var(--gold);font-size:12px">يختار</span>` : ""}</div>
+      <div class="score ${p.score < 0 ? "neg" : ""}">${fmt(p.score)}</div>
+      <div class="prow">
+        <div class="mini">
+          <button type="button" class="small-btn" data-adj="${p.pid}" data-d="200">+200</button>
+          <button type="button" class="small-btn" data-adj="${p.pid}" data-d="-200">−200</button>
+        </div>
+        <button type="button" class="small-btn" data-rm="${p.pid}" aria-label="احذف اللاعب">✕</button>
+      </div>
+    </div>`).join("");
+}
+
+function pub() {
+  if (!G) return;
+  let cat = "", val = 0;
+  if (T.key) { const [c, r] = T.key.split("-").map(Number); cat = CATS[c].name; val = T.isWager ? T.wagerAmt : VALUES[r]; }
+  if (T.phase === "final") cat = FINAL.category;
+  send("state", {
+    players: G.players.map(({ pid, name, score }) => ({ pid, name, score })),
+    phase: T.phase, armed: T.armed, winner: T.winner, locked: T.locked, revealed: T.revealed, cat, val,
+    wagerFor: (T.phase === "wager" || T.isWager) ? T.wagerFor : null,
+    wagerMax: T.wagerFor ? maxFor(T.wagerFor) : 0,
+    wagerSet: T.isWager,
+    answering: T.phase === "clue" && !T.revealed && !T.answerText && (T.isWager ? !!T.wagerFor : !!T.winner),
+    ansLeft: T.deadline ? Math.max(0, T.deadline - Date.now()) : 0,
+    judging: T.phase === "clue" && !T.revealed && !!T.answerText,
+    res: T.res,
+    final: T.final ? { stage: T.final.stage, w: Object.keys(T.final.wagers), a: Object.keys(T.final.answers) } : null
+  });
+}
+
+function hostMsg(ev, p) {
+  if (ev === "hello") return pub();
+  const pid = String(p.pid || "").slice(0, 16); if (!pid) return;
+  if (ev === "join") {
+    const name = String(p.name || "").trim().slice(0, 24) || "لاعب";
+    const pl = pf(pid);
+    if (pl) pl.name = name; else G.players.push({ pid, name, score: 0 });
+    saveG(); renderRail(); if (T.phase !== "board") drawOverlay(); return pub();
+  }
+  const pl = pf(pid); if (!pl) return;
+  if (ev === "buzz") {
+    const now = performance.now();
+    if (T.phase !== "clue" || T.isWager || T.revealed) return;
+    if (p.early) { if (!T.armed && !T.winner) T.penalty[pid] = now + 250; return; }
+    if (!T.armed || T.winner || T.locked.includes(pid)) return;
+    if ((T.penalty[pid] || 0) > now) return;
+    T.winner = pid; T.armed = false; T.undo = null; startAnswerTimer(); beep(); drawOverlay(); pub();
+  } else if (ev === "ans") {
+    if (T.phase !== "clue" || T.revealed || T.answerText) return;
+    if (T.isWager ? pid !== T.wagerFor : pid !== T.winner) return;
+    const text = String(p.text || "").trim().slice(0, 140); if (!text) return;
+    T.answerText = text; clearTimeout(T.timer);
+    const [official, alts] = clueAns();
+    const j = judge(text, official, alts);
+    T.attempts.push({ pid, text, v: j.v });
+    if (j.v === "close") T.judge = "close";
+    else { T.undo = snapshot(); j.v === "right" ? applyRight(pid, "تصحيح تلقائي") : applyWrong(pid, "تصحيح تلقائي"); }
+    drawOverlay(); pub();
+  } else if (ev === "wager") {
+    if (T.phase !== "wager" || T.wagerFor !== pid) return;
+    const v = Math.round(+p.amount);
+    if (!(v >= 5 && v <= maxFor(pid))) return;
+    T.wagerInput = String(v); drawOverlay(); pub();
+  } else if (ev === "fin") {
+    const F = T.final; if (!F) return;
+    if (p.kind === "wager" && F.stage === "wager") {
+      const v = Math.round(+p.value), mx = Math.max(pl.score, 0);
+      if (!(v >= 0 && v <= mx)) return;
+      F.wagers[pid] = v;
+    } else if (p.kind === "answer" && F.stage === "answer") {
+      F.answers[pid] = String(p.value || "").trim().slice(0, 140);
+    } else return;
+    drawOverlay(); pub();
+  }
+}
+
+let actx;
+function beep() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+    o.type = "square"; o.frequency.setValueAtTime(660, t); o.frequency.setValueAtTime(990, t + .09);
+    g.gain.setValueAtTime(.12, t); g.gain.exponentialRampToValueAtTime(.001, t + .4);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + .42);
+  } catch (e) {}
+}
+
+function openTile(k) {
+  resetT(); T.key = k;
+  if (G.wagers.includes(k)) {
+    T.phase = "wager";
+    T.wagerFor = pf(G.control) ? G.control : (G.players[0] ? G.players[0].pid : null);
+  } else T.phase = "clue";
+  drawOverlay(); pub();
+}
+
+function startFinal() {
+  resetT(); T.phase = "final"; T.final = { stage: "wager", wagers: {}, answers: {}, marks: {} };
+  drawOverlay(); pub();
+}
+
+function drawOverlay() {
+  const ov = $("#overlay");
+  if (T.phase === "board") { ov.hidden = true; ov.innerHTML = ""; return; }
+  let html = "";
+  if (T.phase === "clue") html = clueView();
+  else if (T.phase === "wager") html = wagerView();
+  else if (T.phase === "final") html = finalView();
+  else if (T.phase === "over") html = overView();
+  const focusedId = document.activeElement && ov.contains(document.activeElement) ? document.activeElement.id : null;
+  ov.innerHTML = `<div class="card" role="dialog" aria-modal="true">${html}</div>`;
+  ov.hidden = false;
+  if (focusedId && document.getElementById(focusedId)) document.getElementById(focusedId).focus();
+}
+
+function clueView() {
+  const [c, r] = T.key.split("-").map(Number);
+  const cat = CATS[c], [clue, ans] = cat.clues[r];
+  const val = T.isWager ? T.wagerAmt : VALUES[r];
+  let status = "";
+  const judgeBtns = `<div class="btns"><button type="button" class="ok big" data-act="right">صح +${num(val)}</button><button type="button" class="no big" data-act="wrong">خطأ −${num(val)}</button></div>`;
+  const manualBtns = `<div class="btns"><button type="button" class="ok small-btn" data-act="right">صح يدويًا</button><button type="button" class="no small-btn" data-act="wrong">خطأ يدويًا</button></div>`;
+  if (!T.revealed) {
+    const who = T.isWager ? pf(T.wagerFor) : pf(T.winner);
+    if ((T.isWager || T.winner) && T.answerText) {
+      status = `<div class="buzzline">${esc(who ? who.name : "")} كتب: <span style="color:var(--gold)">«${esc(T.answerText)}»</span></div>
+        <p class="hint">${T.judge === "close" ? "الإجابة قريبة من الصحيحة. قرّر أنت:" : "قرّر أنت:"}</p>${judgeBtns}`;
+    } else if (T.isWager) {
+      status = `<div class="buzzline">${esc(who ? who.name : "")} يكتب إجابته…</div>${manualBtns}`;
+    } else if (T.winner) {
+      status = `<div class="buzzline win">${esc(who ? who.name : "")} ضغط أولًا! يكتب الإجابة… <span id="cd" style="color:var(--gold)"></span></div>${manualBtns}`;
+    } else if (T.armed) {
+      status = `<div class="buzzline live">الأزرار مفتوحة…</div><div class="btns"><button type="button" data-act="disarm">أغلق الأزرار</button></div>`;
+    } else {
+      status = `<div class="btns"><button type="button" class="primary big" data-act="arm" id="armBtn">افتح الأزرار</button></div>
+        <p class="hint">اقرأ الدليل كاملًا ثم افتح الأزرار. من يضغط قبل ذلك يُقفل زره ربع ثانية.</p>`;
+    }
+  }
+  const tries = T.attempts.length ? `<div class="rows">${T.attempts.map(x => `<div class="row"><div class="who">${esc(pf(x.pid) ? pf(x.pid).name : "")}<em>${x.text ? "«" + esc(x.text) + "»" : "انتهى الوقت"}</em></div><div>${VLABEL[x.v] || ""}</div></div>`).join("")}</div>` : "";
+  const undo = T.undo ? `<div class="btns"><button type="button" class="small-btn" data-act="undo">تراجع عن التصحيح التلقائي</button></div>` : "";
+  if (!T.revealed && (tries || undo)) status += tries + undo;
+  const answer = T.revealed ? `<div class="answer"><span>الإجابة الصحيحة</span>${esc(ans)}</div>${T.result ? `<p class="hint">${T.result}</p>` : ""}${tries}${undo}` : "";
+  const foot = T.revealed
+    ? `<button type="button" class="primary" data-act="done" id="doneBtn">عودة إلى اللوحة</button>`
+    : `<button type="button" data-act="reveal">لا أحد · أظهر الإجابة</button><button type="button" data-act="cancel">إلغاء</button>`;
+  return `<div class="meta"><span>${esc(cat.name)}</span><span class="val">${T.isWager ? "رهان · " : ""}${num(val)}</span></div>
+    <p class="clue">${esc(clue)}</p>
+    ${status ? `<div class="status">${status}</div>` : ""}
+    ${answer}
+    <div class="foot">${foot}</div>`;
+}
+
+function wagerView() {
+  const [c] = T.key.split("-").map(Number);
+  if (!G.players.length) return `<div class="badge">رهان!</div><p class="hint">لا يوجد لاعبون. انضم بهاتفك أولًا ثم افتح الخانة.</p><div class="foot"><button type="button" data-act="cancel">عودة إلى اللوحة</button></div>`;
+  const p = pf(T.wagerFor);
+  const got = T.wagerInput !== "";
+  return `<div class="badge">رهان!</div>
+    <div class="meta"><span>${esc(CATS[c].name)}</span><span class="val">خانة رهان مخفية</span></div>
+    <div class="wgrid">
+      <div class="field"><label for="wWho">من اختار الخانة؟</label>
+        <select id="wWho">${G.players.map(x => `<option value="${x.pid}" ${x.pid === T.wagerFor ? "selected" : ""}>${esc(x.name)} (${fmt(x.score)})</option>`).join("")}</select></div>
+      <div class="field"><label for="wAmt">الرهان (الحد الأقصى ${num(maxFor(T.wagerFor))})</label>
+        <input id="wAmt" type="text" inputmode="numeric" value="${esc(T.wagerInput)}" placeholder="من الهاتف أو يدويًا"></div>
+    </div>
+    <p class="hint">${got ? `وصل رهان ${esc(p ? p.name : "")}. ثبّته لعرض الدليل.` : `بانتظار أن يرسل ${esc(p ? p.name : "")} رهانه من هاتفه، أو اكتبه هنا.`}</p>
+    <p class="err" id="wErr"></p>
+    <div class="foot"><button type="button" class="primary" data-act="wlock">ثبّت الرهان واعرض الدليل</button><button type="button" data-act="cancel">عودة إلى اللوحة</button></div>`;
+}
+
+function finalView() {
+  const F = T.final;
+  if (F.stage === "wager") {
+    return `<div class="badge">الجولة الأخيرة</div>
+      <div class="meta"><span>الفئة</span><span class="val">${30 - Object.keys(G.used).length ? "بقيت " + (30 - Object.keys(G.used).length) + " خانة لم تُلعب" : "اكتملت اللوحة"}</span></div>
+      <p class="clue">${esc(FINAL.category)}</p>
+      <p class="hint">يرسل كل لاعب رهانه سرًّا من هاتفه، من صفر حتى رصيده. من رصيده صفر أو أقل يراهن بصفر ويمكنه الإجابة.</p>
+      <div class="rows">${G.players.map(p => `<div class="row"><div class="who">${esc(p.name)}</div><div>${p.score <= 0 ? "رهان صفر" : (F.wagers[p.pid] != null ? "✓ راهن" : "بانتظار الرهان…")}</div></div>`).join("")}</div>
+      <div class="foot"><button type="button" class="primary" data-act="fclue">اعرض الدليل</button><button type="button" data-act="fcancel">عودة إلى اللوحة</button></div>`;
+  }
+  if (F.stage === "answer") {
+    return `<div class="meta"><span>الجولة الأخيرة · ${esc(FINAL.category)}</span><span class="val">الرهانات مثبّتة</span></div>
+      <p class="clue">${esc(FINAL.clue)}</p>
+      <div class="rows">${G.players.map(p => `<div class="row"><div class="who">${esc(p.name)}</div><div>${F.answers[p.pid] != null ? "✓ أرسل إجابته" : "يكتب…"}</div></div>`).join("")}</div>
+      <div class="foot"><button type="button" class="primary" data-act="freveal">أظهر الإجابات</button></div>`;
+  }
+  return `<div class="meta"><span>الجولة الأخيرة · ${esc(FINAL.category)}</span></div>
+    <p class="clue">${esc(FINAL.clue)}</p>
+    <div class="answer"><span>الإجابة الصحيحة</span>${esc(FINAL.answer)}</div>
+    <div class="rows">${G.players.map(p => `
+      <div class="row"><div class="who">${esc(p.name)}<em>راهن بـ ${num(F.wagers[p.pid] || 0)}</em><div class="said">${F.answers[p.pid] ? "«" + esc(F.answers[p.pid]) + "»" : "لم يُجب"} <span class="hint">${F.verdict && F.verdict[p.pid] === "close" ? "· قريبة، قرّر أنت" : ""}</span></div></div>
+        <div class="btns"><button type="button" class="ok ${F.marks[p.pid] === 1 ? "on" : ""}" data-act="fmark" data-pid="${p.pid}" data-v="1">أصاب</button><button type="button" class="no ${F.marks[p.pid] === -1 ? "on" : ""}" data-act="fmark" data-pid="${p.pid}" data-v="-1">أخطأ</button></div></div>`).join("")}</div>
+    <div class="foot"><button type="button" class="primary" data-act="ftally">احسب النتيجة النهائية</button></div>`;
+}
+
+function overView() {
+  if (!G.players.length) return `<p class="clue">لا يوجد لاعبون</p><div class="foot"><button type="button" data-act="close">إغلاق</button></div>`;
+  const top = Math.max(...G.players.map(p => p.score));
+  const winners = G.players.filter(p => p.score === top);
+  const ranked = [...G.players].sort((a, b) => b.score - a.score);
+  return `<div class="badge">انتهت اللعبة</div>
+    <p class="clue">${winners.length > 1 ? "تعادل: " + winners.map(w => esc(w.name)).join(" و") : "الفائز: " + esc(winners[0].name)}</p>
+    <div class="rows">${ranked.map(p => `<div class="row"><div class="who">${esc(p.name)}</div><div class="score ${p.score < 0 ? "neg" : ""}" style="font-size:28px">${fmt(p.score)}</div></div>`).join("")}</div>
+    <div class="foot"><button type="button" class="primary" data-act="newgame">ابدأ لعبة جديدة</button><button type="button" data-act="close">إغلاق</button></div>`;
+}
+
+function toBoard(markUsed) {
+  if (markUsed && T.key) G.used[T.key] = 1;
+  resetT(); saveG(); renderBoard(); renderRail(); drawOverlay(); pub();
+}
+
+function hostAct(e) {
+  const t = e.target.closest("button[data-act]"); if (!t) return;
+  const a = t.dataset.act;
+  if (a !== "undo") T.undo = null;
+  if (a === "arm") { T.armed = true; T.winner = null; }
+  else if (a === "disarm") { T.armed = false; }
+  else if (a === "right" || a === "wrong") {
+    const pid = T.isWager ? T.wagerFor : T.winner; if (!pf(pid)) return;
+    const last = T.attempts[T.attempts.length - 1];
+    if (T.answerText && last && last.pid === pid) last.v = a;
+    a === "right" ? applyRight(pid, "قرار المضيف") : applyWrong(pid, "قرار المضيف");
+  }
+  else if (a === "undo") {
+    const u = T.undo; if (!u) return;
+    u.scores.forEach(([pid, s]) => { const p = pf(pid); if (p) p.score = s; });
+    G.control = u.control; Object.assign(T, u.t); T.judge = "manual"; T.undo = null; clearTimeout(T.timer);
+    const last = T.attempts[T.attempts.length - 1]; if (last) last.v = "close";
+    saveG(); renderRail();
+  }
+  else if (a === "reveal") { T.revealed = true; T.armed = false; T.winner = null; clearTimeout(T.timer); }
+  else if (a === "cancel") return toBoard(false);
+  else if (a === "done") return toBoard(true);
+  else if (a === "wlock") {
+    const v = parseNum(T.wagerInput), mx = maxFor(T.wagerFor);
+    if (!v || v < 5 || v > mx) { $("#wErr").textContent = `أدخل رهانًا بين 5 و${num(mx)}.`; return; }
+    T.wagerAmt = v; T.isWager = true; T.phase = "clue";
+  }
+  else if (a === "fclue") { T.final.stage = "answer"; }
+  else if (a === "freveal") {
+    const F = T.final; F.stage = "reveal"; F.verdict = {};
+    G.players.forEach(p => {
+      const ans = F.answers[p.pid];
+      const v = ans ? judge(ans, FINAL.answer, FINAL_ALTS).v : "none";
+      F.verdict[p.pid] = v; F.marks[p.pid] = v === "right" ? 1 : v === "close" ? 0 : -1;
+    });
+  }
+  else if (a === "fmark") { const pid = t.dataset.pid, v = +t.dataset.v; T.final.marks[pid] = T.final.marks[pid] === v ? 0 : v; }
+  else if (a === "ftally") {
+    const F = T.final;
+    G.players.forEach(p => { p.score += (F.marks[p.pid] || 0) * (F.wagers[p.pid] || 0); });
+    G.finalDone = true; saveG(); renderRail(); T.phase = "over"; T.final = null;
+  }
+  else if (a === "fcancel" || a === "close") return toBoard(false);
+  else if (a === "newgame") return newGame();
+  drawOverlay(); pub();
+}
+
+// =====================================================================
+// PLAYER (phone)
+// =====================================================================
+const PKEY = "mws-player-v1";
+let P, S = null, lastState = 0, penaltyUntil = 0, pending = false, sentWager = null, sentFin = {}, lastJoin = 0, connState = "", lastView = "", editingName = false, wasWinner = false, sentAns = null, ansDeadline = 0;
+
+function initPlayer() {
+  P = store.get(PKEY) || {};
+  if (!P.pid) P.pid = rid();
+  store.set(PKEY, P);
+  $("#app").innerHTML = `<div class="pl"><div class="plhead" id="plhead"></div><div class="center" id="plbody"></div><div class="center" id="plfoot"></div></div>`;
+  document.addEventListener("pointerdown", e => { if (e.target.closest("#buzz")) { e.preventDefault(); tap(); } });
+  document.addEventListener("submit", onPlayerSubmit);
+  document.addEventListener("click", e => { if (e.target.closest("#rename")) { editingName = true; renderPlayer(); } });
+  if (roomParam.length === 4 && P.name) startPlayerConn();
+  renderPlayer();
+  setInterval(renderPlayer, 1500);
+  setInterval(() => { const cd = document.getElementById("cdp"); if (cd && ansDeadline) cd.textContent = Math.max(0, Math.ceil((ansDeadline - Date.now()) / 1000)); }, 250);
+}
+
+function startPlayerConn() {
+  if (ch) return;
+  connect(roomParam, P.pid, {
+    msg: (ev, p) => {
+      if (ev !== "state") return;
+      S = p; lastState = Date.now();
+      if (!S.armed || S.winner) pending = false;
+      if (S.phase !== "wager") sentWager = null;
+      if (!S.final) sentFin = {};
+      if (!S.answering) sentAns = null;
+      const me = S.players.find(x => x.pid === P.pid);
+      if (!me && Date.now() - lastJoin > 2000) { lastJoin = Date.now(); send("join", { pid: P.pid, name: P.name }); }
+      const iWin = S.phase === "clue" && S.winner === P.pid;
+      if (iWin && !wasWinner && navigator.vibrate) navigator.vibrate([120, 60, 120]);
+      wasWinner = iWin;
+      renderPlayer();
+    },
+    status: st => {
+      connState = st;
+      if (st === "SUBSCRIBED") { lastJoin = Date.now(); send("join", { pid: P.pid, name: P.name }); send("hello", {}); }
+      renderPlayer();
+    }
+  });
+}
+
+let wakeLock = null;
+async function wake() { try { if (!wakeLock && navigator.wakeLock) { wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", () => wakeLock = null); } } catch (e) {} }
+
+function tap() {
+  wake();
+  if (!S || S.phase !== "clue" || S.wagerFor || S.revealed || S.winner || S.locked.includes(P.pid) || pending) return;
+  const now = performance.now();
+  if (now < penaltyUntil) return;
+  if (S.armed) {
+    pending = true; send("buzz", { pid: P.pid });
+    setTimeout(() => { pending = false; renderPlayer(); }, 2000);
+  } else {
+    penaltyUntil = now + 250; send("buzz", { pid: P.pid, early: true });
+    if (navigator.vibrate) navigator.vibrate(60);
+    setTimeout(renderPlayer, 270);
+  }
+  renderPlayer();
+}
+
+function onPlayerSubmit(e) {
+  const f = e.target.closest("form[data-f]"); if (!f) return;
+  e.preventDefault();
+  const kind = f.dataset.f, inp = f.querySelector("input"), err = f.querySelector(".err");
+  if (kind === "code") {
+    const code = inp.value.toUpperCase().replace(/[^A-Z]/g, "");
+    if (code.length !== 4) { err.textContent = "الرمز من 4 أحرف إنجليزية، مثل ABCD."; return; }
+    location.search = "?room=" + code; return;
+  }
+  if (kind === "name") {
+    const n = inp.value.trim().slice(0, 24);
+    if (!n) { err.textContent = "اكتب اسمك."; return; }
+    P.name = n; store.set(PKEY, P); editingName = false;
+    if (ch) send("join", { pid: P.pid, name: P.name }); else startPlayerConn();
+    lastView = ""; renderPlayer(); return;
+  }
+  if (kind === "wager") {
+    const v = parseNum(inp.value), mx = S ? S.wagerMax : 0;
+    if (!v || v < 5 || v > mx) { err.textContent = `اختر رهانًا بين 5 و${num(mx)}.`; return; }
+    send("wager", { pid: P.pid, amount: v }); sentWager = v; lastView = ""; renderPlayer(); return;
+  }
+  if (kind === "fwager") {
+    const me = S.players.find(x => x.pid === P.pid), mx = Math.max(me ? me.score : 0, 0);
+    const raw = inp.value.trim(), v = raw === "" ? 0 : parseNum(raw);
+    if (isNaN(v) || v < 0 || v > mx) { err.textContent = `اختر رهانًا بين 0 و${num(mx)}.`; return; }
+    send("fin", { pid: P.pid, kind: "wager", value: v }); sentFin.wager = v; lastView = ""; renderPlayer(); return;
+  }
+  if (kind === "ans") {
+    const v = inp.value.trim();
+    if (!v) { err.textContent = "اكتب إجابتك."; return; }
+    send("ans", { pid: P.pid, text: v }); sentAns = v; lastView = ""; renderPlayer(); return;
+  }
+  if (kind === "fanswer") {
+    const v = inp.value.trim();
+    if (!v) { err.textContent = "اكتب إجابتك."; return; }
+    send("fin", { pid: P.pid, kind: "answer", value: v }); sentFin.answer = v; lastView = ""; renderPlayer(); return;
+  }
+}
+
+const formHTML = (kind, title, label, placeholder, btn, numeric, hint) => `
+  <form class="pform" data-f="${kind}" autocomplete="off">
+    <h2>${title}</h2>
+    <div class="field"><label for="pf-${kind}">${label}</label>
+      <input id="pf-${kind}" ${numeric ? 'inputmode="numeric"' : ""} placeholder="${esc(placeholder)}" ${kind === "name" ? `value="${esc(P.name || "")}" maxlength="24"` : ""} ${kind === "code" ? 'maxlength="4" autocapitalize="characters" dir="ltr"' : ""}></div>
+    ${hint ? `<p class="hint">${hint}</p>` : ""}
+    <p class="err"></p>
+    <button type="submit" class="primary big">${btn}</button>
+  </form>`;
+
+function buzzHTML(cls, label, sub) { return `<button type="button" id="buzz" class="buzz b-${cls}" aria-live="polite">${label}${sub ? `<small>${sub}</small>` : ""}</button>`; }
+
+function renderPlayer() {
+  if (!P) return;
+  const head = $("#plhead"), body = $("#plbody"), foot = $("#plfoot");
+  const live = S && Date.now() - lastState < 7000;
+  const me = S ? S.players.find(x => x.pid === P.pid) : null;
+  head.innerHTML = P.name && roomParam.length === 4 && !editingName
+    ? `<div style="min-width:0"><div class="nm">${esc(P.name)}</div><div class="conn"><span class="dot ${live ? "on" : ""}"></span>${live ? "متصل بالغرفة " + roomParam : "بانتظار المضيف…"}</div></div><div class="score ${me && me.score < 0 ? "neg" : ""}">${fmt(me ? me.score : 0)}</div>`
+    : `<div class="nm" style="color:var(--gold)">ما وراء السطور</div>`;
+
+  let key, html;
+  if (roomParam.length !== 4) { key = "code"; html = formHTML("code", "انضم إلى اللعبة", "رمز الغرفة الظاهر على شاشة المضيف", "ABCD", "التالي", false); }
+  else if (!P.name || editingName) { key = "name"; html = formHTML("name", "ما اسمك؟", "يظهر اسمك على شاشة المضيف", "مثلًا: سارة", "انضم", false); }
+  else if (!live) { key = "off"; html = buzzHTML("off", "بانتظار المضيف…", "تأكد أن شاشة المضيف مفتوحة"); }
+  else if (S.phase === "over") {
+    const ranked = [...S.players].sort((a, b) => b.score - a.score);
+    const rank = ranked.findIndex(x => x.pid === P.pid) + 1;
+    key = "over" + rank; html = `<div class="big-msg">انتهت اللعبة</div><div class="hint">${rank === 1 ? "أنت الفائز!" : "ترتيبك: " + rank}</div>`;
+  }
+  else if (S.final) {
+    const F = S.final, myScore = me ? me.score : 0;
+    if (F.stage === "wager") {
+      if (F.w.includes(P.pid) || sentFin.wager != null) { key = "fw-done"; html = `<div class="big-msg">تم تسجيل رهانك</div><div class="hint">انتظر عرض الدليل على الشاشة</div>`; }
+      else if (myScore <= 0) { key = "fw-zero"; html = `<div class="big-msg">رهانك صفر</div><div class="hint">رصيدك لا يسمح بالرهان، لكن يمكنك الإجابة</div>`; }
+      else { key = "fw"; html = formHTML("fwager", "الجولة الأخيرة", `رهانك السري (0 إلى ${num(myScore)})`, "0", "أرسل الرهان", true, `الفئة: <b>${esc(S.cat)}</b>`); }
+    } else if (F.stage === "answer") {
+      if (F.a.includes(P.pid) || sentFin.answer != null) { key = "fa-done"; html = `<div class="big-msg">تم إرسال إجابتك</div>`; }
+      else { key = "fa"; html = formHTML("fanswer", "اكتب إجابتك", "بصيغة سؤال", "من هو …؟", "أرسل الإجابة", false); }
+    } else { key = "fr"; html = `<div class="big-msg">انظر إلى الشاشة</div><div class="hint">المضيف يكشف الإجابات</div>`; }
+  }
+  else if (S.phase === "wager") {
+    const who = S.players.find(x => x.pid === S.wagerFor);
+    if (S.wagerFor === P.pid && sentWager == null) { key = "w"; html = formHTML("wager", "رهان!", `رهانك (5 إلى ${num(S.wagerMax)})`, "مثلًا 1000", "أرسل الرهان", true, `الفئة: <b>${esc(S.cat)}</b>`); }
+    else if (S.wagerFor === P.pid) { key = "w-sent"; html = `<div class="big-msg">أرسلت رهانك: ${num(sentWager)}</div><div class="hint">بانتظار تثبيت المضيف</div>`; }
+    else { key = "w-other"; html = buzzHTML("idle", "رهان!", `${esc(who ? who.name : "")} يراهن الآن`); }
+  }
+  else if (S.phase === "clue" && S.res && S.res.pid === P.pid && (S.revealed || !S.res.ok)) {
+    key = "res" + S.res.ok + S.revealed;
+    html = S.res.ok ? `<div class="big-msg" style="color:var(--good)">✓ إجابتك صحيحة</div><div class="score">+${num(S.res.val)}</div>`
+                    : `<div class="big-msg" style="color:var(--bad)">✗ إجابتك خاطئة</div><div class="score neg">−${num(S.res.val)}</div><div class="hint">${S.revealed ? "انظر إلى الشاشة" : "أُقفل زرك في هذا السؤال"}</div>`;
+  }
+  else if (S.phase === "clue" && (S.wagerFor === P.pid || S.winner === P.pid) && !S.revealed && (S.answering || S.judging)) {
+    if (S.answering && sentAns == null) {
+      if (lastView !== "ans") ansDeadline = S.ansLeft ? Date.now() + S.ansLeft : 0;
+      key = "ans"; html = formHTML("ans", "دورك! اكتب الإجابة", `بصيغة سؤال${S.ansLeft ? ` · باقي <span id="cdp"></span> ث` : ""}`, "من هو …؟", "أرسل الإجابة", false, `${esc(S.cat)} · ${num(S.val)}`);
+    } else { key = "ans-sent"; html = `<div class="big-msg">تم إرسال إجابتك</div><div class="hint">${S.judging ? "المضيف يراجع إجابتك" : "…"}</div>`; }
+  }
+  else if (S.phase === "clue" && S.wagerFor) {
+    const who = S.players.find(x => x.pid === S.wagerFor);
+    key = "wc"; html = buzzHTML("idle", "سؤال رهان", (S.revealed ? "انتهى السؤال" : esc(who ? who.name : "") + " يُجيب"));
+  }
+  else if (S.phase === "clue") {
+    const sub = `${esc(S.cat)} · ${num(S.val)}`;
+    const winner = S.players.find(x => x.pid === S.winner);
+    if (S.revealed) { key = "rev"; html = buzzHTML("idle", "انتهى السؤال", sub); }
+    else if (performance.now() < penaltyUntil) { key = "pen"; html = buzzHTML("pen", "مبكر جدًا!", "انتظر فتح الأزرار"); }
+    else if (S.locked.includes(P.pid)) { key = "locked"; html = buzzHTML("locked", "أُقفل زرك", "أخطأت في هذا السؤال"); }
+    else if (S.winner === P.pid) { key = "win"; html = buzzHTML("win", "دورك! أجب الآن", sub); }
+    else if (S.winner) { key = "lost"; html = buzzHTML("lost", "سبقك " + esc(winner ? winner.name : ""), S.judging ? "يراجع المضيف إجابته" : "يكتب إجابته…"); }
+    else if (pending) { key = "pending"; html = buzzHTML("pending", "…", sub); }
+    else if (S.armed) { key = "ready"; html = buzzHTML("ready", "اضغط!", sub); }
+    else { key = "wait"; html = buzzHTML("wait", "استمع…", "لا تضغط قبل فتح الأزرار"); }
+  }
+  else { key = "idle"; html = buzzHTML("idle", "انتظر", "المضيف يختار السؤال"); }
+
+  // Don't wipe a form the player is typing in
+  const isForm = ["code", "name", "w", "fw", "fa", "ans"].includes(key);
+  if (key !== lastView || !isForm) body.innerHTML = html;
+  lastView = key;
+  foot.innerHTML = P.name && roomParam.length === 4 && !editingName ? `<button type="button" class="linkbtn" id="rename">تغيير الاسم</button>` : "";
+}
+
+// ---------- Boot ----------
+if (IS_PLAYER) initPlayer(); else initHost();
+</script>
+</body>
+</html>
