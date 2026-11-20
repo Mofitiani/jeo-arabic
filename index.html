@@ -182,8 +182,8 @@ button { cursor: pointer; }
 .pcard .sub { font-weight: 700; font-size: 15px; line-height: 1.5; display: flex; justify-content: space-between; gap: 12px; }
 .pcard input { font-weight: 700; font-size: 24px; padding: 14px; border: 3px solid var(--ink); background: var(--paper); color: var(--ink); width: 100%; }
 .pcard .send { padding: 16px; background: var(--ink); color: var(--saffron); border: 0; box-shadow: 6px 6px 0 var(--saffron); font-weight: 900; font-size: 24px; }
-.ptrack { height: 14px; background: #D9D9D9; border: 2px solid var(--ink); }
-.ptrack .fill { height: 100%; background: var(--saffron); width: 100%; }
+.ptrack { height: 14px; background: #D9D9D9; margin: -24px -20px 0; }
+.ptrack .fill { height: 100%; background: var(--ink); width: 100%; }
 .gpick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .gpick .btn { font-size: 22px; font-weight: 900; padding: 14px; }
 .msg { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; color: var(--paper); padding: 24px; }
@@ -195,6 +195,36 @@ button { cursor: pointer; }
 .claims .row { justify-content: flex-start; }
 .pfoot { display: flex; justify-content: center; padding: 8px 16px calc(16px + env(safe-area-inset-bottom, 0px)); }
 .linkbtn { background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: 14px; padding: 6px; }
+/* category descriptions on hover */
+.cat { position: relative; cursor: help; }
+.cat .tip { position: absolute; inset-inline: 0; top: calc(100% + 10px); z-index: 5; background: var(--paper); color: var(--ink); border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); padding: 10px 12px; font-size: 15px; font-weight: 700; line-height: 1.6; opacity: 0; pointer-events: none; transform: translateY(-4px); transition: opacity .12s, transform .12s; }
+.cat:hover .tip, .cat:focus-visible .tip { opacity: 1; transform: none; }
+
+/* voting */
+.votes { display: flex; flex-direction: column; gap: 10px; }
+.vrow { display: grid; grid-template-columns: 8.5em minmax(0, 1fr) 2em; gap: 12px; align-items: center; font-weight: 700; font-size: 17px; line-height: 1.5; }
+.vbar { height: 20px; background: rgba(17,17,17,.12); display: block; }
+.vbar span { display: block; height: 100%; background: var(--ink); }
+.topics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.topics .btn { font-size: 17px; padding: 12px 8px; box-shadow: 3px 3px 0 var(--ink); }
+
+/* round intro */
+.intro { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 32px; }
+.intro .step { font-weight: 700; font-size: 20px; }
+.intro h2 { margin: 0; font-weight: 900; font-size: clamp(56px, 8vw, 120px); line-height: 1.3; }
+.intro p { margin: 0; max-width: 40ch; font-weight: 700; font-size: clamp(24px, 2.6vw, 36px); line-height: 1.7; }
+.reveal { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.rcard { min-height: 150px; padding: 20px; background: var(--paper); border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; }
+.rcard.new { background: var(--ink); color: var(--saffron); box-shadow: 8px 8px 0 var(--paper); }
+.rcard.hid { background: transparent; border-style: dashed; box-shadow: none; align-items: center; justify-content: center; font-weight: 900; font-size: 56px; color: rgba(17,17,17,.3); }
+.rcard .rn { font-weight: 900; font-size: 28px; line-height: 1.4; }
+.rcard .rd { font-weight: 500; font-size: 17px; line-height: 1.6; }
+@media (max-width: 900px) { .reveal { grid-template-columns: 1fr 1fr; } }
+
+/* mic */
+.btn.mic { align-self: flex-start; }
+.micst { font-weight: 700; font-size: 14px; min-height: 1.4em; }
+
 @media (prefers-reduced-motion: reduce) { .slab.s-ready, .bar .live { animation: none; } * { transition: none !important; } }
 </style>
 </head>
@@ -204,69 +234,11 @@ button { cursor: pointer; }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="questions.js"></script>
 <script>
 const VALUES = [200, 400, 600, 800, 1000];
-const CATS = [
-  { name: "كلمات عربية في الإنجليزية", clues: [
-    ["كلمة إنجليزية لفرع من الرياضيات، أُخذت من عنوان كتاب الخوارزمي في «الجبر والمقابلة».", "ما هي Algebra؟"],
-    ["أصلها «الكُحل»، المسحوق الناعم لتكحيل العيون، ثم صارت تعني في الإنجليزية المادة المُسكِرة.", "ما هي Alcohol؟"],
-    ["رتبة بحرية رفيعة في الإنجليزية، يُرجَّح أنها مأخوذة من لقب «أمير البحر».", "ما هي Admiral؟"],
-    ["أعطت كلمة «صِفر» العربية الإنجليزيةَ كلمة zero، وأعطتها أيضًا هذه الكلمة التي تعني الرمز أو الشيفرة.", "ما هي Cipher؟"],
-    ["من الكلمة العربية «تعريف»، وصارت تعني في الإنجليزية جدول الرسوم الجمركية.", "ما هي Tariff؟"]
-  ]},
-  { name: "علماء العصر الذهبي", clues: [
-    ["من اسمه اشتُقّت كلمة «خوارزمية».", "من هو الخوارزمي؟"],
-    ["مؤلف «القانون في الطب» الذي دُرِّس في جامعات أوروبا قرونًا.", "من هو ابن سينا؟"],
-    ["عالم من البصرة شرح في «كتاب المناظر» أن الرؤية تحدث بدخول الضوء إلى العين.", "من هو ابن الهيثم؟"],
-    ["جرّاح أندلسي وضع موسوعة «التصريف لمن عجز عن التأليف» ورسم فيها أدوات الجراحة.", "من هو الزهراوي؟"],
-    ["طبيب دمشقي وصف الدورة الدموية الصغرى بين القلب والرئتين في القرن الثالث عشر.", "من هو ابن النفيس؟"]
-  ]},
-  { name: "بيت من الشعر", clues: [
-    ["صاحب البيت: «الخيلُ والليلُ والبيداءُ تعرفني ... والسيفُ والرمحُ والقرطاسُ والقلمُ».", "من هو المتنبي؟"],
-    ["بويع بلقب «أمير الشعراء» في القاهرة عام 1927.", "من هو أحمد شوقي؟"],
-    ["مطلع معلّقته: «قِفا نبكِ من ذكرى حبيبٍ ومنزلِ».", "من هو امرؤ القيس؟"],
-    ["قال في فتح عمّورية: «السيفُ أصدقُ إنباءً من الكتبِ».", "من هو أبو تمام؟"],
-    ["شاعر صعلوك جاهلي تُنسب إليه قصيدة «لاميّة العرب».", "من هو الشنفرى؟"]
-  ]},
-  { name: "مدن عريقة", clues: [
-    ["بناها الخليفة العباسي أبو جعفر المنصور مدوّرةً، وسمّاها «مدينة السلام».", "ما هي بغداد؟"],
-    ["عاصمة الأنباط المنحوتة في الصخر الوردي جنوب الأردن.", "ما هي البتراء؟"],
-    ["مدينة القوافل في بادية الشام التي حكمتها الملكة زنوبيا.", "ما هي تدمر؟"],
-    ["أسسها عقبة بن نافع نحو عام 670م في تونس لتكون قاعدة للفتح في المغرب.", "ما هي القيروان؟"],
-    ["أسّست جامع القرويين في فاس عام 859م.", "من هي فاطمة الفهرية؟"]
-  ]},
-  { name: "محطات تاريخية", clues: [
-    ["افتُتحت هذه القناة المصرية للملاحة عام 1869.", "ما هي قناة السويس؟"],
-    ["صلح عُقد سنة 6 للهجرة بين المسلمين وقريش، ونصّ على هدنة عشر سنين.", "ما هو صلح الحديبية؟"],
-    ["اتفاقية سرية عام 1916 بين بريطانيا وفرنسا لاقتسام المشرق العربي.", "ما هي اتفاقية سايكس بيكو؟"],
-    ["معركة عام 1260م في فلسطين أوقف فيها المماليك بقيادة قطز زحف المغول.", "ما هي معركة عين جالوت؟"],
-    ["معركة عام 1071م انتصر فيها السلطان السلجوقي ألب أرسلان على الإمبراطور البيزنطي وأسَره.", "ما هي معركة ملاذكرد؟"]
-  ]},
-  { name: "أدب وسينما", clues: [
-    ["أول أديب عربي ينال جائزة نوبل للآداب، عام 1988.", "من هو نجيب محفوظ؟"],
-    ["الملك الذي ظلت شهرزاد تروي له الحكايات في «ألف ليلة وليلة».", "من هو شهريار؟"],
-    ["روائي سوداني صاحب «موسم الهجرة إلى الشمال».", "من هو الطيب صالح؟"],
-    ["الجزء الأول من ثلاثية نجيب محفوظ، يليه «قصر الشوق» ثم «السكرية».", "ما هو «بين القصرين»؟"],
-    ["فيلم ليوسف شاهين عام 1997 عن الفيلسوف ابن رشد، عُرض في مهرجان كان.", "ما هو فيلم «المصير»؟"]
-  ]}
-];
-
-const FINAL = {
-  category: "رحّالة وجغرافيون",
-  clue: "رسم خريطة للعالم للملك النورماني روجر الثاني في صقلية، وألّف له كتاب «نزهة المشتاق في اختراق الآفاق».",
-  answer: "من هو الإدريسي؟"
-};
-
-// Other accepted answers per clue, same order as CATS (spelling variants, short forms)
-const ALTS = [
-  [["algebra", "الجبر"], ["alcohol", "الكحول"], ["admiral", "أدميرال", "اميرال"], ["cipher", "سايفر", "سيفر"], ["tariff", "تعريفة", "تعرفة"]],
-  [["الخوارزمي", "محمد بن موسى الخوارزمي"], ["ابن سينا"], ["ابن الهيثم", "الحسن بن الهيثم"], ["الزهراوي", "أبو القاسم الزهراوي"], ["ابن النفيس"]],
-  [["المتنبي", "أبو الطيب المتنبي"], ["أحمد شوقي", "شوقي"], ["امرؤ القيس", "امرئ القيس", "امرأ القيس"], ["أبو تمام", "ابو تمام"], ["الشنفرى", "الشنفري"]],
-  [["بغداد"], ["البتراء", "بترا"], ["تدمر", "بالميرا"], ["القيروان"], ["فاطمة الفهرية", "الفهرية"]],
-  [["قناة السويس", "السويس"], ["صلح الحديبية", "الحديبية"], ["سايكس بيكو", "سايكس-بيكو"], ["عين جالوت"], ["ملاذكرد", "منزكرت"]],
-  [["نجيب محفوظ", "محفوظ"], ["شهريار"], ["الطيب صالح"], ["بين القصرين"], ["المصير"]]
-];
-const FINAL_ALTS = ["الإدريسي", "الشريف الإدريسي"];
+// Board columns and the final clue are chosen per game from questions.js (see applyBoard)
+let CATS = [], ALTS = [], FINAL = null, FINAL_ALTS = [];
 
 // ---------- Fuzzy answer matching (Levenshtein on normalized Arabic/English) ----------
 const ANSWER_MS = 20000;
@@ -296,6 +268,12 @@ function lev(a, b) {
 function judge(text, official, alts) {
   const a = norm(text).replace(/\s/g, "");
   if (!a) return { v: "wrong", sim: 0 };
+  // Numbers must match exactly (365 is not "close" to 366)
+  const offN = norm(official).replace(/\s/g, "");
+  if (/^\d+$/.test(offN)) {
+    const ok = a.replace(/[^\d]/g, "") === offN || (alts || []).some(x => norm(x).replace(/\s/g, "") === a);
+    return { v: ok ? "right" : "wrong", sim: ok ? 1 : 0 };
+  }
   let best = 0;
   for (const v of [official, ...(alts || [])]) {
     const b = norm(v).replace(/\s/g, ""); if (!b) continue;
@@ -317,7 +295,7 @@ function connect(room, key, h) {
   connArgs = [room, key, h];
   const c = sb.channel("mws-" + room, { config: { broadcast: { self: false }, presence: { key } } });
   ch = c;
-  for (const ev of ["join", "buzz", "wager", "fin", "ans", "hello", "state"]) c.on("broadcast", { event: ev }, m => h.msg(ev, m.payload || {}));
+  for (const ev of ["join", "buzz", "wager", "fin", "ans", "vote", "hello", "state"]) c.on("broadcast", { event: ev }, m => h.msg(ev, m.payload || {}));
   c.on("presence", { event: "sync" }, () => h.presence && h.presence(c.presenceState()));
   c.subscribe(st => {
     if (c !== ch) return;                       // an old channel we already replaced
@@ -356,6 +334,7 @@ const newCode = () => Array.from({ length: 4 }, () => CODE_CHARS[Math.floor(Math
 const params = new URLSearchParams(location.search);
 const roomParam = (params.get("room") || "").toUpperCase().replace(/[^A-Z]/g, "").slice(0, 4);
 const IS_PLAYER = params.has("room") || params.has("join");
+
 
 const COPY = {
 "board.empty": [
@@ -754,6 +733,105 @@ const COPY = {
 ],
 "wager.who": [
 "مين اختار الخانة؟"
+],
+"vote.title": [
+"اختار 3 مواضيع",
+"اختاري 3 مواضيع"
+],
+"vote.hint": [
+"المواضيع اللي بتاخد أصوات أكتر بتطلع على اللوح"
+],
+"vote.send": [
+"صوّت",
+"صوّتي"
+],
+"vote.sent": [
+"وصل صوتك"
+],
+"vote.change": [
+"غيّر صوتك",
+"غيّري صوتك"
+],
+"vote.max": [
+"بتقدر تختار 3 بس",
+"بتقدري تختاري 3 بس"
+],
+"vote.none": [
+"اختار موضوع واحد على الأقل",
+"اختاري موضوع واحد على الأقل"
+],
+"lobby.votesTitle": [
+"التصويت"
+],
+"lobby.votesCount": [
+"{n} من {total} صوّتوا"
+],
+"intro.welcome": [
+"أهلا وسهلا بـ{name}"
+],
+"intro.welcomeSub": [
+"قبل ما نبلّش، هيك بنلعب"
+],
+"intro.buzzT": [
+"الأزرار"
+],
+"intro.buzzB": [
+"المضيف بيقرأ السؤال، وبس يخلص بتنفتح الأزرار على تلفوناتكم. اللي بيضغط قبل الوقت، بيتأخر ربع ثانية."
+],
+"intro.answerT": [
+"الجواب"
+],
+"intro.answerB": [
+"أول واحد بيضغط عنده 20 ثانية يكتب الجواب أو يحكيه. الجواب الغلط بينقص من نقاطه، وبيرجع الدور للباقي."
+],
+"intro.wagerT": [
+"الرهان"
+],
+"intro.wagerB": [
+"في خانتين مخفيات على اللوح. اللي بيلاقي وحدة منهن بيراهن بالمبلغ اللي بدّه ياه."
+],
+"intro.finalT": [
+"الجولة الأخيرة"
+],
+"intro.finalB": [
+"بالآخر، كل واحد بيراهن بالسر على سؤال واحد. هون ممكن تنقلب النتيجة."
+],
+"intro.catsT": [
+"فئات اليوم"
+],
+"intro.step": [
+"{i} من {n}"
+],
+"intro.next": [
+"التالي"
+],
+"intro.skip": [
+"تخطّى المقدمة"
+],
+"intro.go": [
+"يلا نبلّش!"
+],
+"intro.phoneSub": [
+"المضيف بيشرح اللعبة"
+],
+"voice.on": [
+"الصوت: شغّال"
+],
+"voice.off": [
+"الصوت: مطفي"
+],
+"voice.none": [
+"ما في صوت عربي على هالجهاز"
+],
+"mic.start": [
+"احكي الجواب"
+],
+"mic.listening": [
+"عم بسمع…"
+],
+"mic.error": [
+"ما قدرت أسمع، جرّب كمان مرة",
+"ما قدرت أسمع، جرّبي كمان مرة"
 ]
 };
 
@@ -855,6 +933,97 @@ function repid(a, b) {
 }
 const sameName = (x, y) => norm(x) === norm(y) && norm(x) !== "";
 function joinUrl() { return location.origin + location.pathname + "?room=" + G.room; }
+
+// ---------- Building the board from votes ----------
+// Topics win columns in proportion to their votes (at most 2 each); inside a topic the
+// least recently played categories are chosen. Finals rotate the same way.
+const HIST = "mws-history-v1";
+const findCat = (tid, cid) => { const tp = TOPICS.find(x => x.id === tid); return tp && tp.cats.find(c => c.id === cid); };
+function tallyVotes() {
+  const tally = {}; TOPICS.forEach(tp => tally[tp.id] = 0);
+  Object.entries(G.votes || {}).forEach(([pid, ids]) => { if (pf(pid)) ids.forEach(id => { if (id in tally) tally[id]++; }); });
+  return tally;
+}
+function chooseBoard(useVotes) {
+  const tally = useVotes ? tallyVotes() : {};
+  const cols = {}, picks = [];
+  for (let i = 0; i < 6; i++) {
+    let best = null, bs = -1;
+    for (const tp of TOPICS) {
+      const n = cols[tp.id] || 0, v = tally[tp.id] || 0;
+      if (!v || n >= Math.min(2, tp.cats.length)) continue;
+      const sc = v / (n + 1) + Math.random() * 1e-3;
+      if (sc > bs) { bs = sc; best = tp; }
+    }
+    if (!best) {                       // not enough votes: fill with topics not on the board yet
+      const pool = TOPICS.filter(tp => !cols[tp.id]);
+      best = (pool.length ? pool : TOPICS)[Math.floor(Math.random() * (pool.length || TOPICS.length))];
+    }
+    cols[best.id] = (cols[best.id] || 0) + 1; picks.push(best);
+  }
+  const H = store.get(HIST) || { cats: {}, finals: {} };
+  const board = [];
+  for (const tp of picks) {
+    const opts = tp.cats.filter(c => !board.some(b => b.t === tp.id && b.c === c.id))
+      .map(c => ({ c, last: H.cats[tp.id + "/" + c.id] || 0, r: Math.random() }))
+      .sort((x, y) => x.last - y.last || x.r - y.r);
+    board.push({ t: tp.id, c: opts[0].c.id });
+  }
+  const finals = FINALS.map((f, i) => ({ i, last: H.finals[i] || 0, r: Math.random() })).sort((x, y) => x.last - y.last || x.r - y.r);
+  return { board, finalIdx: finals[0].i };
+}
+function rememberBoard() {
+  const H = store.get(HIST) || { cats: {}, finals: {} }, now = Date.now();
+  G.board.forEach(b => H.cats[b.t + "/" + b.c] = now);
+  H.finals[G.finalIdx] = now;
+  store.set(HIST, H);
+}
+function applyBoard() {
+  if (!Array.isArray(G.board) || G.board.length !== 6 || G.board.some(b => !findCat(b.t, b.c)) || !FINALS[G.finalIdx]) {
+    const r = chooseBoard(false); G.board = r.board; G.finalIdx = r.finalIdx;
+  }
+  CATS = G.board.map(b => { const c = findCat(b.t, b.c); return { id: c.id, name: c.name, desc: CAT_DESC[c.id] || "", clues: c.q.map(x => [x[0], x[1]]) }; });
+  ALTS = G.board.map(b => findCat(b.t, b.c).q.map(x => x[2] || []));
+  const f = FINALS[G.finalIdx];
+  FINAL = { category: f.category, clue: f.clue, answer: f.answer }; FINAL_ALTS = f.alts || [];
+}
+
+// ---------- Voice: the TV reads clues with the device's Arabic voice ----------
+let arVoice = null;
+function pickVoice() {
+  if (!window.speechSynthesis) return null;
+  const vs = speechSynthesis.getVoices();
+  arVoice = vs.find(v => /^ar[-_](SA|JO|PS|LB|SY|AE)/i.test(v.lang)) || vs.find(v => /^ar/i.test(v.lang)) || null;
+  return arVoice;
+}
+if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = () => { pickVoice(); renderVoiceBtn(); }; }
+function speak(text, onend) {
+  if (!G.voice || !window.speechSynthesis) return false;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = arVoice ? arVoice.lang : "ar-SA"; if (arVoice) u.voice = arVoice;
+    u.rate = 0.95;
+    if (onend) { let done = false; const fin = () => { if (!done) { done = true; onend(); } }; u.onend = fin; u.onerror = fin; }
+    speechSynthesis.speak(u);
+    return true;
+  } catch (e) { return false; }
+}
+function hush() { try { window.speechSynthesis && speechSynthesis.cancel(); } catch (e) {} }
+function renderVoiceBtn() {
+  const b = document.getElementById("voiceBtn"); if (!b || !G) return;
+  if (!window.speechSynthesis) { b.hidden = true; return; }
+  b.textContent = G.voice ? t("voice.on") : t("voice.off");
+  b.classList.toggle("sel", !!G.voice);
+  b.title = arVoice ? "" : t("voice.none");
+}
+// Read the clue, then open the buzzers when the reading ends
+function readClue() {
+  const key = T.key, [c, r] = key.split("-").map(Number), clue = CATS[c].clues[r][0];
+  speak(CATS[c].name + ". " + clue, () => {
+    if (T.phase === "clue" && T.key === key && !T.isWager && !T.armed && !T.winner && !T.revealed && !T.locked.length) { T.armed = true; drawOverlay(); pub(); }
+  });
+}
 function makeQR(el, size) {
   if (!el) return;
   el.innerHTML = "";
@@ -867,12 +1036,15 @@ function initHost() {
   if (!G || !G.room || !Array.isArray(G.players)) G = { room: newCode(), players: [], used: {}, wagers: freshWagers(), control: null, finalDone: false, started: false, delta: {} };
   G.players.forEach(p => { if (!p.g) p.g = "m"; });
   if (G.started == null) G.started = Object.keys(G.used).length > 0;
+  if (!G.votes) G.votes = {};
+  applyBoard();
   resetT(); saveG();
   $("#app").innerHTML = `
   <div class="host dots">
     <div class="hhead">
       <h1 class="extrude">${th("name.title")}</h1>
       <div class="hside">
+        <button type="button" class="btn" id="voiceBtn"></button>
         <button type="button" class="btn dark" id="finalBtn">${th("board.final")}</button>
         <button type="button" class="btn" id="resetBtn">${th("board.newGame")}</button>
         <button type="button" class="codechip" id="codeChip" aria-label="${th("lobby.codeLabel")}">
@@ -902,6 +1074,8 @@ function initHost() {
     }
   });
   $("#codeChip").onclick = () => { T.phase = "lobby"; drawOverlay(); pub(); };
+  renderVoiceBtn();
+  $("#voiceBtn").onclick = () => { G.voice = !G.voice; saveG(); renderVoiceBtn(); if (G.voice) speak(t("voice.on")); else hush(); };
   $("#finalBtn").onclick = () => { if (G.finalDone) { T.phase = "over"; drawOverlay(); pub(); } else startFinal(); };
   const rb = $("#resetBtn");
   rb.onclick = () => {
@@ -938,12 +1112,13 @@ function tickDrain() {
 
 function newGame() {
   G.players.forEach(p => p.score = 0);
-  G.used = {}; G.wagers = freshWagers(); G.control = null; G.finalDone = false; G.started = false; G.delta = {};
+  G.used = {}; G.wagers = freshWagers(); G.control = null; G.finalDone = false; G.started = false; G.delta = {}; G.votes = {};
+  G.board = null; applyBoard(); hush();
   resetT(); saveG(); renderBoard(); renderLeader(); drawOverlay(); pub();
 }
 
 function renderBoard() {
-  let h = CATS.map(c => `<div class="cat">${esc(c.name)}</div>`).join("");
+  let h = CATS.map(c => `<div class="cat" tabindex="0">${esc(c.name)}${c.desc ? `<span class="tip" role="tooltip">${esc(c.desc)}</span>` : ""}</div>`).join("");
   for (let r = 0; r < 5; r++) for (let c = 0; c < 6; c++) {
     const k = c + "-" + r, used = !!G.used[k];
     h += `<button class="tile" type="button" data-k="${k}" ${used ? "disabled" : ""} aria-label="${esc(CATS[c].name)} ${VALUES[r]}">${used ? "" : num(VALUES[r])}</button>`;
@@ -988,6 +1163,7 @@ function pub() {
     judging: T.phase === "clue" && !T.revealed && !!T.answerText,
     res: T.res,
     lastWrong: (!T.isWager && T.armed && T.res && !T.res.ok && pf(T.res.pid)) ? T.res.pid : "",
+    votes: G.votes || {},
     final: T.final ? { stage: T.final.stage, w: Object.keys(T.final.wagers), a: Object.keys(T.final.answers) } : null
   });
   saveT();
@@ -1012,13 +1188,18 @@ function hostMsg(ev, p) {
     saveG(); renderLeader(); if (T.phase !== "board") drawOverlay(); return pub();
   }
   const pl = pf(pid); if (!pl) return;
+  if (ev === "vote") {
+    if (G.started) return;
+    const ids = (Array.isArray(p.topics) ? p.topics : []).map(String).filter((id, i, a) => TOPICS.some(tp => tp.id === id) && a.indexOf(id) === i).slice(0, 3);
+    G.votes[pid] = ids; saveG(); if (T.phase === "lobby") drawOverlay(); return pub();
+  }
   if (ev === "buzz") {
     const now = performance.now();
     if (T.phase !== "clue" || T.isWager || T.revealed) return;
     if (p.early) { if (!T.armed && !T.winner) T.penalty[pid] = now + 250; return; }
     if (!T.armed || T.winner || T.locked.includes(pid)) return;
     if ((T.penalty[pid] || 0) > now) return;
-    T.winner = pid; T.armed = false; T.undo = null; startAnswerTimer(); beep();
+    T.winner = pid; T.armed = false; T.undo = null; startAnswerTimer(); beep(); speak(pl.name);
     T.flashUntil = Date.now() + 1300; clearTimeout(T.flashTimer); T.flashTimer = setTimeout(drawOverlay, 1350);
     drawOverlay(); pub();
   } else if (ev === "ans") {
@@ -1068,6 +1249,7 @@ function openTile(k) {
     T.wagerFor = pf(G.control) ? G.control : (G.players[0] ? G.players[0].pid : null);
   } else T.phase = "clue";
   saveG(); renderLeader(); drawOverlay(); pub();
+  if (T.phase === "clue") readClue(); else speak(t("wager.title"));
 }
 
 function startFinal() {
@@ -1080,6 +1262,7 @@ function drawOverlay() {
   if (T.phase === "board") { ov.hidden = true; ov.innerHTML = ""; ov.className = "ov"; return; }
   let html = "", cls = "dots";
   if (T.phase === "lobby") html = lobbyView();
+  else if (T.phase === "intro") html = introView();
   else if (T.phase === "clue" && T.flashUntil > Date.now() && T.winner) { html = flashView(); cls = "dots"; }
   else if (T.phase === "clue") html = clueView();
   else if (T.phase === "wager") { html = wagerView(); cls = "hatch"; }
@@ -1106,7 +1289,7 @@ function lobbyView() {
       </div>
       <div class="row"><button type="button" class="btn dark big" data-act="start">${th("lobby.start")}</button></div>
     </div>
-    <div style="display: flex; flex-direction: column; gap: 32px;">
+    <div style="display: flex; flex-direction: column; gap: 28px;">
       <div class="qrbig"><div class="qrbox" id="qrBig"></div></div>
       <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
         <div style="font-weight: 900; font-size: 26px; line-height: 1.5;">${th("lobby.joined")}</div>
@@ -1116,8 +1299,54 @@ function lobbyView() {
         ${G.players.map(p => `<div class="sticker ${p.pid === G.lastJoined ? "new" : ""}">${esc(p.name)}${p.pid === G.lastJoined ? `<small>${th("lobby.justJoined", null, p.g)}</small>` : ""}</div>`).join("")}
         <div class="waitchip">${th("lobby.waiting")}</div>
       </div>
+      ${voteTally()}
     </div>
   </div>`;
+}
+
+function voteTally() {
+  const voters = G.players.filter(p => (G.votes[p.pid] || []).length).length;
+  if (!voters) return "";
+  const tally = tallyVotes(), max = Math.max(1, ...Object.values(tally));
+  const rows = TOPICS.map(tp => ({ tp, v: tally[tp.id] })).filter(x => x.v).sort((a, b) => b.v - a.v);
+  return `<div class="votes">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+      <div style="font-weight: 900; font-size: 22px; line-height: 1.5;">${th("lobby.votesTitle")}</div>
+      <div style="font-weight: 700; font-size: 16px;">${th("lobby.votesCount", { n: voters, total: G.players.length })}</div>
+    </div>
+    ${rows.map(x => `<div class="vrow"><span>${esc(x.tp.name)}</span><span class="vbar"><span style="width: ${100 * x.v / max}%;"></span></span><span>${x.v}</span></div>`).join("")}
+  </div>`;
+}
+
+// Round intro: rules in four slides, then today's categories revealed one at a time
+const RULES = [["intro.buzzT", "intro.buzzB"], ["intro.answerT", "intro.answerB"], ["intro.wagerT", "intro.wagerB"], ["intro.finalT", "intro.finalB"]];
+function introSteps() { return 1 + RULES.length + CATS.length; }   // welcome + rules + one per category
+function introView() {
+  const i = T.slide || 0, n = introSteps();
+  const nav = `<div class="row"><button type="button" class="btn dark big" data-act="inext" id="inextBtn">${i >= n - 1 ? th("intro.go") : th("intro.next")}</button>
+    ${i < n - 1 ? `<button type="button" class="btn" data-act="iskip">${th("intro.skip")}</button>` : ""}
+    <span style="font-weight: 700; font-size: 16px;">${th("intro.step", { i: i + 1, n })}</span></div>`;
+  let body;
+  if (i === 0) {
+    body = `<h2 class="extrude">${th("intro.welcome", { name: t("name.title") })}</h2><p>${th("intro.welcomeSub")}</p>
+      <div class="row" style="gap: 16px;">${G.players.map(p => `<div class="sticker">${esc(p.name)}</div>`).join("")}</div>`;
+  } else if (i <= RULES.length) {
+    const [tk, bk] = RULES[i - 1];
+    body = `<div class="step">${th("intro.step", { i, n: RULES.length })}</div><h2 class="extrude">${th(tk)}</h2><p>${th(bk)}</p>`;
+  } else {
+    const shown = i - RULES.length;            // how many categories are revealed so far
+    body = `<h2 class="extrude">${th("intro.catsT")}</h2>
+      <div class="reveal">${CATS.map((c, k) => k < shown
+        ? `<div class="rcard ${k === shown - 1 ? "new" : ""}"><div class="rn">${esc(c.name)}</div><div class="rd">${esc(c.desc)}</div></div>`
+        : `<div class="rcard hid" aria-hidden="true">?</div>`).join("")}</div>`;
+  }
+  return `<div class="scr pad" role="dialog" aria-modal="true"><div class="intro">${body}${nav}</div></div>`;
+}
+function introSpeech() {
+  const i = T.slide || 0;
+  if (i === 0) return t("intro.welcome", { name: t("name.title") }) + ". " + t("intro.welcomeSub");
+  if (i <= RULES.length) { const [tk, bk] = RULES[i - 1]; return t(tk) + ". " + t(bk); }
+  const c = CATS[i - RULES.length - 1]; return c ? c.name + ". " + c.desc : "";
 }
 
 function flashView() {
@@ -1264,14 +1493,28 @@ function overView() {
 
 function toBoard(markUsed) {
   if (markUsed && T.key) G.used[T.key] = 1;
-  resetT(); saveG(); renderBoard(); renderLeader(); drawOverlay(); pub();
+  hush(); resetT(); saveG(); renderBoard(); renderLeader(); drawOverlay(); pub();
 }
 
 function hostAct(e) {
   const b = e.target.closest("button[data-act]"); if (!b) return;
   const a = b.dataset.act;
   if (a !== "undo") T.undo = null;
-  if (a === "start") { G.started = true; saveG(); T.phase = "board"; }
+  if (a === "start") {
+    if (!G.started) {                       // first start: build today's board from the votes
+      const r = chooseBoard(true); G.board = r.board; G.finalIdx = r.finalIdx;
+      applyBoard(); rememberBoard(); renderBoard();
+      G.started = true; saveG(); T.phase = "intro"; T.slide = 0;
+      drawOverlay(); pub(); speak(introSpeech()); return;
+    }
+    T.phase = "board";                      // lobby reopened mid-game from the code chip
+  }
+  else if (a === "inext") {
+    T.slide = (T.slide || 0) + 1;
+    if (T.slide >= introSteps()) { hush(); T.phase = "board"; T.slide = 0; }
+    else { drawOverlay(); pub(); speak(introSpeech()); return; }
+  }
+  else if (a === "iskip") { hush(); T.phase = "board"; T.slide = 0; }
   else if (a === "arm") { T.armed = true; T.winner = null; }
   else if (a === "disarm") { T.armed = false; }
   else if (a === "right" || a === "wrong") {
@@ -1295,8 +1538,9 @@ function hostAct(e) {
     const v = parseNum(T.wagerInput), mx = maxFor(T.wagerFor);
     if (!v || v < 5 || v > mx) { $("#wErr").textContent = t("wager.error", { max: num(mx) }); return; }
     T.wagerAmt = v; T.isWager = true; T.phase = "clue";
+    const [c, r] = T.key.split("-").map(Number); speak(CATS[c].clues[r][0]);
   }
-  else if (a === "fclue") { T.final.stage = "answer"; }
+  else if (a === "fclue") { T.final.stage = "answer"; speak(FINAL.clue); }
   else if (a === "freveal") {
     const F = T.final; F.stage = "reveal"; F.verdict = {};
     G.players.forEach(p => {
@@ -1321,7 +1565,25 @@ function hostAct(e) {
 // =====================================================================
 const PKEY = "mws-player-v1";
 let P, S = null, lastState = 0, penaltyUntil = 0, pending = false, sentWager = null, sentFin = {}, lastJoin = 0,
-    lastView = "", editingName = false, wasWinner = false, sentAns = null, ansDeadline = 0, pickG = null;
+    lastView = "", editingName = false, wasWinner = false, sentAns = null, ansDeadline = 0, pickG = null,
+    votePick = null, voteEditing = false;
+
+// ---------- Speaking an answer instead of typing it (browser speech recognition) ----------
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null;
+function micButton() { return SR ? `<button type="button" class="btn mic" id="micBtn">${th("mic.start")}</button><span class="micst" id="micSt" aria-live="polite"></span>` : ""; }
+function startMic() {
+  const inp = document.querySelector("form[data-f=ans] input, form[data-f=fanswer] input"), st = document.getElementById("micSt");
+  if (!SR || !inp) return;
+  try { if (rec) rec.abort(); } catch (e) {}
+  rec = new SR(); rec.lang = "ar-JO"; rec.interimResults = true; rec.maxAlternatives = 1;
+  let heard = false;
+  rec.onresult = e => { heard = true; inp.value = Array.from(e.results).map(r => r[0].transcript).join(" ").trim(); };
+  rec.onerror = () => { if (st) st.textContent = t("mic.error", null, meG()); };
+  rec.onend = () => { rec = null; const b = document.getElementById("micBtn"); if (b) b.classList.remove("sel"); if (st && heard) st.textContent = ""; };
+  try { rec.start(); if (st) st.textContent = t("mic.listening"); const b = document.getElementById("micBtn"); if (b) b.classList.add("sel"); }
+  catch (e) { if (st) st.textContent = t("mic.error", null, meG()); }
+}
 
 const meG = () => P.g === "f" ? "f" : "m";
 const sp = pid => S && S.players.find(x => x.pid === pid);
@@ -1339,6 +1601,17 @@ function initPlayer() {
     if (e.target.closest("#rename")) { editingName = true; pickG = P.g || null; lastView = ""; renderPlayer(); }
     const gb = e.target.closest("[data-g]");
     if (gb) { pickG = gb.dataset.g; document.querySelectorAll("[data-g]").forEach(x => x.classList.toggle("sel", x === gb)); document.querySelectorAll("[data-g]").forEach(x => x.setAttribute("aria-pressed", String(x === gb))); }
+    const tb = e.target.closest("[data-topic]");
+    if (tb && votePick) {
+      const id = tb.dataset.topic, err = document.querySelector("form[data-f=vote] .err");
+      if (votePick.includes(id)) votePick = votePick.filter(x => x !== id);
+      else if (votePick.length >= 3) { if (err) err.textContent = t("vote.max", null, meG()); return; }
+      else votePick.push(id);
+      if (err) err.textContent = "";
+      tb.classList.toggle("sel", votePick.includes(id)); tb.setAttribute("aria-pressed", String(votePick.includes(id)));
+    }
+    if (e.target.closest("#voteEdit")) { voteEditing = true; votePick = null; lastView = ""; renderPlayer(); }
+    if (e.target.closest("#micBtn")) startMic();
     const c = e.target.closest("[data-claim]");
     if (c && S) {
       const old = sp(c.dataset.claim); if (!old) return;
@@ -1425,6 +1698,14 @@ function onPlayerSubmit(e) {
     if (ch) send("join", joinPayload()); else startPlayerConn();
     lastView = ""; renderPlayer(); return;
   }
+  if (kind === "vote") {
+    if (!votePick || !votePick.length) { err.textContent = t("vote.none", null, meG()); return; }
+    const picks = votePick.slice(0, 3);
+    send("vote", { pid: P.pid, topics: picks });
+    S.votes = Object.assign({}, S.votes, { [P.pid]: picks });   // show it right away; the host's next update confirms it
+    voteEditing = false; votePick = null; lastView = "";
+    renderPlayer(); return;
+  }
   if (kind === "wager") {
     const n = parseNum(v), mx = S ? S.wagerMax : 0;
     if (!n || n < 5 || n > mx) { err.textContent = t("wager.error", { max: num(mx) }); return; }
@@ -1505,10 +1786,29 @@ function renderPlayer() {
       else { key = "fw"; html = form("fwager", t("pfinal.title"), t("pfinal.wagerLabel", { max: num(myScore) }), t("wager.phoneSend"), { numeric: true, placeholder: "0", sub: `<span>${esc(S.cat)}</span>` }); }
     } else if (F.stage === "answer") {
       if (F.a.includes(P.pid) || sentFin.answer != null) { key = "fa-done"; html = msg(t("phone.sent"), ""); }
-      else { key = "fa"; html = form("fanswer", t("pfinal.answerTitle", null, g), t("phone.answerLabel"), t("pfinal.answerSend"), {}); }
+      else { key = "fa"; html = form("fanswer", t("pfinal.answerTitle", null, g), t("phone.answerLabel"), t("pfinal.answerSend"), { extra: micButton() }); }
     } else { key = "fr"; html = msg(t("pfinal.look", null, g), t("pfinal.lookSub")); }
   } else if (S.phase === "lobby") {
-    key = "lobby"; html = slab("idle", t("phone.idle", null, g), t("lobby.waiting"));
+    const mine = (S.votes || {})[P.pid];
+    if (mine && mine.length && !voteEditing) {
+      key = "voted" + mine.join(",");
+      html = `<div class="msg"><div class="big">${th("vote.sent")}</div>
+        <div class="row" style="justify-content: center;">${mine.map(id => { const tp = TOPICS.find(x => x.id === id); return tp ? `<span class="sticker" style="font-size: 18px; padding: 6px 14px;">${esc(tp.name)}</span>` : ""; }).join("")}</div>
+        <div class="sub">${th("lobby.waiting")}</div>
+        <button type="button" class="btn" id="voteEdit">${th("vote.change", null, g)}</button></div>`;
+    } else {
+      key = "vote";
+      if (votePick == null) votePick = (mine || []).slice();
+      html = `<form class="pcard" data-f="vote">
+        <h2>${th("vote.title", null, g)}</h2>
+        <div style="font-weight: 500; font-size: 15px; line-height: 1.6;">${th("vote.hint")}</div>
+        <div class="topics" role="group" aria-label="${th("vote.title", null, g)}">${TOPICS.map(tp => `<button type="button" class="btn ${votePick.includes(tp.id) ? "sel" : ""}" data-topic="${tp.id}" aria-pressed="${votePick.includes(tp.id)}">${esc(tp.name)}</button>`).join("")}</div>
+        <p class="err"></p>
+        <button type="submit" class="send">${th("vote.send", null, g)}</button>
+      </form>`;
+    }
+  } else if (S.phase === "intro") {
+    key = "intro"; html = msg(t("pfinal.look", null, g), t("intro.phoneSub"));
   } else if (S.phase === "wager") {
     if (S.wagerFor === P.pid && sentWager == null) { key = "w"; html = form("wager", t("wager.title"), t("wager.phoneLabel", { max: num(S.wagerMax) }), t("wager.phoneSend"), { numeric: true, sub: `<span>${esc(S.cat)}</span>` }); }
     else if (S.wagerFor === P.pid) { key = "w-sent"; html = msg(t("wager.phoneSent", { n: num(sentWager) }), t("wager.phoneSentSub")); }
@@ -1522,7 +1822,7 @@ function renderPlayer() {
     if (S.answering && sentAns == null) {
       if (lastView !== "ans") ansDeadline = S.ansLeft ? Date.now() + S.ansLeft : 0;
       key = "ans"; html = form("ans", t("phone.yourTurn", null, g), t("phone.answerLabel"), t("phone.send"), {
-        track: !!S.ansLeft, sub: `<span>${esc(S.cat)} · ${num(S.val)}</span><span id="ptSecs"></span>`
+        track: !!S.ansLeft, sub: `<span>${esc(S.cat)} · ${num(S.val)}</span><span id="ptSecs"></span>`, extra: micButton()
       });
     } else { key = "ans-sent"; html = msg(t("phone.sent"), S.judging ? t("phone.reviewing") : ""); }
   } else if (S.phase === "clue" && S.wagerFor) {
@@ -1539,7 +1839,7 @@ function renderPlayer() {
     key = "idle"; html = slab("idle", t("phone.idle", null, g), t("phone.idleSub"));
   }
 
-  const isForm = ["code", "name", "w", "fw", "fa", "ans"].includes(key);
+  const isForm = ["code", "name", "w", "fw", "fa", "ans", "vote"].includes(key);
   if (key !== lastView || !isForm) body.innerHTML = html;
   lastView = key;
   // "Rejoin as" buttons, refreshed without wiping a name being typed
