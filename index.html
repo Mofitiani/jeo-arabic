@@ -3,139 +3,204 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f2420">
+<meta name="theme-color" content="#111111">
 <title>ما وراء السطور</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;700;900&display=swap">
 <style>
-/* Host: board on a TV or laptop with room code and QR. Players: one big buzzer per phone. Single dark malachite look. */
+/* Saffron poster with depth: hard offset shadows, halftone dots, extruded type. TV = host screen, phone = one big slab per state. */
 :root {
-  --felt: #0f2420; --felt-deep: #081613; --tile: #17382f; --tile-hi: #21493d;
-  --gold: #d8b65f; --ink: #eef0e6; --muted: #9fb5a8; --good: #7fd1a0; --bad: #ee8f7b;
-  --line: rgba(216,182,95,.24);
-  --display: "Reem Kufi", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
-  --body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, "Noto Sans Arabic", sans-serif;
-  color-scheme: dark;
+  --saffron: #F2B705; --saffron-deep: #6B5200; --ink: #111111; --paper: #FFFFFF;
+  --grey: #2A2A2A; --grey2: #3A3A3A; --muted: #CFCFCF;
+  --red: #D62828; --wine: #B3261E; --green: #1F7A4D; --focus: #1F4FB3;
+  --font: "Alexandria", Tahoma, "Noto Sans Arabic", sans-serif;
+  color-scheme: light;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
-body {
-  background: radial-gradient(ellipse at 50% 0%, #1a3a32 0%, var(--felt) 45%, var(--felt-deep) 100%) fixed, var(--felt);
-  color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6;
-  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
-}
+body { background: var(--ink); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.6; }
 [hidden] { display: none !important; }
-.wrap {
-  max-width: 1240px; margin: 0 auto;
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 18px 40px; display: grid; gap: 18px;
-}
-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
-h1 { font-family: var(--display); font-weight: 700; font-size: clamp(34px, 5vw, 54px); line-height: 1.1; margin: 0; color: var(--gold); }
-h1 small { display: block; font-family: var(--body); font-weight: 500; font-size: 14px; color: var(--muted); }
-.joinbox { display: flex; align-items: center; gap: 14px; background: rgba(0,0,0,.28); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
-#qr { background: var(--ink); padding: 6px; border-radius: 6px; line-height: 0; }
-#qr img, #qr canvas { width: 104px; height: 104px; }
-.code { font-family: var(--display); font-weight: 700; font-size: 40px; line-height: 1; letter-spacing: .12em; color: var(--gold); direction: ltr; text-align: start; }
-.joinbox .small { font-size: 13px; color: var(--muted); }
-.joinbox .url { direction: ltr; unicode-bidi: isolate; color: var(--ink); word-break: break-all; }
-.conn { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
-.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--bad); display: inline-block; flex: none; }
-.dot.on { background: var(--good); }
-.actions { display: flex; flex-wrap: wrap; gap: 8px; }
-button {
-  font: 600 15px/1.2 var(--body); color: var(--ink); background: transparent;
-  border: 1px solid var(--line); border-radius: 6px; padding: 9px 14px; cursor: pointer;
-}
-button:hover { border-color: var(--gold); }
-button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-button.primary { background: var(--gold); color: var(--felt-deep); border-color: var(--gold); }
-button.big { font-size: 20px; padding: 14px 22px; }
-button:disabled { opacity: .4; cursor: not-allowed; }
-button.ok { border-color: rgba(127,209,160,.5); color: var(--good); }
-button.ok.on, button.ok.big { background: var(--good); color: var(--felt-deep); }
-button.no { border-color: rgba(238,143,123,.5); color: var(--bad); }
-button.no.on, button.no.big { background: var(--bad); color: var(--felt-deep); }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.dots { background-color: var(--saffron); background-image: radial-gradient(rgba(17,17,17,.13) 1.3px, transparent 1.8px); background-size: 9px 9px; }
+.dots-dark { background-color: var(--ink); background-image: radial-gradient(rgba(242,183,5,.10) 1.3px, transparent 1.8px); background-size: 9px 9px; color: var(--paper); }
+.extrude { text-shadow: 5px 5px 0 var(--paper), 10px 10px 0 var(--ink); }
+.extrude-dark { text-shadow: 6px 6px 0 var(--saffron-deep); }
+.ltr { direction: ltr; unicode-bidi: isolate; }
 
-.board-scroll { overflow-x: auto; border-radius: 10px; }
-.board { display: grid; grid-template-columns: repeat(6, minmax(108px, 1fr)); gap: 6px; min-width: 680px; padding: 6px; background: #050e0c; border-radius: 10px; box-shadow: 0 20px 50px rgba(0,0,0,.45), inset 0 0 0 1px var(--line); }
-.cat { display: grid; place-items: center; text-align: center; min-height: 82px; padding: 8px 6px; font-family: var(--display); font-weight: 600; font-size: 19px; line-height: 1.3; background: var(--felt-deep); border-bottom: 2px solid var(--gold); text-wrap: balance; border-radius: 4px 4px 0 0; }
-.tile { height: 74px; border: 0; border-radius: 4px; background: linear-gradient(180deg, var(--tile-hi), var(--tile)); font-family: var(--display); font-weight: 700; font-size: 34px; color: var(--gold); text-shadow: 0 2px 0 rgba(0,0,0,.4); transition: transform .12s ease, filter .12s ease; }
-.tile:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.15); }
-.tile:disabled { background: rgba(255,255,255,.025); color: transparent; text-shadow: none; cursor: default; }
+/* Buttons */
+.btn { font-weight: 700; font-size: 16px; line-height: 1.4; padding: 10px 18px; border: 3px solid var(--ink); background: var(--paper); color: var(--ink); box-shadow: 4px 4px 0 var(--ink); transition: transform .06s, box-shadow .06s; }
+.btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+.btn.dark { background: var(--ink); color: var(--saffron); box-shadow: 4px 4px 0 var(--paper); }
+.btn.gold { background: var(--saffron); color: var(--ink); }
+.btn.ok { background: var(--green); color: var(--paper); }
+.btn.no { background: var(--wine); color: var(--paper); }
+.btn.big { font-size: 24px; font-weight: 900; padding: 14px 28px; }
+.btn.sm { font-size: 14px; padding: 6px 12px; box-shadow: 3px 3px 0 var(--ink); }
+.btn.ghost { background: transparent; color: inherit; border-color: currentColor; box-shadow: none; }
+.btn.sel { background: var(--ink); color: var(--saffron); }
+.btn:disabled { opacity: .4; cursor: default; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.err { color: var(--wine); font-weight: 700; font-size: 15px; margin: 0; min-height: 1.6em; }
 
-.rail { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
-.player { background: rgba(0,0,0,.25); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 2px; min-width: 0; }
-.pname { font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 8px; min-width: 0; }
-.pname span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.score { font-family: var(--display); font-weight: 700; font-size: 38px; line-height: 1.2; font-variant-numeric: tabular-nums; }
-.score.neg { color: var(--bad); }
-.prow { display: flex; gap: 6px; align-items: center; justify-content: space-between; }
-.prow .mini { display: flex; gap: 4px; }
-.small-btn { padding: 5px 9px; font-size: 14px; }
-.empty { border: 1px dashed var(--line); border-radius: 8px; padding: 18px; color: var(--muted); }
-.hint { color: var(--muted); font-size: 14px; margin: 0; max-width: 72ch; line-height: 1.8; }
-.hint b { color: var(--ink); }
+/* ---------------- HOST: board ---------------- */
+.host { min-height: 100vh; padding: 32px max(24px, env(safe-area-inset-right, 0px)) 40px max(24px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 24px; }
+.hhead { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.hhead h1 { margin: 0; font-weight: 900; font-size: clamp(44px, 6vw, 84px); line-height: 1.3; }
+.hside { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.codechip { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: var(--ink); color: var(--saffron); box-shadow: 6px 6px 0 var(--paper); border: 0; }
+.codechip .lbl { font-weight: 700; font-size: 13px; color: var(--paper); line-height: 1.5; }
+.codechip .code { font-weight: 900; font-size: 32px; letter-spacing: .08em; line-height: 1; }
+.qrbox { background: var(--paper); padding: 4px; line-height: 0; }
+.qrbox img, .qrbox canvas { display: block; width: 100%; height: auto; }
+.conn { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--wine); flex: none; display: inline-block; }
+.dot.on { background: #3FBF7F; }
+.board-scroll { overflow-x: auto; padding: 0 0 10px 10px; flex: 1; display: flex; }
+.board { flex: 1; min-width: 900px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); grid-auto-rows: auto; gap: 16px; }
+.cat { display: flex; align-items: flex-end; padding: 12px 14px 14px; min-height: 80px; background: var(--ink); color: var(--saffron); font-weight: 900; font-size: 19px; line-height: 1.5; box-shadow: 6px 6px 0 var(--paper); }
+.tile { min-height: 84px; border: 3px solid var(--ink); background: var(--paper); box-shadow: 6px 6px 0 var(--ink); font-weight: 900; font-size: clamp(30px, 3vw, 44px); color: var(--ink); line-height: 1.3; transition: transform .08s, box-shadow .08s; }
+.tile:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--ink); }
+.tile:disabled { cursor: default; color: transparent; border-color: rgba(17,17,17,.28); box-shadow: none; transform: translate(3px, 3px); background: repeating-linear-gradient(135deg, rgba(17,17,17,.10) 0 3px, transparent 3px 11px); }
+.leader { display: flex; gap: 16px; flex-wrap: wrap; }
+.pc { flex: 1 1 260px; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--paper); border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+.pc .rank { display: grid; place-items: center; width: 40px; height: 40px; flex: none; background: var(--ink); color: var(--saffron); font-weight: 900; font-size: 22px; }
+.pc .nm { flex: 1; min-width: 0; font-weight: 700; font-size: 19px; line-height: 1.5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pc .nm small { display: block; font-size: 12px; font-weight: 700; color: var(--saffron-deep); }
+.pc .delta { padding: 2px 8px; font-weight: 900; font-size: 15px; color: var(--paper); background: #555; }
+.pc .delta.up { background: var(--green); } .pc .delta.down { background: var(--wine); }
+.pc .sc { font-weight: 900; font-size: 32px; line-height: 1.3; font-variant-numeric: tabular-nums; }
+.pc .sc.neg { color: var(--wine); }
+.pc .ctl { display: flex; flex-direction: column; gap: 4px; opacity: .25; transition: opacity .15s; }
+.pc:hover .ctl, .pc:focus-within .ctl { opacity: 1; }
+.pc .ctl button { font-size: 12px; font-weight: 700; padding: 2px 6px; border: 2px solid var(--ink); background: var(--paper); line-height: 1.4; }
+.emptycard { flex: 1; padding: 14px 18px; border: 3px dashed var(--ink); font-weight: 700; line-height: 1.6; }
 
-.overlay { position: fixed; inset: 0; z-index: 20; background: rgba(3,10,8,.86); backdrop-filter: blur(3px); display: grid; place-items: center; overflow-y: auto;
-  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
-.card { width: min(920px, 100%); background: linear-gradient(180deg, #1d4337, #122c25); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 30px 80px rgba(0,0,0,.6); padding: clamp(20px, 4vw, 40px); display: grid; gap: 20px; }
-.meta { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-weight: 600; font-size: 15px; color: var(--muted); }
-.meta .val { color: var(--gold); }
-.clue { font-family: var(--display); font-weight: 600; font-size: clamp(24px, 4vw, 42px); line-height: 1.55; text-wrap: balance; margin: 0; }
-.answer { border-top: 1px solid var(--line); padding-top: 16px; font-size: clamp(20px, 3vw, 28px); font-weight: 700; color: var(--gold); }
-.answer span { display: block; font-size: 13px; color: var(--muted); font-weight: 600; }
-.status { display: grid; gap: 12px; justify-items: start; }
-.buzzline { font-family: var(--display); font-weight: 700; font-size: clamp(26px, 4vw, 40px); line-height: 1.3; }
-.buzzline.win { color: var(--good); }
-.buzzline.live { color: var(--gold); animation: blink 1s ease-in-out infinite; }
+/* ---------------- HOST: full-screen overlays ---------------- */
+.ov { position: fixed; inset: 0; z-index: 20; overflow-y: auto; display: flex; flex-direction: column; }
+.scr { flex: 1; display: flex; flex-direction: column; min-height: 100%; }
+.pad { padding: 48px max(32px, env(safe-area-inset-right, 0px)) 40px max(32px, env(safe-area-inset-left, 0px)); }
+.chip { padding: 8px 18px; background: var(--ink); color: var(--saffron); font-weight: 900; font-size: 22px; line-height: 1.5; box-shadow: 6px 6px 0 var(--paper); }
+.vchip { padding: 4px 18px; background: var(--paper); border: 3px solid var(--ink); font-weight: 900; font-size: 36px; line-height: 1.3; box-shadow: 6px 6px 0 var(--ink); }
+
+/* lobby */
+.lobby { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 64px; }
+.lobby h1 { margin: 0; font-weight: 900; font-size: clamp(64px, 9vw, 136px); line-height: 1.3; }
+.lobby .bigcode { align-self: flex-end; font-weight: 900; font-size: clamp(96px, 12vw, 176px); line-height: 1; letter-spacing: .06em; text-shadow: 8px 8px 0 var(--paper); }
+.lobby .qrbig { align-self: center; padding: 18px; background: var(--paper); border: 4px solid var(--ink); box-shadow: 12px 12px 0 var(--ink); width: min(340px, 100%); }
+.sticker { padding: 10px 22px; font-weight: 900; font-size: 24px; line-height: 1.5; background: var(--paper); border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+.sticker.new { background: var(--ink); color: var(--saffron); }
+.sticker small { font-size: 14px; font-weight: 700; margin-inline-start: 8px; }
+.waitchip { padding: 10px 22px; font-weight: 700; font-size: 18px; border: 3px dashed var(--ink); line-height: 1.5; }
+@media (max-width: 900px) { .lobby { grid-template-columns: 1fr; gap: 32px; } }
+
+/* clue */
+.cluetop { flex: 1; display: flex; flex-direction: column; gap: 32px; }
+.cluetxt { margin: 0; max-width: 1180px; font-weight: 900; font-size: clamp(34px, 4.4vw, 60px); line-height: 1.65; text-wrap: balance; }
+.tries { display: flex; gap: 12px; flex-wrap: wrap; }
+.try { display: flex; align-items: center; gap: 10px; padding: 6px 14px; background: var(--paper); border: 3px solid var(--ink); font-weight: 700; font-size: 17px; line-height: 1.5; }
+.try .v { padding: 2px 8px; font-weight: 900; color: var(--paper); background: #555; }
+.try .v.right { background: var(--green); } .try .v.wrong, .try .v.none { background: var(--wine); }
+.bar { background: var(--ink); color: var(--paper); box-shadow: 0 -10px 0 rgba(17,17,17,.25); padding: 24px max(32px, env(safe-area-inset-right, 0px)) 32px max(32px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 16px; }
+.bar .who { font-weight: 900; font-size: clamp(44px, 5vw, 72px); line-height: 1.3; color: var(--saffron); text-shadow: 5px 5px 0 var(--saffron-deep); }
+.bar .what { font-weight: 700; font-size: 24px; line-height: 1.5; }
+.bar .hint { color: var(--muted); font-size: 16px; line-height: 1.6; margin: 0; }
+.bar .live { font-weight: 900; font-size: 40px; line-height: 1.3; color: var(--saffron); animation: blink 1s ease-in-out infinite; }
+.bar .ans { font-weight: 900; font-size: clamp(30px, 3.6vw, 48px); line-height: 1.4; color: var(--saffron); }
+.bar .lbl { font-weight: 700; font-size: 15px; color: var(--muted); }
+.drain { display: flex; align-items: center; gap: 18px; }
+.drain .track { flex: 1; height: 22px; background: var(--grey2); }
+.drain .fill { height: 100%; background: var(--saffron); width: 100%; }
+.drain .secs { font-weight: 900; font-size: 28px; color: var(--saffron); min-width: 3.5em; }
+.bar .btn.ghost { color: var(--paper); }
 @keyframes blink { 50% { opacity: .45; } }
-.btns { display: flex; gap: 8px; flex-wrap: wrap; }
-.rows { display: grid; gap: 2px; width: 100%; }
-.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: space-between; padding: 8px 0; border-top: 1px solid rgba(255,255,255,.06); }
-.row .who { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
-.row .who em { font-style: normal; color: var(--muted); font-weight: 500; margin-inline-start: 8px; }
-.row .said { color: var(--gold); font-weight: 600; }
-.foot { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-.badge { justify-self: start; font-family: var(--display); font-weight: 700; font-size: 22px; color: var(--felt-deep); background: var(--gold); padding: 4px 14px; border-radius: 4px; }
-.field { display: grid; gap: 6px; width: 100%; }
-.field label { font-weight: 600; font-size: 14px; color: var(--muted); }
-.field input, .field select { font: 600 20px var(--body); color: var(--ink); background: rgba(0,0,0,.3); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; width: 100%; }
-.err { color: var(--bad); font-size: 14px; margin: 0; min-height: 1.2em; }
-.wgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; width: 100%; }
 
-/* Player phone */
-.pl { min-height: 100svh; display: grid; grid-template-rows: auto 1fr auto; gap: 16px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 14px 20px; }
-.plhead { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.plhead .nm { font-weight: 700; font-size: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.plhead .score { font-size: 34px; }
-.center { display: grid; place-items: center; align-content: center; gap: 16px; text-align: center; }
-.buzz { width: min(80vw, 60svh, 440px); aspect-ratio: 1; border-radius: 50%; border: 0; display: grid; place-content: center; gap: 4px; padding: 20px;
-  font-family: var(--display); font-weight: 700; font-size: clamp(30px, 10vw, 54px); line-height: 1.2;
-  touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 12px 0 rgba(0,0,0,.4), inset 0 -8px 0 rgba(0,0,0,.18); transition: transform .05s, background-color .12s; }
-.buzz small { font-family: var(--body); font-size: 15px; font-weight: 600; opacity: .85; }
-.buzz:active { transform: translateY(6px); box-shadow: 0 6px 0 rgba(0,0,0,.4); }
-.b-off, .b-idle { background: #22413a; color: var(--muted); }
-.b-wait { background: #3b4a2c; color: #d9d2a4; }
-.b-ready { background: var(--gold); color: var(--felt-deep); animation: pulse .9s ease-in-out infinite; }
-.b-pending { background: #b89a4d; color: var(--felt-deep); }
-.b-win { background: var(--good); color: var(--felt-deep); }
-.b-lost, .b-locked { background: #3d2925; color: var(--bad); }
-.b-pen { background: var(--bad); color: var(--felt-deep); }
-@keyframes pulse { 50% { box-shadow: 0 12px 0 rgba(0,0,0,.4), 0 0 0 18px rgba(216,182,95,.18); } }
-@media (prefers-reduced-motion: reduce) { .b-ready, .buzzline.live { animation: none; } .tile { transition: none; } }
-.pform { width: min(420px, 100%); display: grid; gap: 12px; text-align: start; }
-.pform h2 { font-family: var(--display); font-size: 28px; margin: 0; color: var(--gold); text-align: center; }
-.linkbtn { background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: 14px; padding: 4px; }
-.big-msg { font-family: var(--display); font-size: clamp(26px, 8vw, 40px); line-height: 1.4; }
+/* buzz flash */
+.flash { flex: 1; border: 28px solid var(--saffron); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; text-align: center; padding: 24px; }
+.flash .t { font-weight: 700; font-size: 34px; line-height: 1.5; }
+.flash .n { font-weight: 900; font-size: clamp(110px, 18vw, 260px); line-height: 1.3; color: var(--saffron); text-shadow: 10px 10px 0 var(--saffron-deep), 20px 20px 0 var(--paper); }
+.flash .c { padding: 12px 24px; border: 3px solid var(--saffron); color: var(--saffron); font-weight: 700; font-size: 24px; line-height: 1.5; }
+
+/* wager */
+.hatch { background: repeating-linear-gradient(135deg, var(--ink) 0 46px, var(--saffron) 46px 92px); display: flex; align-items: center; justify-content: center; padding: 32px 16px; }
+.wcard { width: min(820px, 100%); padding: 48px clamp(20px, 5vw, 56px); display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; background: var(--paper); border: 6px solid var(--ink); box-shadow: 18px 18px 0 var(--ink); }
+.wcard .big { font-weight: 900; font-size: clamp(90px, 13vw, 190px); line-height: 1.3; text-shadow: 8px 8px 0 var(--saffron); }
+.wcard .line { font-weight: 700; font-size: 28px; line-height: 1.6; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; width: 100%; text-align: start; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-weight: 700; font-size: 15px; line-height: 1.5; }
+.field input, .field select { font-weight: 700; font-size: 22px; padding: 12px 14px; border: 3px solid var(--ink); background: var(--paper); color: var(--ink); width: 100%; }
+
+/* final */
+.final h2 { margin: 0; font-weight: 900; font-size: clamp(64px, 9vw, 136px); line-height: 1.3; color: var(--saffron); }
+.final .cluetxt { color: var(--saffron); }
+.fcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+.fcard { display: flex; flex-direction: column; gap: 8px; padding: 20px 24px; background: #1C1C1C; border: 3px solid #4A4A4A; box-shadow: 8px 8px 0 #000; color: var(--paper); }
+.fcard.done { border-color: var(--saffron); box-shadow: 8px 8px 0 var(--saffron); }
+.fcard .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.fcard .n { font-weight: 900; font-size: 28px; line-height: 1.4; }
+.fcard .s { font-weight: 900; font-size: 24px; color: var(--saffron); }
+.fcard .st { font-weight: 700; font-size: 19px; line-height: 1.5; color: var(--muted); }
+.fcard.done .st { color: var(--saffron); }
+.fcard .said { font-weight: 700; font-size: 20px; color: var(--paper); line-height: 1.6; }
+.fbtns .btn.ghost { color: var(--paper); }
+
+/* results */
+.results { display: flex; flex-direction: column; gap: 24px; }
+.results h2 { margin: 0; font-weight: 900; font-size: clamp(56px, 8vw, 110px); line-height: 1.3; }
+.rlist { display: flex; flex-direction: column; gap: 12px; max-width: 760px; }
+
+/* ---------------- PHONE ---------------- */
+.pl { min-height: 100svh; display: flex; flex-direction: column; background: var(--ink); }
+.phead { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: calc(16px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) 14px max(20px, env(safe-area-inset-left, 0px)); background: var(--ink); color: var(--paper); border-bottom: 3px solid var(--saffron); }
+.phead .nm { font-weight: 900; font-size: 22px; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.phead .sc { font-weight: 900; font-size: 38px; line-height: 1.2; color: var(--saffron); font-variant-numeric: tabular-nums; }
+.phead .sc.neg { color: #FF8A80; }
+.pbody { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 16px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px)); }
+.pmeta { display: flex; justify-content: space-between; gap: 12px; font-weight: 700; font-size: 15px; line-height: 1.5; color: var(--paper); }
+.slab { flex: 1; min-height: 360px; width: 100%; border: 4px solid var(--ink); padding: 22px; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; text-align: right; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; transition: transform .05s, box-shadow .05s; }
+.slab .tag { font-weight: 700; font-size: 17px; line-height: 1.5; padding: 6px 12px; background: var(--ink); color: var(--saffron); }
+.slab .big { font-weight: 900; font-size: clamp(64px, 24vw, 116px); line-height: 1.3; }
+.slab.s-idle, .slab.s-wait { background: var(--grey2); color: var(--muted); box-shadow: 8px 8px 0 #000; }
+.slab.s-wait .tag, .slab.s-idle .tag { color: var(--muted); }
+.slab.s-ready { background: var(--saffron); color: var(--ink); box-shadow: 10px 10px 0 var(--paper); animation: pulse .9s ease-in-out infinite; }
+.slab.s-ready:active { transform: translate(6px, 6px); box-shadow: 4px 4px 0 var(--paper); }
+.slab.s-pending { background: #B8941F; color: var(--ink); }
+.slab.s-early { background: var(--red); color: var(--paper); transform: translate(6px, 6px); }
+.slab.s-early .tag { color: var(--paper); }
+.slab.s-win { background: var(--paper); color: var(--ink); }
+.slab.s-beaten { background: var(--grey); color: var(--paper); }
+.slab.s-beaten .tag { background: var(--saffron); color: var(--ink); }
+.slab.s-locked { background: repeating-linear-gradient(135deg, var(--wine) 0 18px, #8E1E18 18px 36px); color: var(--paper); transform: translate(6px, 6px); }
+.slab.s-locked .tag { background: var(--paper); color: var(--wine); }
+.slab.s-off { background: var(--grey); color: var(--muted); }
+@keyframes pulse { 50% { box-shadow: 10px 10px 0 var(--paper), 0 0 0 14px rgba(242,183,5,.25); } }
+.pcard { flex: 1; background: var(--paper); color: var(--ink); padding: 24px 20px; display: flex; flex-direction: column; gap: 16px; }
+.pcard h2 { margin: 0; font-weight: 900; font-size: 32px; line-height: 1.4; }
+.pcard .sub { font-weight: 700; font-size: 15px; line-height: 1.5; display: flex; justify-content: space-between; gap: 12px; }
+.pcard input { font-weight: 700; font-size: 24px; padding: 14px; border: 3px solid var(--ink); background: var(--paper); color: var(--ink); width: 100%; }
+.pcard .send { padding: 16px; background: var(--ink); color: var(--saffron); border: 0; box-shadow: 6px 6px 0 var(--saffron); font-weight: 900; font-size: 24px; }
+.ptrack { height: 14px; background: #D9D9D9; border: 2px solid var(--ink); }
+.ptrack .fill { height: 100%; background: var(--saffron); width: 100%; }
+.gpick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.gpick .btn { font-size: 22px; font-weight: 900; padding: 14px; }
+.msg { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; color: var(--paper); padding: 24px; }
+.msg .big { font-weight: 900; font-size: clamp(34px, 10vw, 48px); line-height: 1.4; }
+.msg .sub { font-weight: 700; font-size: 17px; line-height: 1.6; color: var(--muted); }
+.msg .num { font-weight: 900; font-size: 56px; line-height: 1.3; }
+.msg.ok .big, .msg.ok .num { color: #7FD1A0; } .msg.bad .big, .msg.bad .num { color: #FF8A80; }
+.claims { display: flex; flex-direction: column; gap: 10px; }
+.claims .row { justify-content: flex-start; }
+.pfoot { display: flex; justify-content: center; padding: 8px 16px calc(16px + env(safe-area-inset-bottom, 0px)); }
+.linkbtn { background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: 14px; padding: 6px; }
+@media (prefers-reduced-motion: reduce) { .slab.s-ready, .bar .live { animation: none; } * { transition: none !important; } }
 </style>
 </head>
 <body>
 <div id="app"></div>
-<div class="overlay" id="overlay" hidden></div>
+<div class="ov" id="overlay" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -292,6 +357,416 @@ const params = new URLSearchParams(location.search);
 const roomParam = (params.get("room") || "").toUpperCase().replace(/[^A-Z]/g, "").slice(0, 4);
 const IS_PLAYER = params.has("room") || params.has("join");
 
+const COPY = {
+"board.empty": [
+"فش حدا جو اللعبة. اعمل سكان للكود عشان تدخل."
+],
+"board.final": [
+"الجولة الأخيرة"
+],
+"board.newGame": [
+"لعبة جديدة"
+],
+"board.newGameConfirm": [
+"بلّش من أول وجديد؟"
+],
+"board.picks": [
+"بختار",
+"بتختار"
+],
+"board.remove": [
+"احذف؟"
+],
+"clue.answer": [
+"الجواب الصح"
+],
+"clue.auto": [
+"تصحيح تلقائي"
+],
+"clue.back": [
+"إرجع للأسئلة"
+],
+"clue.cancel": [
+"إلغي"
+],
+"clue.close": [
+"سكّر الأزرار"
+],
+"clue.closeMatch": [
+"الجواب قريب من الجواب الصح. قرّر أنت:"
+],
+"clue.flash": [
+"ضغط قبل!",
+"ضغطت قبل!"
+],
+"clue.hostCall": [
+"قرار الهوست"
+],
+"clue.live": [
+"الأزرار مفتوحة…"
+],
+"clue.manualRight": [
+"صح يدويًا"
+],
+"clue.manualWrong": [
+"خطأ يدويًا"
+],
+"clue.noOne": [
+"ولا حدا جاوب · بيّن الجواب"
+],
+"clue.open": [
+"افتح الأزرار"
+],
+"clue.openHint": [
+"اقرأ السؤال كلّه بعدين افتح الأزرار. إللي بضغط قبل بتأخر ربع ثانية."
+],
+"clue.right": [
+"صح +{value}"
+],
+"clue.seconds": [
+"{n} ث"
+],
+"clue.timeUp": [
+"خلّص الوقت"
+],
+"clue.turn": [
+"{name} بيكتب الجواب…",
+"{name} بتكتب الجواب…"
+],
+"clue.typed": [
+"{name} كتب: «{answer}»",
+"{name} جاوبت: «{answer}»"
+],
+"clue.undo": [
+"تراجع عن التصحيح التلقائي"
+],
+"clue.vClose": [
+"؟ قريبة"
+],
+"clue.vNone": [
+"ما جاوب",
+"ما جاوبت"
+],
+"clue.vRight": [
+"✓ صح"
+],
+"clue.vWrong": [
+"✗ خطأ"
+],
+"clue.wrong": [
+"خطأ −{value}"
+],
+"final.answered": [
+"✓ بعت جوابه",
+"✓ بعتت جوابها"
+],
+"final.badge": [
+"الجولة الأخيرة"
+],
+"final.catLabel": [
+"الفئة"
+],
+"final.instructions": [
+"كل لاعب يكتب رهانه بالسِر على تلفونه"
+],
+"final.noAnswer": [
+"ما جاوب!",
+"ما جاوبت!"
+],
+"final.reveal": [
+"بيّن الأجوبة"
+],
+"final.showClue": [
+"اعرض الدليل"
+],
+"final.tally": [
+"احسب النتيجة النهائية"
+],
+"final.wagerOf": [
+"الرهان: {n}"
+],
+"final.wagered": [
+"✓ راهن",
+"✓ راهنت"
+],
+"final.waitingAnswer": [
+"بيكتب…",
+"بتكتب…"
+],
+"final.waitingWager": [
+"بانتظار الرهان…"
+],
+"final.zero": [
+"رهان صفر · بيقدر يجاوب",
+"رهان صفر · بتقدر تجاوب"
+],
+"join.codeError": [
+"الرمز من 4 أحرف إنجليزية، مثل ABCD."
+],
+"join.codeLabel": [
+"رمز الغرفة الظاهر على الشاشة"
+],
+"join.connected": [
+"متصل · {code}",
+"متصلة · {code}"
+],
+"join.female": [
+"لاعبة"
+],
+"join.genderError": [
+"اختر لاعب أو لاعبة."
+],
+"join.genderLabel": [
+"أنا"
+],
+"join.join": [
+"دخلني!"
+],
+"join.male": [
+"لاعب"
+],
+"join.nameError": [
+"اكتب اسمك."
+],
+"join.nameLabel": [
+"اسمك مبين على الشاشة"
+],
+"join.namePlaceholder": [
+"مثلًا: علي"
+],
+"join.nameTitle": [
+"ما اسمك؟"
+],
+"join.next": [
+"التالي"
+],
+"join.noHost": [
+"بانتظار الهوست…"
+],
+"join.noHostSub": [
+"تأكد أن شاشة المضيف مفتوحة"
+],
+"join.rejoin": [
+"كنت في اللعبة من قبل؟ عُد إلى مكانك ونقاطك:"
+],
+"join.rejoinBtn": [
+"أنا {name}"
+],
+"join.rename": [
+"تغيير الاسم"
+],
+"join.title": [
+"أدخل على اللعبة"
+],
+"lobby.codeLabel": [
+"رمز الغرفة"
+],
+"lobby.count1": [
+"لاعب واحد"
+],
+"lobby.count2": [
+"لاعبان"
+],
+"lobby.countFew": [
+"{n} لاعبين"
+],
+"lobby.howToJoin": [
+"إعمل سكان بتلفونك، أو افتح اللينك واكتب الكود"
+],
+"lobby.joined": [
+"جوّا اللعبة"
+],
+"lobby.justJoined": [
+"دخل هلّأ",
+"دخلت هلّأ"
+],
+"lobby.start": [
+"ابدأ اللعبة"
+],
+"lobby.waiting": [
+"بنستنى الباقي..."
+],
+"name.title": [
+"ما وراء السطور"
+],
+"over.close": [
+"إغلاق"
+],
+"over.newGame": [
+"ابدأ لعبة جديدة"
+],
+"over.tie": [
+"تعادل: {names}"
+],
+"over.title": [
+"انتهت اللعبة"
+],
+"over.winner": [
+"الفائز: {name}",
+"الفائزة: {name}"
+],
+"pfinal.answerSend": [
+"إبعت الجواب"
+],
+"pfinal.answerTitle": [
+"اكتب جوابك",
+"اكتبي جوابك"
+],
+"pfinal.look": [
+"إتطلع على الشاشة",
+"إتطلعي إلى الشاشة"
+],
+"pfinal.lookSub": [
+"الهوست بيكشف الأجوبة"
+],
+"pfinal.rank": [
+"ترتيبك: {n}"
+],
+"pfinal.title": [
+"الجولة الأخيرة"
+],
+"pfinal.wagerDone": [
+"تم تسجيل رهانك"
+],
+"pfinal.wagerDoneSub": [
+"استنى يبين السؤال على الشاشة",
+"استني يبين السؤال على الشاشة"
+],
+"pfinal.wagerLabel": [
+"رهانك السري (0 إلى {max})"
+],
+"pfinal.won": [
+"أنت الفائز!",
+"أنتِ الفائزة!"
+],
+"pfinal.zero": [
+"رهانك صفر"
+],
+"pfinal.zeroSub": [
+"رصيدك ما بكفي عشان الرهان، بس ممكن تعطي جواب"
+],
+"phone.answerError": [
+"اكتب إجابتك.",
+"اكتبي جوابك."
+],
+"phone.answerLabel": [
+"جوابك"
+],
+"phone.beaten": [
+"سبقك {name}",
+"سبقتك {name}"
+],
+"phone.beatenSub": [
+"{name} بيكتب الإجابة…",
+"{name} بتكتب الإجابة…"
+],
+"phone.buzz": [
+"اضغط!",
+"اضغطي!"
+],
+"phone.buzzAfterMiss": [
+"{name} غِلط · دورك الآن",
+"{name} غِلطت · دورك الآن"
+],
+"phone.early": [
+"كتير بدري!"
+],
+"phone.earlySub": [
+"معاقب ربع ثانية"
+],
+"phone.idle": [
+"استنى",
+"استني"
+],
+"phone.idleSub": [
+"الهوست بيختار السؤال"
+],
+"phone.listen": [
+"اسمع…",
+"اسمعي…"
+],
+"phone.listenSub": [
+"ما تضغط قبل فتح الأزرار",
+"ما تضغطي قبل فتح الأزرار"
+],
+"phone.locked": [
+"تسكّر زرك في هذا السؤال"
+],
+"phone.over": [
+"خلص السؤال"
+],
+"phone.reviewing": [
+"الهوست براجع إجابتك"
+],
+"phone.right": [
+"✓ إجابتك صحيحة"
+],
+"phone.send": [
+"إبعت"
+],
+"phone.sent": [
+"جوابك انبعت"
+],
+"phone.wagerOther": [
+"{name} براهن الآن",
+"{name} بتراهن الآن"
+],
+"phone.wrong": [
+"✗ إجابتك خاطئة"
+],
+"phone.yourTurn": [
+"دورك! اكتب الجواب",
+"دورك! اكتبي الجواب"
+],
+"wager.amount": [
+"الرهان (الحد الأقصى {max})"
+],
+"wager.arrived": [
+"وصل رهان {name}. ثبّته لعرض السؤال."
+],
+"wager.error": [
+"أدخل رهان بين 5 و{max}."
+],
+"wager.lock": [
+"ثبّت الرهان واعرض الدليل"
+],
+"wager.phoneLabel": [
+"رهانك (5 إلى {max})"
+],
+"wager.phoneSend": [
+"إبعت الرهان"
+],
+"wager.phoneSent": [
+"بعتت رهانك: {n}"
+],
+"wager.phoneSentSub": [
+"بانتظار تثبيت الهوست"
+],
+"wager.title": [
+"الرهان!"
+],
+"wager.upTo": [
+"لحد {max}"
+],
+"wager.waiting": [
+"{name} بيختار مبلغ الرهان من تلفونه",
+"{name} بتختار مبلغ الرهان من تلفونها"
+],
+"wager.who": [
+"مين اختار الخانة؟"
+]
+};
+
+// ---------- Copy (approved in the copy review; [masculine, feminine]) ----------
+// t(id, vars, g): g is "m" or "f" — the gender of the player the line is about or addressed to.
+function t(id, vars, g) {
+  const e = COPY[id]; if (!e) return id;
+  const s = (g === "f" && e[1]) ? e[1] : e[0];
+  return s.replace(/\{(\w+)\}/g, (_, k) => (vars && vars[k] != null) ? vars[k] : "");
+}
+const th = (id, vars, g) => esc(t(id, vars, g));
+const countLabel = n => n === 1 ? t("lobby.count1") : n === 2 ? t("lobby.count2") : t("lobby.countFew", { n });
+
 // =====================================================================
 // HOST
 // =====================================================================
@@ -306,37 +781,40 @@ function freshWagers() {
   return w;
 }
 const pf = pid => G.players.find(p => p.pid === pid);
+const gOf = pid => (pf(pid) || {}).g || "m";
+const nameOf = pid => (pf(pid) || {}).name || "";
 const maxFor = pid => Math.max((pf(pid) || { score: 0 }).score, 1000);
 const saveG = () => store.set(HKEY, G);
+function addDelta(pid, d) { G.delta = G.delta || {}; G.delta[pid] = (G.delta[pid] || 0) + d; }
 function resetT() {
   const online = T ? T.online : new Set();
-  if (T) clearTimeout(T.timer);
-  T = { phase: "board", key: null, isWager: false, armed: false, winner: null, locked: [], penalty: {}, revealed: false, result: "",
+  if (T) { clearTimeout(T.timer); clearTimeout(T.flashTimer); }
+  T = { phase: G && G.started ? "board" : "lobby", key: null, isWager: false, armed: false, winner: null, locked: [], penalty: {}, revealed: false, result: "",
         wagerFor: null, wagerInput: "", wagerAmt: 0, final: null, online,
-        answerText: "", judge: "", deadline: 0, timer: null, attempts: [], undo: null, res: null };
+        answerText: "", judge: "", deadline: 0, timer: null, attempts: [], undo: null, res: null, flashUntil: 0, flashTimer: null };
 }
 const curVal = () => T.isWager ? T.wagerAmt : VALUES[+T.key.split("-")[1]];
 const clueAns = () => { const [c, r] = T.key.split("-").map(Number); return [CATS[c].clues[r][1], ALTS[c][r]]; };
 function snapshot() {
-  return { scores: G.players.map(p => [p.pid, p.score]), control: G.control,
+  return { scores: G.players.map(p => [p.pid, p.score]), control: G.control, delta: Object.assign({}, G.delta),
     t: { armed: T.armed, winner: T.winner, locked: [...T.locked], revealed: T.revealed, result: T.result, res: T.res, answerText: T.answerText } };
 }
 function applyRight(pid, note) {
   const p = pf(pid); if (!p) return; const val = curVal();
-  p.score += val; G.control = pid; T.revealed = true; T.armed = false; T.judge = ""; clearTimeout(T.timer);
-  T.result = `${esc(p.name)} +${num(val)}${note ? " · " + note : ""}`; T.res = { pid, ok: true, val };
-  saveG(); renderRail();
+  p.score += val; addDelta(pid, val); G.control = pid; T.revealed = true; T.armed = false; T.judge = ""; clearTimeout(T.timer);
+  T.result = `${p.name} +${num(val)}${note ? " · " + note : ""}`; T.res = { pid, ok: true, val };
+  saveG(); renderLeader();
 }
 function applyWrong(pid, note) {
   const p = pf(pid); if (!p) return; const val = curVal();
-  p.score -= val; T.judge = ""; clearTimeout(T.timer); T.res = { pid, ok: false, val };
-  if (T.isWager) { T.revealed = true; T.result = `${esc(p.name)} −${num(val)}${note ? " · " + note : ""}`; }
+  p.score -= val; addDelta(pid, -val); T.judge = ""; clearTimeout(T.timer); T.res = { pid, ok: false, val };
+  if (T.isWager) { T.revealed = true; T.result = `${p.name} −${num(val)}${note ? " · " + note : ""}`; }
   else {
     T.locked.push(pid); T.winner = null; T.answerText = ""; T.deadline = 0;
     const left = G.players.some(x => !T.locked.includes(x.pid));
     T.armed = left; if (!left) T.revealed = true;
   }
-  saveG(); renderRail();
+  saveG(); renderLeader();
 }
 function startAnswerTimer() {
   clearTimeout(T.timer);
@@ -345,24 +823,26 @@ function startAnswerTimer() {
     const pid = T.winner;
     if (T.phase === "clue" && pid && !T.answerText && !T.revealed) {
       T.attempts.push({ pid, text: "", v: "none" }); T.undo = null;
-      applyWrong(pid, "انتهى الوقت"); drawOverlay(); pub();
+      applyWrong(pid, t("clue.timeUp")); drawOverlay(); pub();
     }
   }, ANSWER_MS + 300);
 }
 
 // The clue in progress is saved too, so reloading the host screen picks up where it left off
 const TKEY = "mws-host-turn-v1";
-function saveT() { store.set(TKEY, Object.assign({}, T, { online: null, timer: null })); }
+function saveT() { store.set(TKEY, Object.assign({}, T, { online: null, timer: null, flashTimer: null })); }
 function restoreT() {
   const s = store.get(TKEY);
-  if (!s || !s.phase || s.phase === "board") return;
-  Object.assign(T, s, { online: T.online, timer: null, undo: null });
+  if (!s || !s.phase || s.phase === "board" || s.phase === "lobby") return;
+  Object.assign(T, s, { online: T.online, timer: null, undo: null, flashUntil: 0, flashTimer: null });
   if (T.phase === "clue" && T.winner && !T.answerText && !T.revealed) startAnswerTimer();
 }
 // A player who rejoins on a new phone or browser takes over their old seat
 function repid(a, b) {
   const p = pf(a); if (p) p.pid = b;
   if (G.control === a) G.control = b;
+  if (G.delta && a in G.delta) { G.delta[b] = G.delta[a]; delete G.delta[a]; }
+  if (G.lastJoined === a) G.lastJoined = b;
   if (T.winner === a) T.winner = b;
   if (T.wagerFor === a) T.wagerFor = b;
   T.locked = T.locked.map(x => x === a ? b : x);
@@ -374,53 +854,59 @@ function repid(a, b) {
   }
 }
 const sameName = (x, y) => norm(x) === norm(y) && norm(x) !== "";
-
 function joinUrl() { return location.origin + location.pathname + "?room=" + G.room; }
+function makeQR(el, size) {
+  if (!el) return;
+  el.innerHTML = "";
+  try { new QRCode(el, { text: joinUrl(), width: size, height: size, colorDark: "#111111", colorLight: "#FFFFFF", correctLevel: QRCode.CorrectLevel.M }); }
+  catch (e) { el.hidden = true; }
+}
 
 function initHost() {
   G = store.get(HKEY);
-  if (!G || !G.room || !Array.isArray(G.players)) G = { room: newCode(), players: [], used: {}, wagers: freshWagers(), control: null, finalDone: false };
+  if (!G || !G.room || !Array.isArray(G.players)) G = { room: newCode(), players: [], used: {}, wagers: freshWagers(), control: null, finalDone: false, started: false, delta: {} };
+  G.players.forEach(p => { if (!p.g) p.g = "m"; });
+  if (G.started == null) G.started = Object.keys(G.used).length > 0;
   resetT(); saveG();
   $("#app").innerHTML = `
-  <div class="wrap">
-    <header>
-      <h1>ما وراء السطور</h1>
-      <div class="joinbox">
-        <div id="qr" aria-label="رمز QR للانضمام"></div>
-        <div>
-          <div class="small">رمز الغرفة</div>
-          <div class="code" id="code">${G.room}</div>
-          <div class="small">امسح الرمز أو افتح <span class="url">${esc(joinUrl())}</span></div>
-          <div class="conn"><span class="dot" id="hdot"></span><span id="hconn">جارٍ الاتصال…</span></div>
-        </div>
+  <div class="host dots">
+    <div class="hhead">
+      <h1 class="extrude">${th("name.title")}</h1>
+      <div class="hside">
+        <button type="button" class="btn dark" id="finalBtn">${th("board.final")}</button>
+        <button type="button" class="btn" id="resetBtn">${th("board.newGame")}</button>
+        <button type="button" class="codechip" id="codeChip" aria-label="${th("lobby.codeLabel")}">
+          <span class="qrbox" id="qrSmall" style="width: 64px;"></span>
+          <span style="display: flex; flex-direction: column; align-items: flex-start;">
+            <span class="lbl">${th("lobby.codeLabel")}</span>
+            <span class="code ltr">${G.room}</span>
+            <span class="conn"><span class="dot" id="hdot"></span><span id="hconn"></span></span>
+          </span>
+        </button>
       </div>
-    </header>
-    <div class="actions">
-      <button id="finalBtn" type="button">الجولة الأخيرة</button>
-      <button id="resetBtn" type="button">لعبة جديدة</button>
     </div>
-    <div class="board-scroll"><div class="board" id="board" aria-label="لوحة الأسئلة"></div></div>
-    <section class="rail" id="rail" aria-label="اللاعبون"></section>
-    <p class="hint">اختر خانة واقرأ الدليل بصوت عالٍ، ثم اضغط <b>افتح الأزرار</b>. أول من يضغط من هاتفه يكتب إجابته خلال 20 ثانية، والباقون يُقفلون. تُصحَّح الإجابة تلقائيًا مع تسامح في الأخطاء الإملائية، ويمكنك التراجع أو التصحيح يدويًا. من يضغط قبل فتح الأزرار يُقفل زره ربع ثانية. في اللوحة خانتان مخفيتان لـ<b>الرهان</b> يرسل فيهما اللاعب رهانه من هاتفه.</p>
+    <div class="board-scroll"><div class="board" id="board"></div></div>
+    <section class="leader" id="leader" aria-label="اللاعبين"></section>
   </div>`;
-  try { new QRCode($("#qr"), { text: joinUrl(), width: 208, height: 208, colorDark: "#081613", colorLight: "#eef0e6", correctLevel: QRCode.CorrectLevel.M }); } catch (e) { $("#qr").hidden = true; }
-  renderBoard(); renderRail();
+  makeQR($("#qrSmall"), 128);
+  renderBoard(); renderLeader();
   restoreT(); drawOverlay();
 
-  $("#board").addEventListener("click", e => { const t = e.target.closest(".tile"); if (t && !t.disabled) openTile(t.dataset.k); });
-  $("#rail").addEventListener("click", e => {
-    const t = e.target.closest("button"); if (!t) return;
-    if (t.dataset.adj) { const p = pf(t.dataset.adj); if (p) { p.score += +t.dataset.d; saveG(); renderRail(); pub(); } }
-    else if (t.dataset.rm) {
-      if (t.dataset.confirm) { G.players = G.players.filter(p => p.pid !== t.dataset.rm); saveG(); renderRail(); pub(); }
-      else { t.dataset.confirm = "1"; t.textContent = "احذف؟"; setTimeout(() => { if (t.isConnected) { delete t.dataset.confirm; t.textContent = "✕"; } }, 2500); }
+  $("#board").addEventListener("click", e => { const b = e.target.closest(".tile"); if (b && !b.disabled) openTile(b.dataset.k); });
+  $("#leader").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.adj) { const p = pf(b.dataset.adj); if (p) { p.score += +b.dataset.d; saveG(); renderLeader(); pub(); } }
+    else if (b.dataset.rm) {
+      if (b.dataset.confirm) { G.players = G.players.filter(p => p.pid !== b.dataset.rm); saveG(); renderLeader(); pub(); }
+      else { b.dataset.confirm = "1"; b.textContent = t("board.remove"); setTimeout(() => { if (b.isConnected) { delete b.dataset.confirm; b.textContent = "✕"; } }, 2500); }
     }
   });
+  $("#codeChip").onclick = () => { T.phase = "lobby"; drawOverlay(); pub(); };
   $("#finalBtn").onclick = () => { if (G.finalDone) { T.phase = "over"; drawOverlay(); pub(); } else startFinal(); };
   const rb = $("#resetBtn");
   rb.onclick = () => {
-    if (rb.dataset.confirm) { newGame(); delete rb.dataset.confirm; rb.textContent = "لعبة جديدة"; }
-    else { rb.dataset.confirm = "1"; rb.textContent = "امسح النقاط واللوحة؟"; setTimeout(() => { delete rb.dataset.confirm; rb.textContent = "لعبة جديدة"; }, 3000); }
+    if (rb.dataset.confirm) { newGame(); delete rb.dataset.confirm; rb.textContent = t("board.newGame"); }
+    else { rb.dataset.confirm = "1"; rb.textContent = t("board.newGameConfirm"); setTimeout(() => { delete rb.dataset.confirm; rb.textContent = t("board.newGame"); }, 3000); }
   };
   $("#overlay").addEventListener("click", hostAct);
   $("#overlay").addEventListener("input", e => { if (e.target.id === "wAmt") T.wagerInput = e.target.value; });
@@ -428,24 +914,32 @@ function initHost() {
 
   connect(G.room, "host", {
     msg: hostMsg,
-    presence: ps => { T.online = new Set(Object.keys(ps)); renderRail(); },
+    presence: ps => { T.online = new Set(Object.keys(ps)); renderLeader(); if (T.phase === "lobby") drawOverlay(); },
     status: st => {
       const ok = st === "SUBSCRIBED";
       $("#hdot").classList.toggle("on", ok);
-      $("#hconn").textContent = ok ? "متصل · بانتظار اللاعبين" : (st === "CHANNEL_ERROR" || st === "TIMED_OUT" || st === "CLOSED" ? "انقطع الاتصال، جارٍ إعادة المحاولة…" : "جارٍ الاتصال…");
+      $("#hconn").textContent = ok ? "" : "…";
       if (ok) pub();
     }
   });
   document.addEventListener("visibilitychange", () => { if (!document.hidden && !connOK) reconnect(); });
   window.addEventListener("online", reconnect);
   setInterval(pub, 2000);
-  setInterval(() => { const cd = document.getElementById("cd"); if (cd && T.deadline) cd.textContent = Math.max(0, Math.ceil((T.deadline - Date.now()) / 1000)); }, 250);
+  setInterval(tickDrain, 200);
+}
+
+function tickDrain() {
+  const fill = document.getElementById("drainFill"), secs = document.getElementById("drainSecs");
+  if (!fill || !T.deadline) return;
+  const left = Math.max(0, T.deadline - Date.now());
+  fill.style.width = (100 * left / ANSWER_MS) + "%";
+  if (secs) secs.textContent = t("clue.seconds", { n: Math.ceil(left / 1000) });
 }
 
 function newGame() {
   G.players.forEach(p => p.score = 0);
-  G.used = {}; G.wagers = freshWagers(); G.control = null; G.finalDone = false;
-  resetT(); saveG(); renderBoard(); renderRail(); drawOverlay(); pub();
+  G.used = {}; G.wagers = freshWagers(); G.control = null; G.finalDone = false; G.started = false; G.delta = {};
+  resetT(); saveG(); renderBoard(); renderLeader(); drawOverlay(); pub();
 }
 
 function renderBoard() {
@@ -457,20 +951,25 @@ function renderBoard() {
   $("#board").innerHTML = h;
 }
 
-function renderRail() {
-  if (!G.players.length) { $("#rail").innerHTML = `<div class="empty">لا يوجد لاعبون بعد. امسح رمز QR بالهاتف، أو افتح الرابط وأدخل الرمز <b>${G.room}</b>.</div>`; return; }
-  $("#rail").innerHTML = G.players.map(p => `
-    <div class="player">
-      <div class="pname"><span class="dot ${T.online.has(p.pid) ? "on" : ""}" title="${T.online.has(p.pid) ? "متصل" : "غير متصل"}"></span><span>${esc(p.name)}</span>${G.control === p.pid ? `<span style="color:var(--gold);font-size:12px">يختار</span>` : ""}</div>
-      <div class="score ${p.score < 0 ? "neg" : ""}">${fmt(p.score)}</div>
-      <div class="prow">
-        <div class="mini">
-          <button type="button" class="small-btn" data-adj="${p.pid}" data-d="200">+200</button>
-          <button type="button" class="small-btn" data-adj="${p.pid}" data-d="-200">−200</button>
-        </div>
-        <button type="button" class="small-btn" data-rm="${p.pid}" aria-label="احذف اللاعب">✕</button>
-      </div>
-    </div>`).join("");
+function renderLeader() {
+  const el = $("#leader"); if (!el) return;
+  if (!G.players.length) { el.innerHTML = `<div class="emptycard">${th("board.empty")}</div>`; return; }
+  const ranked = [...G.players].sort((a, b) => b.score - a.score);
+  el.innerHTML = ranked.map((p, i) => {
+    const d = (G.delta || {})[p.pid];
+    const delta = d ? `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "+" : "−"}${num(d)}</span>` : "";
+    return `<div class="pc">
+      <span class="rank">${i + 1}</span>
+      <span class="nm"><span class="dot ${T.online.has(p.pid) ? "on" : ""}"></span> ${esc(p.name)}${G.control === p.pid ? `<small>${th("board.picks", null, p.g)}</small>` : ""}</span>
+      ${delta}
+      <span class="sc ${p.score < 0 ? "neg" : ""}">${fmt(p.score)}</span>
+      <span class="ctl">
+        <button type="button" data-adj="${p.pid}" data-d="200" aria-label="+200">+200</button>
+        <button type="button" data-adj="${p.pid}" data-d="-200" aria-label="−200">−200</button>
+        <button type="button" data-rm="${p.pid}" aria-label="${th("board.remove")}">✕</button>
+      </span>
+    </div>`;
+  }).join("");
 }
 
 function pub() {
@@ -479,7 +978,7 @@ function pub() {
   if (T.key) { const [c, r] = T.key.split("-").map(Number); cat = CATS[c].name; val = T.isWager ? T.wagerAmt : VALUES[r]; }
   if (T.phase === "final") cat = FINAL.category;
   send("state", {
-    players: G.players.map(({ pid, name, score }) => ({ pid, name, score })),
+    players: G.players.map(({ pid, name, score, g }) => ({ pid, name, score, g })),
     phase: T.phase, armed: T.armed, winner: T.winner, locked: T.locked, revealed: T.revealed, cat, val,
     wagerFor: (T.phase === "wager" || T.isWager) ? T.wagerFor : null,
     wagerMax: T.wagerFor ? maxFor(T.wagerFor) : 0,
@@ -488,7 +987,7 @@ function pub() {
     ansLeft: T.deadline ? Math.max(0, T.deadline - Date.now()) : 0,
     judging: T.phase === "clue" && !T.revealed && !!T.answerText,
     res: T.res,
-    lastWrong: (!T.isWager && T.armed && T.res && !T.res.ok && pf(T.res.pid)) ? pf(T.res.pid).name : "",
+    lastWrong: (!T.isWager && T.armed && T.res && !T.res.ok && pf(T.res.pid)) ? T.res.pid : "",
     final: T.final ? { stage: T.final.stage, w: Object.keys(T.final.wagers), a: Object.keys(T.final.answers) } : null
   });
   saveT();
@@ -499,16 +998,18 @@ function hostMsg(ev, p) {
   const pid = String(p.pid || "").slice(0, 16); if (!pid) return;
   if (ev === "join") {
     const name = String(p.name || "").trim().slice(0, 24) || "لاعب";
+    const g = p.g === "f" ? "f" : "m";
     // Same name as an existing player (or an explicit "I'm X" tap) means the same person coming back
     let claim = String(p.claim || "");
     if (!pf(claim)) { const m = G.players.find(x => x.pid !== pid && sameName(x.name, name)); claim = m ? m.pid : ""; }
     if (claim && claim !== pid) {
-      G.players = G.players.filter(x => x.pid !== pid);   // drop a seat this phone may already have
+      G.players = G.players.filter(x => x.pid !== pid);
       repid(claim, pid);
     }
     const pl = pf(pid);
-    if (pl) pl.name = name; else G.players.push({ pid, name, score: 0 });
-    saveG(); renderRail(); if (T.phase !== "board") drawOverlay(); return pub();
+    if (pl) { pl.name = name; if (p.g) pl.g = g; }
+    else { G.players.push({ pid, name, score: 0, g }); G.lastJoined = pid; }
+    saveG(); renderLeader(); if (T.phase !== "board") drawOverlay(); return pub();
   }
   const pl = pf(pid); if (!pl) return;
   if (ev === "buzz") {
@@ -517,7 +1018,9 @@ function hostMsg(ev, p) {
     if (p.early) { if (!T.armed && !T.winner) T.penalty[pid] = now + 250; return; }
     if (!T.armed || T.winner || T.locked.includes(pid)) return;
     if ((T.penalty[pid] || 0) > now) return;
-    T.winner = pid; T.armed = false; T.undo = null; startAnswerTimer(); beep(); drawOverlay(); pub();
+    T.winner = pid; T.armed = false; T.undo = null; startAnswerTimer(); beep();
+    T.flashUntil = Date.now() + 1300; clearTimeout(T.flashTimer); T.flashTimer = setTimeout(drawOverlay, 1350);
+    drawOverlay(); pub();
   } else if (ev === "ans") {
     if (T.phase !== "clue" || T.revealed || T.answerText) return;
     if (T.isWager ? pid !== T.wagerFor : pid !== T.winner) return;
@@ -527,8 +1030,8 @@ function hostMsg(ev, p) {
     const j = judge(text, official, alts);
     T.attempts.push({ pid, text, v: j.v });
     if (j.v === "close") T.judge = "close";
-    else { T.undo = snapshot(); j.v === "right" ? applyRight(pid, "تصحيح تلقائي") : applyWrong(pid, "تصحيح تلقائي"); }
-    drawOverlay(); pub();
+    else { T.undo = snapshot(); j.v === "right" ? applyRight(pid, t("clue.auto")) : applyWrong(pid, t("clue.auto")); }
+    T.flashUntil = 0; drawOverlay(); pub();
   } else if (ev === "wager") {
     if (T.phase !== "wager" || T.wagerFor !== pid) return;
     const v = Math.round(+p.amount);
@@ -551,162 +1054,246 @@ let actx;
 function beep() {
   try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
-    o.type = "square"; o.frequency.setValueAtTime(660, t); o.frequency.setValueAtTime(990, t + .09);
-    g.gain.setValueAtTime(.12, t); g.gain.exponentialRampToValueAtTime(.001, t + .4);
-    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + .42);
+    const o = actx.createOscillator(), g = actx.createGain(), tt = actx.currentTime;
+    o.type = "square"; o.frequency.setValueAtTime(660, tt); o.frequency.setValueAtTime(990, tt + .09);
+    g.gain.setValueAtTime(.12, tt); g.gain.exponentialRampToValueAtTime(.001, tt + .4);
+    o.connect(g).connect(actx.destination); o.start(tt); o.stop(tt + .42);
   } catch (e) {}
 }
 
 function openTile(k) {
-  resetT(); T.key = k;
+  resetT(); T.key = k; G.delta = {};
   if (G.wagers.includes(k)) {
     T.phase = "wager";
     T.wagerFor = pf(G.control) ? G.control : (G.players[0] ? G.players[0].pid : null);
   } else T.phase = "clue";
-  drawOverlay(); pub();
+  saveG(); renderLeader(); drawOverlay(); pub();
 }
 
 function startFinal() {
-  resetT(); T.phase = "final"; T.final = { stage: "wager", wagers: {}, answers: {}, marks: {} };
-  drawOverlay(); pub();
+  resetT(); G.delta = {}; T.phase = "final"; T.final = { stage: "wager", wagers: {}, answers: {}, marks: {} };
+  saveG(); renderLeader(); drawOverlay(); pub();
 }
 
 function drawOverlay() {
   const ov = $("#overlay");
-  if (T.phase === "board") { ov.hidden = true; ov.innerHTML = ""; return; }
-  let html = "";
-  if (T.phase === "clue") html = clueView();
-  else if (T.phase === "wager") html = wagerView();
-  else if (T.phase === "final") html = finalView();
+  if (T.phase === "board") { ov.hidden = true; ov.innerHTML = ""; ov.className = "ov"; return; }
+  let html = "", cls = "dots";
+  if (T.phase === "lobby") html = lobbyView();
+  else if (T.phase === "clue" && T.flashUntil > Date.now() && T.winner) { html = flashView(); cls = "dots"; }
+  else if (T.phase === "clue") html = clueView();
+  else if (T.phase === "wager") { html = wagerView(); cls = "hatch"; }
+  else if (T.phase === "final") { html = finalView(); cls = "dots-dark"; }
   else if (T.phase === "over") html = overView();
   const focusedId = document.activeElement && ov.contains(document.activeElement) ? document.activeElement.id : null;
-  ov.innerHTML = `<div class="card" role="dialog" aria-modal="true">${html}</div>`;
+  ov.className = "ov " + cls;
+  ov.innerHTML = html;
   ov.hidden = false;
+  if (T.phase === "lobby") makeQR($("#qrBig"), 600);
   if (focusedId && document.getElementById(focusedId)) document.getElementById(focusedId).focus();
+  tickDrain();
+}
+
+function lobbyView() {
+  const n = G.players.length;
+  return `<div class="scr pad lobby" role="dialog" aria-modal="true">
+    <div style="display: flex; flex-direction: column; justify-content: space-between; gap: 32px;">
+      <h1 class="extrude">${th("name.title")}</h1>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="font-weight: 700; font-size: 22px; line-height: 1.5;">${th("lobby.codeLabel")}</div>
+        <div class="bigcode ltr">${G.room}</div>
+        <div style="font-weight: 500; font-size: 20px; line-height: 1.6;">${th("lobby.howToJoin")} <span class="ltr" style="font-weight: 700;">${esc(location.host + location.pathname)}</span></div>
+      </div>
+      <div class="row"><button type="button" class="btn dark big" data-act="start">${th("lobby.start")}</button></div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 32px;">
+      <div class="qrbig"><div class="qrbox" id="qrBig"></div></div>
+      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+        <div style="font-weight: 900; font-size: 26px; line-height: 1.5;">${th("lobby.joined")}</div>
+        <div style="font-weight: 700; font-size: 18px;">${n ? esc(countLabel(n)) : ""}</div>
+      </div>
+      <div class="row" style="gap: 16px;">
+        ${G.players.map(p => `<div class="sticker ${p.pid === G.lastJoined ? "new" : ""}">${esc(p.name)}${p.pid === G.lastJoined ? `<small>${th("lobby.justJoined", null, p.g)}</small>` : ""}</div>`).join("")}
+        <div class="waitchip">${th("lobby.waiting")}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function flashView() {
+  const [c, r] = T.key.split("-").map(Number);
+  return `<div class="scr" role="dialog" aria-modal="true" style="padding: 0;">
+    <div class="flash dots-dark">
+      <div class="t">${th("clue.flash", null, gOf(T.winner))}</div>
+      <div class="n">${esc(nameOf(T.winner))}</div>
+      <div class="c">${esc(CATS[c].name)} · ${num(VALUES[r])}</div>
+    </div>
+  </div>`;
 }
 
 function clueView() {
   const [c, r] = T.key.split("-").map(Number);
   const cat = CATS[c], [clue, ans] = cat.clues[r];
-  const val = T.isWager ? T.wagerAmt : VALUES[r];
-  let status = "";
-  const judgeBtns = `<div class="btns"><button type="button" class="ok big" data-act="right">صح +${num(val)}</button><button type="button" class="no big" data-act="wrong">خطأ −${num(val)}</button></div>`;
-  const manualBtns = `<div class="btns"><button type="button" class="ok small-btn" data-act="right">صح يدويًا</button><button type="button" class="no small-btn" data-act="wrong">خطأ يدويًا</button></div>`;
-  if (!T.revealed) {
-    const who = T.isWager ? pf(T.wagerFor) : pf(T.winner);
-    if ((T.isWager || T.winner) && T.answerText) {
-      status = `<div class="buzzline">${esc(who ? who.name : "")} كتب: <span style="color:var(--gold)">«${esc(T.answerText)}»</span></div>
-        <p class="hint">${T.judge === "close" ? "الإجابة قريبة من الصحيحة. قرّر أنت:" : "قرّر أنت:"}</p>${judgeBtns}`;
-    } else if (T.isWager) {
-      status = `<div class="buzzline">${esc(who ? who.name : "")} يكتب إجابته…</div>${manualBtns}`;
-    } else if (T.winner) {
-      status = `<div class="buzzline win">${esc(who ? who.name : "")} ضغط أولًا! يكتب الإجابة… <span id="cd" style="color:var(--gold)"></span></div>${manualBtns}`;
-    } else if (T.armed) {
-      status = `<div class="buzzline live">الأزرار مفتوحة…</div><div class="btns"><button type="button" data-act="disarm">أغلق الأزرار</button></div>`;
-    } else {
-      status = `<div class="btns"><button type="button" class="primary big" data-act="arm" id="armBtn">افتح الأزرار</button></div>
-        <p class="hint">اقرأ الدليل كاملًا ثم افتح الأزرار. من يضغط قبل ذلك يُقفل زره ربع ثانية.</p>`;
-    }
+  const val = curVal();
+  const who = T.isWager ? T.wagerFor : T.winner, wg = gOf(who);
+  const tries = T.attempts.length ? `<div class="tries">${T.attempts.map(x => {
+    const xg = gOf(x.pid);
+    const v = x.v === "right" ? t("clue.vRight") : x.v === "close" ? t("clue.vClose") : x.v === "none" ? t("clue.vNone", null, xg) : t("clue.vWrong");
+    return `<div class="try"><span>${esc(nameOf(x.pid))}</span><span style="font-weight: 500;">${x.text ? "«" + esc(x.text) + "»" : th("clue.timeUp")}</span><span class="v ${x.v}">${esc(v)}</span></div>`;
+  }).join("")}</div>` : "";
+  const undo = T.undo ? `<button type="button" class="btn sm" data-act="undo">${th("clue.undo")}</button>` : "";
+  const manual = `<button type="button" class="btn ghost sm" data-act="right">${th("clue.manualRight")}</button><button type="button" class="btn ghost sm" data-act="wrong">${th("clue.manualWrong")}</button>`;
+  const judgeBtns = `<div class="row"><button type="button" class="btn ok big" data-act="right">${th("clue.right", { value: num(val) })}</button><button type="button" class="btn no big" data-act="wrong">${th("clue.wrong", { value: num(val) })}</button></div>`;
+  const drain = `<div class="drain"><div class="track"><div class="fill" id="drainFill"></div></div><span class="secs" id="drainSecs"></span></div>`;
+  let bar;
+  if (T.revealed) {
+    bar = `<div class="lbl">${th("clue.answer")}</div>
+      <div class="ans">${esc(ans)}</div>
+      ${T.result ? `<div class="what">${esc(T.result)}</div>` : ""}
+      <div class="row">${undo}<button type="button" class="btn gold big" data-act="done" id="doneBtn">${th("clue.back")}</button></div>`;
+  } else if (who && T.answerText) {
+    bar = `<div class="what">${th("clue.typed", { name: nameOf(who), answer: T.answerText }, wg)}</div>
+      <p class="hint">${T.judge === "close" ? th("clue.closeMatch") : ""}</p>${judgeBtns}`;
+  } else if (T.isWager) {
+    bar = `<div class="row" style="justify-content: space-between;"><div class="who">${esc(nameOf(who))}</div><div class="row">${manual}</div></div>
+      <div class="what">${th("clue.turn", { name: nameOf(who) }, wg)}</div>`;
+  } else if (T.winner) {
+    bar = `<div class="row" style="justify-content: space-between;"><div class="row" style="align-items: baseline; gap: 22px;"><div class="who">${esc(nameOf(who))}</div><div class="what">${th("clue.turn", { name: "" }, wg).trim()}</div></div><div class="row">${manual}</div></div>
+      ${drain}${undo ? `<div class="row">${undo}</div>` : ""}`;
+  } else if (T.armed) {
+    bar = `<div class="row" style="justify-content: space-between;"><div class="live">${th("clue.live")}</div><button type="button" class="btn ghost" data-act="disarm">${th("clue.close")}</button></div>${undo ? `<div class="row">${undo}</div>` : ""}`;
+  } else {
+    bar = `<div class="row"><button type="button" class="btn gold big" data-act="arm" id="armBtn">${th("clue.open")}</button></div><p class="hint">${th("clue.openHint")}</p>`;
   }
-  const tries = T.attempts.length ? `<div class="rows">${T.attempts.map(x => `<div class="row"><div class="who">${esc(pf(x.pid) ? pf(x.pid).name : "")}<em>${x.text ? "«" + esc(x.text) + "»" : "انتهى الوقت"}</em></div><div>${VLABEL[x.v] || ""}</div></div>`).join("")}</div>` : "";
-  const undo = T.undo ? `<div class="btns"><button type="button" class="small-btn" data-act="undo">تراجع عن التصحيح التلقائي</button></div>` : "";
-  if (!T.revealed && (tries || undo)) status += tries + undo;
-  const answer = T.revealed ? `<div class="answer"><span>الإجابة الصحيحة</span>${esc(ans)}</div>${T.result ? `<p class="hint">${T.result}</p>` : ""}${tries}${undo}` : "";
-  const foot = T.revealed
-    ? `<button type="button" class="primary" data-act="done" id="doneBtn">عودة إلى اللوحة</button>`
-    : `<button type="button" data-act="reveal">لا أحد · أظهر الإجابة</button><button type="button" data-act="cancel">إلغاء</button>`;
-  return `<div class="meta"><span>${esc(cat.name)}</span><span class="val">${T.isWager ? "رهان · " : ""}${num(val)}</span></div>
-    <p class="clue">${esc(clue)}</p>
-    ${status ? `<div class="status">${status}</div>` : ""}
-    ${answer}
-    <div class="foot">${foot}</div>`;
+  const topBtns = T.revealed ? "" : `<div class="row"><button type="button" class="btn sm" data-act="reveal">${th("clue.noOne")}</button><button type="button" class="btn sm" data-act="cancel">${th("clue.cancel")}</button></div>`;
+  return `<div class="scr" role="dialog" aria-modal="true">
+    <div class="pad cluetop">
+      <div class="row" style="justify-content: space-between;">
+        <div class="row" style="gap: 16px;"><span class="chip">${esc(cat.name)}</span>${topBtns}</div>
+        <span class="vchip">${T.isWager ? th("wager.title") + " " : ""}${num(val)}</span>
+      </div>
+      <p class="cluetxt">${esc(clue)}</p>
+      ${tries}
+    </div>
+    <div class="bar">${bar}</div>
+  </div>`;
 }
 
 function wagerView() {
   const [c] = T.key.split("-").map(Number);
-  if (!G.players.length) return `<div class="badge">رهان!</div><p class="hint">لا يوجد لاعبون. انضم بهاتفك أولًا ثم افتح الخانة.</p><div class="foot"><button type="button" data-act="cancel">عودة إلى اللوحة</button></div>`;
-  const p = pf(T.wagerFor);
-  const got = T.wagerInput !== "";
-  return `<div class="badge">رهان!</div>
-    <div class="meta"><span>${esc(CATS[c].name)}</span><span class="val">خانة رهان مخفية</span></div>
-    <div class="wgrid">
-      <div class="field"><label for="wWho">من اختار الخانة؟</label>
+  const back = `<button type="button" class="btn" data-act="cancel">${th("clue.back")}</button>`;
+  if (!G.players.length) return `<div class="wcard" role="dialog" aria-modal="true"><div class="big">${th("wager.title")}</div><p class="line">${th("board.empty")}</p>${back}</div>`;
+  const p = pf(T.wagerFor), got = T.wagerInput !== "";
+  return `<div class="wcard" role="dialog" aria-modal="true">
+    <span class="chip" style="box-shadow: none;">${esc(CATS[c].name)}</span>
+    <div class="big">${th("wager.title")}</div>
+    <div class="line">${got ? th("wager.arrived", { name: p ? p.name : "" }) : th("wager.waiting", { name: p ? p.name : "" }, p ? p.g : "m")}</div>
+    <div class="row" style="justify-content: center; font-weight: 700; font-size: 20px;">${th("wager.upTo", { max: num(maxFor(T.wagerFor)) })}</div>
+    <div class="fields">
+      <div class="field"><label for="wWho">${th("wager.who")}</label>
         <select id="wWho">${G.players.map(x => `<option value="${x.pid}" ${x.pid === T.wagerFor ? "selected" : ""}>${esc(x.name)} (${fmt(x.score)})</option>`).join("")}</select></div>
-      <div class="field"><label for="wAmt">الرهان (الحد الأقصى ${num(maxFor(T.wagerFor))})</label>
-        <input id="wAmt" type="text" inputmode="numeric" value="${esc(T.wagerInput)}" placeholder="من الهاتف أو يدويًا"></div>
+      <div class="field"><label for="wAmt">${th("wager.amount", { max: num(maxFor(T.wagerFor)) })}</label>
+        <input id="wAmt" type="text" inputmode="numeric" value="${esc(T.wagerInput)}"></div>
     </div>
-    <p class="hint">${got ? `وصل رهان ${esc(p ? p.name : "")}. ثبّته لعرض الدليل.` : `بانتظار أن يرسل ${esc(p ? p.name : "")} رهانه من هاتفه، أو اكتبه هنا.`}</p>
     <p class="err" id="wErr"></p>
-    <div class="foot"><button type="button" class="primary" data-act="wlock">ثبّت الرهان واعرض الدليل</button><button type="button" data-act="cancel">عودة إلى اللوحة</button></div>`;
+    <div class="row" style="justify-content: center;"><button type="button" class="btn dark big" data-act="wlock">${th("wager.lock")}</button>${back}</div>
+  </div>`;
 }
 
 function finalView() {
   const F = T.final;
+  const back = `<button type="button" class="btn ghost" data-act="fcancel">${th("clue.back")}</button>`;
   if (F.stage === "wager") {
-    return `<div class="badge">الجولة الأخيرة</div>
-      <div class="meta"><span>الفئة</span><span class="val">${30 - Object.keys(G.used).length ? "بقيت " + (30 - Object.keys(G.used).length) + " خانة لم تُلعب" : "اكتملت اللوحة"}</span></div>
-      <p class="clue">${esc(FINAL.category)}</p>
-      <p class="hint">يرسل كل لاعب رهانه سرًّا من هاتفه، من صفر حتى رصيده. من رصيده صفر أو أقل يراهن بصفر ويمكنه الإجابة.</p>
-      <div class="rows">${G.players.map(p => `<div class="row"><div class="who">${esc(p.name)}</div><div>${p.score <= 0 ? "رهان صفر" : (F.wagers[p.pid] != null ? "✓ راهن" : "بانتظار الرهان…")}</div></div>`).join("")}</div>
-      <div class="foot"><button type="button" class="primary" data-act="fclue">اعرض الدليل</button><button type="button" data-act="fcancel">عودة إلى اللوحة</button></div>`;
+    return `<div class="scr pad final" role="dialog" aria-modal="true" style="justify-content: space-between; gap: 32px;">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <span class="chip" style="align-self: flex-start; background: var(--saffron); color: var(--ink);">${th("final.badge")}</span>
+        <div style="font-weight: 700; font-size: 24px; color: var(--muted);">${th("final.catLabel")}</div>
+        <h2 class="extrude-dark">${esc(FINAL.category)}</h2>
+        <div style="font-weight: 500; font-size: 24px; line-height: 1.6;">${th("final.instructions")}</div>
+      </div>
+      <div class="fcards">${G.players.map(p => {
+        const done = F.wagers[p.pid] != null;
+        const st = p.score <= 0 ? t("final.zero", null, p.g) : done ? t("final.wagered", null, p.g) : t("final.waitingWager");
+        return `<div class="fcard ${done ? "done" : ""}"><div class="top"><span class="n">${esc(p.name)}</span><span class="s">${fmt(p.score)}</span></div><div class="st">${esc(st)}</div></div>`;
+      }).join("")}</div>
+      <div class="row fbtns"><button type="button" class="btn gold big" data-act="fclue">${th("final.showClue")}</button>${back}</div>
+    </div>`;
   }
   if (F.stage === "answer") {
-    return `<div class="meta"><span>الجولة الأخيرة · ${esc(FINAL.category)}</span><span class="val">الرهانات مثبّتة</span></div>
-      <p class="clue">${esc(FINAL.clue)}</p>
-      <div class="rows">${G.players.map(p => `<div class="row"><div class="who">${esc(p.name)}</div><div>${F.answers[p.pid] != null ? "✓ أرسل إجابته" : "يكتب…"}</div></div>`).join("")}</div>
-      <div class="foot"><button type="button" class="primary" data-act="freveal">أظهر الإجابات</button></div>`;
+    return `<div class="scr pad final" role="dialog" aria-modal="true" style="justify-content: space-between; gap: 32px;">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <span class="chip" style="align-self: flex-start; background: var(--saffron); color: var(--ink);">${th("final.badge")} · ${esc(FINAL.category)}</span>
+        <p class="cluetxt">${esc(FINAL.clue)}</p>
+      </div>
+      <div class="fcards">${G.players.map(p => {
+        const done = F.answers[p.pid] != null;
+        return `<div class="fcard ${done ? "done" : ""}"><div class="top"><span class="n">${esc(p.name)}</span></div><div class="st">${esc(done ? t("final.answered", null, p.g) : t("final.waitingAnswer", null, p.g))}</div></div>`;
+      }).join("")}</div>
+      <div class="row fbtns"><button type="button" class="btn gold big" data-act="freveal">${th("final.reveal")}</button></div>
+    </div>`;
   }
-  return `<div class="meta"><span>الجولة الأخيرة · ${esc(FINAL.category)}</span></div>
-    <p class="clue">${esc(FINAL.clue)}</p>
-    <div class="answer"><span>الإجابة الصحيحة</span>${esc(FINAL.answer)}</div>
-    <div class="rows">${G.players.map(p => `
-      <div class="row"><div class="who">${esc(p.name)}<em>راهن بـ ${num(F.wagers[p.pid] || 0)}</em><div class="said">${F.answers[p.pid] ? "«" + esc(F.answers[p.pid]) + "»" : "لم يُجب"} <span class="hint">${F.verdict && F.verdict[p.pid] === "close" ? "· قريبة، قرّر أنت" : ""}</span></div></div>
-        <div class="btns"><button type="button" class="ok ${F.marks[p.pid] === 1 ? "on" : ""}" data-act="fmark" data-pid="${p.pid}" data-v="1">أصاب</button><button type="button" class="no ${F.marks[p.pid] === -1 ? "on" : ""}" data-act="fmark" data-pid="${p.pid}" data-v="-1">أخطأ</button></div></div>`).join("")}</div>
-    <div class="foot"><button type="button" class="primary" data-act="ftally">احسب النتيجة النهائية</button></div>`;
+  return `<div class="scr pad final" role="dialog" aria-modal="true" style="gap: 32px;">
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <span class="chip" style="align-self: flex-start; background: var(--saffron); color: var(--ink);">${th("final.badge")} · ${esc(FINAL.category)}</span>
+      <div style="font-weight: 700; font-size: 17px; color: var(--muted);">${th("clue.answer")}</div>
+      <div style="font-weight: 900; font-size: clamp(34px, 4vw, 56px); line-height: 1.4; color: var(--saffron);">${esc(FINAL.answer)}</div>
+    </div>
+    <div class="fcards">${G.players.map(p => `
+      <div class="fcard ${F.marks[p.pid] === 1 ? "done" : ""}">
+        <div class="top"><span class="n">${esc(p.name)}</span><span class="s">${th("final.wagerOf", { n: num(F.wagers[p.pid] || 0) })}</span></div>
+        <div class="said">${F.answers[p.pid] ? "«" + esc(F.answers[p.pid]) + "»" : th("final.noAnswer", null, p.g)}</div>
+        ${F.verdict && F.verdict[p.pid] === "close" ? `<div class="st">${th("clue.vClose")}</div>` : ""}
+        <div class="row"><button type="button" class="btn sm ${F.marks[p.pid] === 1 ? "ok" : ""}" data-act="fmark" data-pid="${p.pid}" data-v="1">${th("clue.vRight")}</button><button type="button" class="btn sm ${F.marks[p.pid] === -1 ? "no" : ""}" data-act="fmark" data-pid="${p.pid}" data-v="-1">${th("clue.vWrong")}</button></div>
+      </div>`).join("")}</div>
+    <div class="row fbtns"><button type="button" class="btn gold big" data-act="ftally">${th("final.tally")}</button></div>
+  </div>`;
 }
 
 function overView() {
-  if (!G.players.length) return `<p class="clue">لا يوجد لاعبون</p><div class="foot"><button type="button" data-act="close">إغلاق</button></div>`;
-  const top = Math.max(...G.players.map(p => p.score));
-  const winners = G.players.filter(p => p.score === top);
   const ranked = [...G.players].sort((a, b) => b.score - a.score);
-  return `<div class="badge">انتهت اللعبة</div>
-    <p class="clue">${winners.length > 1 ? "تعادل: " + winners.map(w => esc(w.name)).join(" و") : "الفائز: " + esc(winners[0].name)}</p>
-    <div class="rows">${ranked.map(p => `<div class="row"><div class="who">${esc(p.name)}</div><div class="score ${p.score < 0 ? "neg" : ""}" style="font-size:28px">${fmt(p.score)}</div></div>`).join("")}</div>
-    <div class="foot"><button type="button" class="primary" data-act="newgame">ابدأ لعبة جديدة</button><button type="button" data-act="close">إغلاق</button></div>`;
+  if (!ranked.length) return `<div class="scr pad results"><h2>${th("over.title")}</h2><div class="row"><button type="button" class="btn" data-act="close">${th("over.close")}</button></div></div>`;
+  const top = ranked[0].score, winners = ranked.filter(p => p.score === top);
+  const head = winners.length > 1 ? t("over.tie", { names: winners.map(w => w.name).join(" و") }) : t("over.winner", { name: winners[0].name }, winners[0].g);
+  return `<div class="scr pad results" role="dialog" aria-modal="true">
+    <span class="chip" style="align-self: flex-start;">${th("over.title")}</span>
+    <h2 class="extrude">${esc(head)}</h2>
+    <div class="rlist">${ranked.map((p, i) => `<div class="pc"><span class="rank">${i + 1}</span><span class="nm">${esc(p.name)}</span><span class="sc ${p.score < 0 ? "neg" : ""}">${fmt(p.score)}</span></div>`).join("")}</div>
+    <div class="row"><button type="button" class="btn dark big" data-act="newgame">${th("over.newGame")}</button><button type="button" class="btn" data-act="close">${th("over.close")}</button></div>
+  </div>`;
 }
 
 function toBoard(markUsed) {
   if (markUsed && T.key) G.used[T.key] = 1;
-  resetT(); saveG(); renderBoard(); renderRail(); drawOverlay(); pub();
+  resetT(); saveG(); renderBoard(); renderLeader(); drawOverlay(); pub();
 }
 
 function hostAct(e) {
-  const t = e.target.closest("button[data-act]"); if (!t) return;
-  const a = t.dataset.act;
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const a = b.dataset.act;
   if (a !== "undo") T.undo = null;
-  if (a === "arm") { T.armed = true; T.winner = null; }
+  if (a === "start") { G.started = true; saveG(); T.phase = "board"; }
+  else if (a === "arm") { T.armed = true; T.winner = null; }
   else if (a === "disarm") { T.armed = false; }
   else if (a === "right" || a === "wrong") {
     const pid = T.isWager ? T.wagerFor : T.winner; if (!pf(pid)) return;
     const last = T.attempts[T.attempts.length - 1];
     if (T.answerText && last && last.pid === pid) last.v = a;
-    a === "right" ? applyRight(pid, "قرار المضيف") : applyWrong(pid, "قرار المضيف");
+    T.flashUntil = 0;
+    a === "right" ? applyRight(pid, t("clue.hostCall")) : applyWrong(pid, t("clue.hostCall"));
   }
   else if (a === "undo") {
     const u = T.undo; if (!u) return;
     u.scores.forEach(([pid, s]) => { const p = pf(pid); if (p) p.score = s; });
-    G.control = u.control; Object.assign(T, u.t); T.judge = "manual"; T.undo = null; clearTimeout(T.timer);
+    G.control = u.control; G.delta = u.delta; Object.assign(T, u.t); T.judge = "manual"; T.undo = null; clearTimeout(T.timer);
     const last = T.attempts[T.attempts.length - 1]; if (last) last.v = "close";
-    saveG(); renderRail();
+    saveG(); renderLeader();
   }
   else if (a === "reveal") { T.revealed = true; T.armed = false; T.winner = null; clearTimeout(T.timer); }
   else if (a === "cancel") return toBoard(false);
   else if (a === "done") return toBoard(true);
   else if (a === "wlock") {
     const v = parseNum(T.wagerInput), mx = maxFor(T.wagerFor);
-    if (!v || v < 5 || v > mx) { $("#wErr").textContent = `أدخل رهانًا بين 5 و${num(mx)}.`; return; }
+    if (!v || v < 5 || v > mx) { $("#wErr").textContent = t("wager.error", { max: num(mx) }); return; }
     T.wagerAmt = v; T.isWager = true; T.phase = "clue";
   }
   else if (a === "fclue") { T.final.stage = "answer"; }
@@ -718,11 +1305,11 @@ function hostAct(e) {
       F.verdict[p.pid] = v; F.marks[p.pid] = v === "right" ? 1 : v === "close" ? 0 : -1;
     });
   }
-  else if (a === "fmark") { const pid = t.dataset.pid, v = +t.dataset.v; T.final.marks[pid] = T.final.marks[pid] === v ? 0 : v; }
+  else if (a === "fmark") { const pid = b.dataset.pid, v = +b.dataset.v; T.final.marks[pid] = T.final.marks[pid] === v ? 0 : v; }
   else if (a === "ftally") {
     const F = T.final;
-    G.players.forEach(p => { p.score += (F.marks[p.pid] || 0) * (F.wagers[p.pid] || 0); });
-    G.finalDone = true; saveG(); renderRail(); T.phase = "over"; T.final = null;
+    G.players.forEach(p => { const d = (F.marks[p.pid] || 0) * (F.wagers[p.pid] || 0); p.score += d; if (d) addDelta(p.pid, d); });
+    G.finalDone = true; saveG(); renderLeader(); T.phase = "over"; T.final = null;
   }
   else if (a === "fcancel" || a === "close") return toBoard(false);
   else if (a === "newgame") return newGame();
@@ -733,33 +1320,48 @@ function hostAct(e) {
 // PLAYER (phone)
 // =====================================================================
 const PKEY = "mws-player-v1";
-let P, S = null, lastState = 0, penaltyUntil = 0, pending = false, sentWager = null, sentFin = {}, lastJoin = 0, connState = "", lastView = "", editingName = false, wasWinner = false, sentAns = null, ansDeadline = 0;
+let P, S = null, lastState = 0, penaltyUntil = 0, pending = false, sentWager = null, sentFin = {}, lastJoin = 0,
+    lastView = "", editingName = false, wasWinner = false, sentAns = null, ansDeadline = 0, pickG = null;
+
+const meG = () => P.g === "f" ? "f" : "m";
+const sp = pid => S && S.players.find(x => x.pid === pid);
+const spName = pid => (sp(pid) || {}).name || "";
+const spG = pid => (sp(pid) || {}).g || "m";
 
 function initPlayer() {
   P = store.get(PKEY) || {};
   if (!P.pid) P.pid = rid();
   store.set(PKEY, P);
-  $("#app").innerHTML = `<div class="pl"><div class="plhead" id="plhead"></div><div class="center" id="plbody"></div><div class="center" id="plfoot"></div></div>`;
+  $("#app").innerHTML = `<div class="pl"><div class="phead" id="phead"></div><div class="pbody" id="pbody"></div><div class="pfoot" id="pfoot"></div></div>`;
   document.addEventListener("pointerdown", e => { if (e.target.closest("#buzz")) { e.preventDefault(); tap(); } });
   document.addEventListener("submit", onPlayerSubmit);
   document.addEventListener("click", e => {
-    if (e.target.closest("#rename")) { editingName = true; renderPlayer(); }
+    if (e.target.closest("#rename")) { editingName = true; pickG = P.g || null; lastView = ""; renderPlayer(); }
+    const gb = e.target.closest("[data-g]");
+    if (gb) { pickG = gb.dataset.g; document.querySelectorAll("[data-g]").forEach(x => x.classList.toggle("sel", x === gb)); document.querySelectorAll("[data-g]").forEach(x => x.setAttribute("aria-pressed", String(x === gb))); }
     const c = e.target.closest("[data-claim]");
     if (c && S) {
-      const old = S.players.find(x => x.pid === c.dataset.claim); if (!old) return;
-      P.name = old.name; store.set(PKEY, P); editingName = false;
-      send("join", { pid: P.pid, name: P.name, claim: old.pid }); lastJoin = Date.now();
+      const old = sp(c.dataset.claim); if (!old) return;
+      P.name = old.name; P.g = old.g || "m"; store.set(PKEY, P); editingName = false;
+      send("join", { pid: P.pid, name: P.name, g: P.g, claim: old.pid }); lastJoin = Date.now();
       lastView = ""; renderPlayer();
     }
   });
-  // Coming back to the tab (after locking the phone or switching apps): reconnect if the host has gone quiet
   document.addEventListener("visibilitychange", () => { if (!document.hidden && ch && Date.now() - lastState > 4000) reconnect(); });
   window.addEventListener("online", () => { if (ch) reconnect(); });
   if (roomParam.length === 4) startPlayerConn();
   renderPlayer();
   setInterval(renderPlayer, 1500);
-  setInterval(() => { const cd = document.getElementById("cdp"); if (cd && ansDeadline) cd.textContent = Math.max(0, Math.ceil((ansDeadline - Date.now()) / 1000)); }, 250);
+  setInterval(() => {
+    const f = document.getElementById("ptFill"), s = document.getElementById("ptSecs");
+    if (!f || !ansDeadline) return;
+    const left = Math.max(0, ansDeadline - Date.now());
+    f.style.width = (100 * left / ANSWER_MS) + "%";
+    if (s) s.textContent = t("clue.seconds", { n: Math.ceil(left / 1000) });
+  }, 200);
 }
+
+function joinPayload() { return { pid: P.pid, name: P.name, g: meG() }; }
 
 function startPlayerConn() {
   if (ch) return;
@@ -771,16 +1373,15 @@ function startPlayerConn() {
       if (S.phase !== "wager") sentWager = null;
       if (!S.final) sentFin = {};
       if (!S.answering) sentAns = null;
-      const me = S.players.find(x => x.pid === P.pid);
-      if (!me && P.name && !editingName && Date.now() - lastJoin > 2000) { lastJoin = Date.now(); send("join", { pid: P.pid, name: P.name }); }
+      const me = sp(P.pid);
+      if (!me && P.name && P.g && !editingName && Date.now() - lastJoin > 2000) { lastJoin = Date.now(); send("join", joinPayload()); }
       const iWin = S.phase === "clue" && S.winner === P.pid;
       if (iWin && !wasWinner && navigator.vibrate) navigator.vibrate([120, 60, 120]);
       wasWinner = iWin;
       renderPlayer();
     },
     status: st => {
-      connState = st;
-      if (st === "SUBSCRIBED") { if (P.name && !editingName) { lastJoin = Date.now(); send("join", { pid: P.pid, name: P.name }); } send("hello", {}); }
+      if (st === "SUBSCRIBED") { if (P.name && P.g && !editingName) { lastJoin = Date.now(); send("join", joinPayload()); } send("hello", {}); }
       renderPlayer();
     }
   });
@@ -808,123 +1409,136 @@ function tap() {
 function onPlayerSubmit(e) {
   const f = e.target.closest("form[data-f]"); if (!f) return;
   e.preventDefault();
-  const kind = f.dataset.f, inp = f.querySelector("input"), err = f.querySelector(".err");
+  const kind = f.dataset.f, inp = f.querySelector("input[type=text], input:not([type])"), err = f.querySelector(".err");
+  const v = inp ? inp.value.trim() : "";
   if (kind === "code") {
-    const code = inp.value.toUpperCase().replace(/[^A-Z]/g, "");
-    if (code.length !== 4) { err.textContent = "الرمز من 4 أحرف إنجليزية، مثل ABCD."; return; }
+    const code = v.toUpperCase().replace(/[^A-Z]/g, "");
+    if (code.length !== 4) { err.textContent = t("join.codeError"); return; }
     location.search = "?room=" + code; return;
   }
   if (kind === "name") {
-    const n = inp.value.trim().slice(0, 24);
-    if (!n) { err.textContent = "اكتب اسمك."; return; }
-    P.name = n; store.set(PKEY, P); editingName = false;
+    const n = v.slice(0, 24);
+    if (!n) { err.textContent = t("join.nameError"); return; }
+    if (!pickG) { err.textContent = t("join.genderError"); return; }
+    P.name = n; P.g = pickG; store.set(PKEY, P); editingName = false;
     lastJoin = Date.now();
-    if (ch) send("join", { pid: P.pid, name: P.name }); else startPlayerConn();
+    if (ch) send("join", joinPayload()); else startPlayerConn();
     lastView = ""; renderPlayer(); return;
   }
   if (kind === "wager") {
-    const v = parseNum(inp.value), mx = S ? S.wagerMax : 0;
-    if (!v || v < 5 || v > mx) { err.textContent = `اختر رهانًا بين 5 و${num(mx)}.`; return; }
-    send("wager", { pid: P.pid, amount: v }); sentWager = v; lastView = ""; renderPlayer(); return;
+    const n = parseNum(v), mx = S ? S.wagerMax : 0;
+    if (!n || n < 5 || n > mx) { err.textContent = t("wager.error", { max: num(mx) }); return; }
+    send("wager", { pid: P.pid, amount: n }); sentWager = n; lastView = ""; renderPlayer(); return;
   }
   if (kind === "fwager") {
-    const me = S.players.find(x => x.pid === P.pid), mx = Math.max(me ? me.score : 0, 0);
-    const raw = inp.value.trim(), v = raw === "" ? 0 : parseNum(raw);
-    if (isNaN(v) || v < 0 || v > mx) { err.textContent = `اختر رهانًا بين 0 و${num(mx)}.`; return; }
-    send("fin", { pid: P.pid, kind: "wager", value: v }); sentFin.wager = v; lastView = ""; renderPlayer(); return;
+    const me = sp(P.pid), mx = Math.max(me ? me.score : 0, 0);
+    const n = v === "" ? 0 : parseNum(v);
+    if (isNaN(n) || n < 0 || n > mx) { err.textContent = t("pfinal.wagerLabel", { max: num(mx) }); return; }
+    send("fin", { pid: P.pid, kind: "wager", value: n }); sentFin.wager = n; lastView = ""; renderPlayer(); return;
   }
-  if (kind === "ans") {
-    const v = inp.value.trim();
-    if (!v) { err.textContent = "اكتب إجابتك."; return; }
-    send("ans", { pid: P.pid, text: v }); sentAns = v; lastView = ""; renderPlayer(); return;
-  }
-  if (kind === "fanswer") {
-    const v = inp.value.trim();
-    if (!v) { err.textContent = "اكتب إجابتك."; return; }
-    send("fin", { pid: P.pid, kind: "answer", value: v }); sentFin.answer = v; lastView = ""; renderPlayer(); return;
+  if (kind === "fanswer" || kind === "ans") {
+    if (!v) { err.textContent = t("phone.answerError", null, meG()); return; }
+    if (kind === "ans") { send("ans", { pid: P.pid, text: v }); sentAns = v; }
+    else { send("fin", { pid: P.pid, kind: "answer", value: v }); sentFin.answer = v; }
+    lastView = ""; renderPlayer(); return;
   }
 }
 
-const formHTML = (kind, title, label, placeholder, btn, numeric, hint) => `
-  <form class="pform" data-f="${kind}" autocomplete="off">
-    <h2>${title}</h2>
-    <div class="field"><label for="pf-${kind}">${label}</label>
-      <input id="pf-${kind}" ${numeric ? 'inputmode="numeric"' : ""} placeholder="${esc(placeholder)}" ${kind === "name" ? `value="${esc(P.name || "")}" maxlength="24"` : ""} ${kind === "code" ? 'maxlength="4" autocapitalize="characters" dir="ltr"' : ""}></div>
-    ${hint ? `<p class="hint">${hint}</p>` : ""}
+// ---- view pieces ----
+function slab(cls, big, tag) {
+  return `<button type="button" id="buzz" class="slab s-${cls}" aria-label="${esc(big)}">${tag ? `<span class="tag">${esc(tag)}</span>` : "<span></span>"}<span class="big">${esc(big)}</span></button>`;
+}
+const meta = () => S && S.cat ? `<div class="pmeta"><span>${esc(S.cat)}</span><span>${S.val ? num(S.val) : ""}</span></div>` : "";
+function msg(big, sub, cls, numHtml) {
+  return `<div class="msg ${cls || ""}"><div class="big">${esc(big)}</div>${numHtml ? `<div class="num">${numHtml}</div>` : ""}${sub ? `<div class="sub">${esc(sub)}</div>` : ""}</div>`;
+}
+function form(kind, title, label, btn, opts) {
+  opts = opts || {};
+  return `<form class="pcard" data-f="${kind}" autocomplete="off">
+    ${opts.track ? `<div class="ptrack"><div class="fill" id="ptFill"></div></div>` : ""}
+    ${opts.sub ? `<div class="sub">${opts.sub}</div>` : ""}
+    <h2>${esc(title)}</h2>
+    <label for="pf-${kind}" style="font-weight: 700; font-size: 15px;">${esc(label)}</label>
+    <input id="pf-${kind}" type="text" ${opts.numeric ? 'inputmode="numeric"' : ""} ${opts.attrs || ""} value="${esc(opts.value || "")}" placeholder="${esc(opts.placeholder || "")}">
+    ${opts.extra || ""}
     <p class="err"></p>
-    <button type="submit" class="primary big">${btn}</button>
+    <button type="submit" class="send">${esc(btn)}</button>
   </form>`;
-
-function buzzHTML(cls, label, sub) { return `<button type="button" id="buzz" class="buzz b-${cls}" aria-live="polite">${label}${sub ? `<small>${sub}</small>` : ""}</button>`; }
+}
 
 function renderPlayer() {
   if (!P) return;
-  const head = $("#plhead"), body = $("#plbody"), foot = $("#plfoot");
+  const head = $("#phead"), body = $("#pbody"), foot = $("#pfoot");
   const live = S && Date.now() - lastState < 7000;
-  const me = S ? S.players.find(x => x.pid === P.pid) : null;
-  head.innerHTML = P.name && roomParam.length === 4 && !editingName
-    ? `<div style="min-width:0"><div class="nm">${esc(P.name)}</div><div class="conn"><span class="dot ${live ? "on" : ""}"></span>${live ? "متصل بالغرفة " + roomParam : "بانتظار المضيف…"}</div></div><div class="score ${me && me.score < 0 ? "neg" : ""}">${fmt(me ? me.score : 0)}</div>`
-    : `<div class="nm" style="color:var(--gold)">ما وراء السطور</div>`;
+  const me = S ? sp(P.pid) : null, g = meG();
+  const joined = P.name && P.g && roomParam.length === 4 && !editingName;
+  head.innerHTML = joined
+    ? `<div style="min-width: 0;"><div class="nm">${esc(P.name)}</div><div class="conn"><span class="dot ${live ? "on" : ""}"></span>${live ? th("join.connected", { code: roomParam }, g) : th("join.noHost")}</div></div><div class="sc ${me && me.score < 0 ? "neg" : ""}">${fmt(me ? me.score : 0)}</div>`
+    : `<div class="nm" style="color: var(--saffron);">${th("name.title")}</div>`;
 
   let key, html;
-  if (roomParam.length !== 4) { key = "code"; html = formHTML("code", "انضم إلى اللعبة", "رمز الغرفة الظاهر على شاشة المضيف", "ABCD", "التالي", false); }
-  else if (!P.name || editingName) {
+  if (roomParam.length !== 4) {
+    key = "code"; html = form("code", t("join.title"), t("join.codeLabel"), t("join.next"), { attrs: 'maxlength="4" autocapitalize="characters" dir="ltr"', placeholder: "ABCD" });
+  } else if (!joined) {
     key = "name";
-    html = formHTML("name", "ما اسمك؟", "يظهر اسمك على شاشة المضيف", "مثلًا: سارة", "انضم", false) + `<div class="pform" id="claims"></div>`;
-  }
-  else if (!live) { key = "off"; html = buzzHTML("off", "بانتظار المضيف…", "تأكد أن شاشة المضيف مفتوحة"); }
-  else if (S.phase === "over") {
+    const gp = pickG || P.g || null;
+    html = form("name", t("join.nameTitle"), t("join.nameLabel"), t("join.join"), {
+      value: P.name || "", placeholder: t("join.namePlaceholder"), attrs: 'maxlength="24"',
+      extra: `<div style="font-weight: 700; font-size: 15px;">${th("join.genderLabel")}</div>
+        <div class="gpick" role="group" aria-label="${th("join.genderLabel")}">
+          <button type="button" class="btn ${gp === "m" ? "sel" : ""}" data-g="m" aria-pressed="${gp === "m"}">${th("join.male")}</button>
+          <button type="button" class="btn ${gp === "f" ? "sel" : ""}" data-g="f" aria-pressed="${gp === "f"}">${th("join.female")}</button>
+        </div>
+        <div class="claims" id="claims"></div>`
+    });
+  } else if (!live) {
+    key = "off"; html = slab("off", t("join.noHost"), t("join.noHostSub"));
+  } else if (S.phase === "over") {
     const ranked = [...S.players].sort((a, b) => b.score - a.score);
     const rank = ranked.findIndex(x => x.pid === P.pid) + 1;
-    key = "over" + rank; html = `<div class="big-msg">انتهت اللعبة</div><div class="hint">${rank === 1 ? "أنت الفائز!" : "ترتيبك: " + rank}</div>`;
-  }
-  else if (S.final) {
+    key = "over" + rank; html = msg(t("over.title"), rank === 1 ? t("pfinal.won", null, g) : t("pfinal.rank", { n: rank }), rank === 1 ? "ok" : "");
+  } else if (S.final) {
     const F = S.final, myScore = me ? me.score : 0;
     if (F.stage === "wager") {
-      if (F.w.includes(P.pid) || sentFin.wager != null) { key = "fw-done"; html = `<div class="big-msg">تم تسجيل رهانك</div><div class="hint">انتظر عرض الدليل على الشاشة</div>`; }
-      else if (myScore <= 0) { key = "fw-zero"; html = `<div class="big-msg">رهانك صفر</div><div class="hint">رصيدك لا يسمح بالرهان، لكن يمكنك الإجابة</div>`; }
-      else { key = "fw"; html = formHTML("fwager", "الجولة الأخيرة", `رهانك السري (0 إلى ${num(myScore)})`, "0", "أرسل الرهان", true, `الفئة: <b>${esc(S.cat)}</b>`); }
+      if (F.w.includes(P.pid) || sentFin.wager != null) { key = "fw-done"; html = msg(t("pfinal.wagerDone"), t("pfinal.wagerDoneSub", null, g)); }
+      else if (myScore <= 0) { key = "fw-zero"; html = msg(t("pfinal.zero"), t("pfinal.zeroSub")); }
+      else { key = "fw"; html = form("fwager", t("pfinal.title"), t("pfinal.wagerLabel", { max: num(myScore) }), t("wager.phoneSend"), { numeric: true, placeholder: "0", sub: `<span>${esc(S.cat)}</span>` }); }
     } else if (F.stage === "answer") {
-      if (F.a.includes(P.pid) || sentFin.answer != null) { key = "fa-done"; html = `<div class="big-msg">تم إرسال إجابتك</div>`; }
-      else { key = "fa"; html = formHTML("fanswer", "اكتب إجابتك", "بصيغة سؤال", "من هو …؟", "أرسل الإجابة", false); }
-    } else { key = "fr"; html = `<div class="big-msg">انظر إلى الشاشة</div><div class="hint">المضيف يكشف الإجابات</div>`; }
-  }
-  else if (S.phase === "wager") {
-    const who = S.players.find(x => x.pid === S.wagerFor);
-    if (S.wagerFor === P.pid && sentWager == null) { key = "w"; html = formHTML("wager", "رهان!", `رهانك (5 إلى ${num(S.wagerMax)})`, "مثلًا 1000", "أرسل الرهان", true, `الفئة: <b>${esc(S.cat)}</b>`); }
-    else if (S.wagerFor === P.pid) { key = "w-sent"; html = `<div class="big-msg">أرسلت رهانك: ${num(sentWager)}</div><div class="hint">بانتظار تثبيت المضيف</div>`; }
-    else { key = "w-other"; html = buzzHTML("idle", "رهان!", `${esc(who ? who.name : "")} يراهن الآن`); }
-  }
-  else if (S.phase === "clue" && S.res && S.res.pid === P.pid && (S.revealed || !S.res.ok)) {
+      if (F.a.includes(P.pid) || sentFin.answer != null) { key = "fa-done"; html = msg(t("phone.sent"), ""); }
+      else { key = "fa"; html = form("fanswer", t("pfinal.answerTitle", null, g), t("phone.answerLabel"), t("pfinal.answerSend"), {}); }
+    } else { key = "fr"; html = msg(t("pfinal.look", null, g), t("pfinal.lookSub")); }
+  } else if (S.phase === "lobby") {
+    key = "lobby"; html = slab("idle", t("phone.idle", null, g), t("lobby.waiting"));
+  } else if (S.phase === "wager") {
+    if (S.wagerFor === P.pid && sentWager == null) { key = "w"; html = form("wager", t("wager.title"), t("wager.phoneLabel", { max: num(S.wagerMax) }), t("wager.phoneSend"), { numeric: true, sub: `<span>${esc(S.cat)}</span>` }); }
+    else if (S.wagerFor === P.pid) { key = "w-sent"; html = msg(t("wager.phoneSent", { n: num(sentWager) }), t("wager.phoneSentSub")); }
+    else { key = "w-other"; html = meta() + slab("idle", t("wager.title"), t("phone.wagerOther", { name: spName(S.wagerFor) }, spG(S.wagerFor))); }
+  } else if (S.phase === "clue" && S.res && S.res.pid === P.pid && (S.revealed || !S.res.ok)) {
     key = "res" + S.res.ok + S.revealed;
-    html = S.res.ok ? `<div class="big-msg" style="color:var(--good)">✓ إجابتك صحيحة</div><div class="score">+${num(S.res.val)}</div>`
-                    : `<div class="big-msg" style="color:var(--bad)">✗ إجابتك خاطئة</div><div class="score neg">−${num(S.res.val)}</div><div class="hint">${S.revealed ? "انظر إلى الشاشة" : "أُقفل زرك في هذا السؤال"}</div>`;
-  }
-  else if (S.phase === "clue" && (S.wagerFor === P.pid || S.winner === P.pid) && !S.revealed && (S.answering || S.judging)) {
+    html = S.res.ok ? msg(t("phone.right"), "", "ok", "+" + num(S.res.val))
+                    : (S.revealed ? msg(t("phone.wrong"), t("phone.over"), "bad", "−" + num(S.res.val))
+                                  : meta() + slab("locked", t("phone.wrong"), t("phone.locked")));
+  } else if (S.phase === "clue" && (S.wagerFor === P.pid || S.winner === P.pid) && !S.revealed && (S.answering || S.judging)) {
     if (S.answering && sentAns == null) {
       if (lastView !== "ans") ansDeadline = S.ansLeft ? Date.now() + S.ansLeft : 0;
-      key = "ans"; html = formHTML("ans", "دورك! اكتب الإجابة", `بصيغة سؤال${S.ansLeft ? ` · باقي <span id="cdp"></span> ث` : ""}`, "من هو …؟", "أرسل الإجابة", false, `${esc(S.cat)} · ${num(S.val)}`);
-    } else { key = "ans-sent"; html = `<div class="big-msg">تم إرسال إجابتك</div><div class="hint">${S.judging ? "المضيف يراجع إجابتك" : "…"}</div>`; }
+      key = "ans"; html = form("ans", t("phone.yourTurn", null, g), t("phone.answerLabel"), t("phone.send"), {
+        track: !!S.ansLeft, sub: `<span>${esc(S.cat)} · ${num(S.val)}</span><span id="ptSecs"></span>`
+      });
+    } else { key = "ans-sent"; html = msg(t("phone.sent"), S.judging ? t("phone.reviewing") : ""); }
+  } else if (S.phase === "clue" && S.wagerFor) {
+    key = "wc"; html = meta() + slab("idle", t("wager.title"), S.revealed ? t("phone.over") : t("phone.beatenSub", { name: spName(S.wagerFor) }, spG(S.wagerFor)));
+  } else if (S.phase === "clue") {
+    if (S.revealed) { key = "rev"; html = meta() + slab("idle", t("phone.over"), ""); }
+    else if (performance.now() < penaltyUntil) { key = "pen"; html = meta() + slab("early", t("phone.early"), t("phone.earlySub")); }
+    else if (S.locked.includes(P.pid)) { key = "locked"; html = meta() + slab("locked", t("phone.wrong"), t("phone.locked")); }
+    else if (S.winner) { key = "lost" + S.winner; html = meta() + slab("beaten", t("phone.beaten", { name: spName(S.winner) }, spG(S.winner)), t("phone.beatenSub", { name: spName(S.winner) }, spG(S.winner))); }
+    else if (pending) { key = "pending"; html = meta() + slab("pending", "…", ""); }
+    else if (S.armed) { key = "ready" + S.lastWrong; html = meta() + slab("ready", t("phone.buzz", null, g), S.lastWrong ? t("phone.buzzAfterMiss", { name: spName(S.lastWrong) }, spG(S.lastWrong)) : ""); }
+    else { key = "wait"; html = meta() + slab("wait", t("phone.listen", null, g), t("phone.listenSub", null, g)); }
+  } else {
+    key = "idle"; html = slab("idle", t("phone.idle", null, g), t("phone.idleSub"));
   }
-  else if (S.phase === "clue" && S.wagerFor) {
-    const who = S.players.find(x => x.pid === S.wagerFor);
-    key = "wc"; html = buzzHTML("idle", "سؤال رهان", (S.revealed ? "انتهى السؤال" : esc(who ? who.name : "") + " يُجيب"));
-  }
-  else if (S.phase === "clue") {
-    const sub = `${esc(S.cat)} · ${num(S.val)}`;
-    const winner = S.players.find(x => x.pid === S.winner);
-    if (S.revealed) { key = "rev"; html = buzzHTML("idle", "انتهى السؤال", sub); }
-    else if (performance.now() < penaltyUntil) { key = "pen"; html = buzzHTML("pen", "مبكر جدًا!", "انتظر فتح الأزرار"); }
-    else if (S.locked.includes(P.pid)) { key = "locked"; html = buzzHTML("locked", "أُقفل زرك", "أخطأت في هذا السؤال"); }
-    else if (S.winner === P.pid) { key = "win"; html = buzzHTML("win", "دورك! أجب الآن", sub); }
-    else if (S.winner) { key = "lost"; html = buzzHTML("lost", "سبقك " + esc(winner ? winner.name : ""), S.judging ? "يراجع المضيف إجابته" : "يكتب إجابته…"); }
-    else if (pending) { key = "pending"; html = buzzHTML("pending", "…", sub); }
-    else if (S.armed) { key = "ready" + S.lastWrong; html = buzzHTML("ready", "اضغط!", S.lastWrong ? `أخطأ ${esc(S.lastWrong)} · دورك الآن` : sub); }
-    else { key = "wait"; html = buzzHTML("wait", "استمع…", "لا تضغط قبل فتح الأزرار"); }
-  }
-  else { key = "idle"; html = buzzHTML("idle", "انتظر", "المضيف يختار السؤال"); }
 
-  // Don't wipe a form the player is typing in
   const isForm = ["code", "name", "w", "fw", "fa", "ans"].includes(key);
   if (key !== lastView || !isForm) body.innerHTML = html;
   lastView = key;
@@ -932,11 +1546,11 @@ function renderPlayer() {
   const claims = document.getElementById("claims");
   if (claims) {
     const others = S ? S.players.filter(x => x.pid !== P.pid) : [];
-    const h = others.length ? `<p class="hint" style="text-align:center">كنت في اللعبة من قبل؟ عُد إلى مكانك ونقاطك:</p>
-      <div class="btns" style="justify-content:center">${others.map(x => `<button type="button" data-claim="${esc(x.pid)}">أنا ${esc(x.name)} (${fmt(x.score)})</button>`).join("")}</div>` : "";
+    const h = others.length ? `<div style="font-weight: 700; font-size: 15px; line-height: 1.6;">${th("join.rejoin")}</div>
+      <div class="row">${others.map(x => `<button type="button" class="btn sm" data-claim="${esc(x.pid)}">${th("join.rejoinBtn", { name: x.name })} (${fmt(x.score)})</button>`).join("")}</div>` : "";
     if (claims.dataset.h !== h) { claims.innerHTML = h; claims.dataset.h = h; }
   }
-  foot.innerHTML = P.name && roomParam.length === 4 && !editingName ? `<button type="button" class="linkbtn" id="rename">تغيير الاسم</button>` : "";
+  foot.innerHTML = joined ? `<button type="button" class="linkbtn" id="rename">${th("join.rename")}</button>` : "";
 }
 
 // ---------- Boot ----------

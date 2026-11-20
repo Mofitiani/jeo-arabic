@@ -8,4 +8,4 @@ An Arabic trivia board game played in one room. The host screen (a laptop or TV)
 - The first player to buzz types an answer within 20 s. Answers are checked with fuzzy matching (Levenshtein, after normalizing Arabic spelling), and the host can undo or override any mark.
 - Two hidden wager tiles, plus a final round with secret wagers and answers typed on phones.
 
-Everything is in `index.html`, with no build step. Buzzes travel over Supabase Realtime broadcast channels using the project's public key, and no database tables are used.
+Everything is in `index.html`, with no build step. All on-screen text is in the `COPY` table (masculine and feminine forms, picked by each player's chosen gender). Buzzes travel over Supabase Realtime broadcast channels using the project's public key, and no database tables are used.
