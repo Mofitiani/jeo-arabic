@@ -1,4 +1,4 @@
-# ما وراء السطور
+# جية!
 
 An Arabic trivia board game played in one room. The host screen (a laptop or TV) shows the board, and players join from their phones to buzz in and type their answers.
 
