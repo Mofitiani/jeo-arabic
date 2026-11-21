@@ -409,7 +409,7 @@ function startDeck(m, c, owner) {
   saveG(); renderHost(); pub();
 }
 function renderLoading(c) {
-  $("#app").innerHTML = `<div class="tv dots"><div class="pad res"><span class="tag">الجولة ${M().round}</span><h2 class="extrude">${esc(c.name)}</h2><div style="font-weight: 700; font-size: 26px;">عم نحمّل الصور…</div></div></div>`;
+  $("#app").innerHTML = `<div class="tv dots"><div class="pad res"><span class="tag">الجولة ${M().round}</span><h2 class="extrude">${esc(c.name)}</h2><div style="font-weight: 700; font-size: 26px;">عم نحمّل الصور…</div><div class="row"><button type="button" class="btn" data-act="restart">إعادة المبارزة</button></div></div></div>`;
 }
 function curItem() { const m = M(), c = catById(m.cat); return c.items[m.deck[m.pos % m.deck.length]]; }
 function curLevel() { const m = M(); return m.pos >= m.deck.length ? 2 : itemLevel(m.cat, curItem()[0]); }
