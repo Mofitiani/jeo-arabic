@@ -42,6 +42,12 @@ button { cursor: pointer; }
 .pic.flag { border: 4px solid var(--ink); background: var(--paper); box-shadow: 10px 10px 0 var(--ink); }
 .emo { display: block; text-align: center; line-height: 1; }
 .credits { font-size: 12px; color: var(--muted); }
+.pic.photo { object-fit: contain; background: #000; border: 4px solid var(--ink); }
+.frame .pic.photo { width: min(560px, 92%); height: min(52vh, 460px); }
+.turn .picrow .pic.photo { width: 96px; height: 96px; border-width: 2px; }
+.pcredit { position: absolute; bottom: 8px; inset-inline: 12px; text-align: center; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pthumb { display: grid; place-items: center; width: 56px; height: 42px; background: var(--ink); color: var(--saffron); font-weight: 900; font-size: 13px; letter-spacing: .04em; }
+.btn.sel .pthumb { background: var(--saffron); color: var(--ink); }
 
 /* ---------- TV ---------- */
 .tv { min-height: 100vh; display: flex; flex-direction: column; }
@@ -230,9 +236,42 @@ const FLAG_URL = c => "https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/"
 const TWEMOJI_URL = e => "https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/" + Array.from(e).map(ch => ch.codePointAt(0).toString(16)).filter(h => h !== "fe0f").join("-") + ".svg";
 function picHTML(kind, key) {
   if (kind === "flag") return `<img class="pic flag" src="${FLAG_URL(key)}" alt="علم">`;
+  if (kind === "wiki") { const r = WIKI[key]; kind = "url"; key = r && r.url; }
+  if (kind === "url") return key ? `<img class="pic photo" src="${esc(key)}" alt="صورة">` : `<span class="emo" style="font-size: 32px;">…</span>`;
   return `<img class="pic" src="${TWEMOJI_URL(key)}" alt="صورة" data-e="${esc(key)}" onerror="this.outerHTML='<span class=&quot;emo&quot;>'+this.dataset.e+'</span>'">`;
 }
-const catThumb = c => picHTML(c.kind, c.items[0][0]);
+const catThumb = c => c.kind === "wiki" ? `<span class="pthumb" aria-hidden="true">${c.prop === "P154" ? "LOGO" : "صور"}</span>` : picHTML(c.kind, c.items[0][0]);
+
+// ---- Photos from Wikimedia Commons, found through Wikidata (looked up once, then remembered) ----
+const WKEY = "mbz-wiki-v1", WIKI = store.get(WKEY) || {};
+const stripTags = h => String(h || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+async function wikiLookup(name, prop) {
+  const hit = WIKI[name];
+  if (hit && (hit.url || Date.now() - hit.t < 864e5)) return hit;          // failures are retried after a day
+  try {
+    const q = await (await fetch("https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&origin=*&language=en&limit=5&search=" + encodeURIComponent(name))).json();
+    const ids = (q.search || []).map(x => x.id); if (!ids.length) throw 0;
+    const e = await (await fetch("https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&origin=*&props=claims&ids=" + ids.join("|"))).json();
+    let file = null;
+    for (const id of ids) { const cl = e.entities && e.entities[id] && e.entities[id].claims && e.entities[id].claims[prop]; if (cl && cl[0] && cl[0].mainsnak.datavalue) { file = cl[0].mainsnak.datavalue.value; break; } }
+    if (!file) throw 0;
+    let credit = "";
+    try {
+      const m = await (await fetch("https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&prop=imageinfo&iiprop=extmetadata&titles=File:" + encodeURIComponent(file))).json();
+      const pg = Object.values(m.query.pages)[0], md = pg.imageinfo[0].extmetadata;
+      credit = [stripTags(md.Artist && md.Artist.value).slice(0, 60), md.LicenseShortName && md.LicenseShortName.value].filter(Boolean).join(" · ");
+    } catch (err) {}
+    WIKI[name] = { url: "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(file) + "?width=640", credit, t: Date.now() };
+  } catch (err) { WIKI[name] = { url: null, t: Date.now() }; }
+  store.set(WKEY, WIKI);
+  return WIKI[name];
+}
+// Look up every photo in a category, a few at a time; also warms the browser's image cache
+async function prefetchCat(catId) {
+  const c = catById(catId); if (!c || c.kind !== "wiki") return;
+  const list = c.items.map(i => i[0]); let k = 0;
+  await Promise.all(Array.from({ length: 6 }, async () => { while (k < list.length) { const r = await wikiLookup(list[k++], c.prop); if (r.url) new Image().src = r.url; } }));
+}
 
 // Fuzzy matching (same rules as جيو!)
 function norm(s) {
@@ -314,7 +353,7 @@ function hostMsg(ev, p) {
     const [a, b] = G.queue;
     const opp = pid === a ? b : pid === b ? a : null;
     if (opp && G.picks[opp] === cat.id) return;                                    // can't take the opponent's category
-    G.picks[pid] = cat.id; saveG(); renderHost(); return pub();
+    G.picks[pid] = cat.id; saveG(); renderHost(); prefetchCat(cat.id); return pub();
   }
   if (ev === "pred") {
     if (!m || pid === m.a || pid === m.b || m.phase === "matchEnd") return;
@@ -342,20 +381,35 @@ function startMatch() {
   G.match = { a, b, score: { [a]: 0, [b]: 0 }, round: 0, phase: "lobby", preds: {}, log: [] };
   nextRound();
 }
-function nextRound() {
+async function nextRound() {
   const m = M(); m.round++;
   let cat, owner = null;
   if (m.round === 1) { cat = G.picks[m.a]; owner = m.a; }
   else if (m.round === 2) { cat = G.picks[m.b]; owner = m.b; }
   else { const pool = DUEL_CATS.filter(c => c.id !== G.picks[m.a] && c.id !== G.picks[m.b]); cat = pool[Math.floor(Math.random() * pool.length)].id; }
   const c = catById(cat);
+  if (c.kind === "wiki") {
+    m.phase = "loading"; m.cat = cat; renderLoading(c); pub();
+    await Promise.race([prefetchCat(cat), new Promise(r => setTimeout(r, 12000))]);
+    if (c.items.filter(it => WIKI[it[0]] && WIKI[it[0]].url).length < 8) {   // offline or too few photos: swap in a picture category
+      cat = DUEL_CATS.filter(x => x.kind !== "wiki" && x.id !== G.picks[m.a] && x.id !== G.picks[m.b])[0].id;
+      return startDeck(m, catById(cat), owner);
+    }
+  }
+  startDeck(m, c, owner);
+}
+function startDeck(m, c, owner) {
+  const cat = c.id;
   // Progressive difficulty: all easy items first, then medium, then hard; shuffled inside each level
-  const lv = [[], [], []]; c.items.forEach((it, i) => lv[itemLevel(c.id, it[0])].push(i));
+  const lv = [[], [], []]; c.items.forEach((it, i) => { if (c.kind !== "wiki" || (WIKI[it[0]] && WIKI[it[0]].url)) lv[itemLevel(c.id, it[0])].push(i); });
   m.cat = cat; m.owner = owner; m.deck = [...shuffle(lv[0]), ...shuffle(lv[1]), ...shuffle(lv[2])]; m.pos = 0;
   m.turn = owner ? (owner === m.a ? m.b : m.a) : m.a;       // the player facing the other's category starts
   m.clocks = { [m.a]: CLOCK_MS, [m.b]: CLOCK_MS };
   m.log = []; m.running = false; m.reveal = null; m.phase = "count"; m.countUntil = Date.now() + 3000;
   saveG(); renderHost(); pub();
+}
+function renderLoading(c) {
+  $("#app").innerHTML = `<div class="tv dots"><div class="pad res"><span class="tag">الجولة ${M().round}</span><h2 class="extrude">${esc(c.name)}</h2><div style="font-weight: 700; font-size: 26px;">عم نحمّل الصور…</div></div></div>`;
 }
 function curItem() { const m = M(), c = catById(m.cat); return c.items[m.deck[m.pos % m.deck.length]]; }
 function curLevel() { const m = M(); return m.pos >= m.deck.length ? 2 : itemLevel(m.cat, curItem()[0]); }
@@ -419,9 +473,9 @@ function pub() {
     queue: G.queue, phase: m ? m.phase : "lobby"
   };
   if (m) {
-    const it = (m.phase === "duel" || m.phase === "count") ? curItem() : null, c = catById(m.cat);
+    const it = (m.phase === "duel" || m.phase === "count") && m.deck ? curItem() : null, c = catById(m.cat);
     Object.assign(state, { a: m.a, b: m.b, score: m.score, round: m.round, cat: m.cat, owner: m.owner, turn: m.turn, running: m.running,
-      clocks: m.clocks, kind: c.kind, pic: it ? it[0] : null, prompt: c.prompt, level: it ? curLevel() : 0, lastOut: m.lastOut || null,
+      clocks: m.clocks, kind: c.kind === "wiki" ? "url" : c.kind, pic: it ? (c.kind === "wiki" ? (WIKI[it[0]] || {}).url : it[0]) : null, prompt: c.prompt, level: it ? curLevel() : 0, lastOut: m.lastOut || null,
       winner: m.winner || null, roundWinner: m.roundWinner || null, preds: m.preds, last: m.log[m.log.length - 1] || null, streak: m.winner ? G.streak[m.winner] : 0 });
   }
   send("state", state);
@@ -431,6 +485,7 @@ function pub() {
 function renderHost() {
   const m = M();
   if (!m || m.phase === "lobby") return renderLobby();
+  if (m.phase === "loading") return renderLoading(catById(m.cat));
   if (m.phase === "count" || m.phase === "duel") return renderDuel();
   renderResult();
 }
@@ -487,6 +542,7 @@ function renderDuel() {
           <span class="lvl">${["سهل", "متوسط", "صعب"][lvl]} ${[0, 1, 2].map(i => `<i class="${i <= lvl ? "on" : ""}"></i>`).join("")}</span>
           ${m.phase === "duel" ? picHTML(c.kind, it[0]) : ""}
           <span class="q">${esc(c.prompt)}</span>
+          ${c.kind === "wiki" && WIKI[it[0]] && WIKI[it[0]].credit ? `<span class="pcredit">الصورة: ${esc(WIKI[it[0]].credit)} · ويكيميديا كومنز</span>` : ""}
           ${m.reveal ? `<span class="reveal">كان: ${esc(m.reveal)}</span>` : ""}
           ${m.phase === "duel" && !m.running ? `<div class="paused">واقف</div>` : ""}
         </div>
@@ -667,6 +723,8 @@ function render() {
       <p class="err"></p><button class="send" type="submit">دخّلني!</button></form>`;
   } else if (!live) {
     key = "off"; html = `<div class="msg"><div class="big">بانتظار الشاشة…</div><div class="sub">تأكد إن شاشة المبارزة مفتوحة</div></div>`;
+  } else if (S.phase === "loading") {
+    key = "loading"; html = `<div class="msg"><div class="big">${esc(catById(S.cat).name)}</div><div class="sub">عم نحمّل الصور…</div></div>`;
   } else if (S.phase === "duel" || S.phase === "count") {
     if (inMatch()) {
       if (S.phase === "duel" && S.turn === P.pid && S.running) {

@@ -103,7 +103,7 @@ const DUEL_CATS = [
 // The flags list has Canada twice; keep each picture once
 DUEL_CATS.forEach(c => { const seen = new Set(); c.items = c.items.filter(it => !seen.has(it[0]) && seen.add(it[0])); });
 
-const DUEL_CREDITS = "الأعلام: flag-icons (MIT) · الصور: Twemoji (CC BY 4.0)";
+const DUEL_CREDITS = "الأعلام: flag-icons (MIT) · الصور: Twemoji (CC BY 4.0) وويكيميديا كومنز (المصوّر والرخصة تحت كل صورة)";
 
 // Difficulty: items not listed are easy. A round deals easy → medium → hard (shuffled within each level).
 const DUEL_LEVELS = {
@@ -124,3 +124,68 @@ function itemLevel(catId, key) {
   if (L.mid.split(" ").includes(key)) return 1;
   return 0;
 }
+
+// Photo categories from Wikimedia Commons, looked up on Wikidata by English name at game time.
+// kind "wiki": the item's picture is the name to look up; prop P18 = photo of the person, P154 = logo.
+// Only freely licensed files live on Commons; the photographer and licence are shown under each picture.
+DUEL_CATS.push(
+  { id: "footballers", name: "نجوم كرة القدم", kind: "wiki", prop: "P18", prompt: "مين هاللاعب؟", items: [
+    ["Mohamed Salah", "محمد صلاح", ["صلاح", "salah"]], ["Lionel Messi", "ميسي", ["ليونيل ميسي", "messi"]], ["Cristiano Ronaldo", "رونالدو", ["كريستيانو", "ronaldo"]],
+    ["Neymar", "نيمار", ["neymar"]], ["Kylian Mbappé", "مبابي", ["كيليان مبابي", "mbappe"]], ["Zinedine Zidane", "زيدان", ["زين الدين زيدان", "zidane"]],
+    ["Riyad Mahrez", "رياض محرز", ["محرز", "mahrez"]], ["Achraf Hakimi", "أشرف حكيمي", ["حكيمي", "hakimi"]], ["Karim Benzema", "بنزيما", ["كريم بنزيما", "benzema"]],
+    ["Erling Haaland", "هالاند", ["هولاند", "haaland"]], ["Luka Modrić", "مودريتش", ["لوكا مودريتش", "modric"]], ["Robert Lewandowski", "ليفاندوفسكي", ["lewandowski"]],
+    ["Kevin De Bruyne", "دي بروين", ["كيفين دي بروين", "de bruyne"]], ["Ronaldinho", "رونالدينيو", ["ronaldinho"]], ["Pelé", "بيليه", ["pele"]],
+    ["Diego Maradona", "مارادونا", ["maradona"]], ["David Beckham", "بيكهام", ["ديفيد بيكهام", "beckham"]], ["Zlatan Ibrahimović", "زلاتان", ["إبراهيموفيتش", "zlatan"]],
+    ["Thierry Henry", "تييري هنري", ["هنري", "henry"]], ["Andrés Iniesta", "إنييستا", ["انيستا", "iniesta"]], ["Sadio Mané", "ساديو ماني", ["ماني", "mane"]],
+    ["Yassine Bounou", "ياسين بونو", ["بونو", "bounou"]], ["Hakim Ziyech", "حكيم زياش", ["زياش", "ziyech"]], ["Mesut Özil", "مسعود أوزيل", ["أوزيل", "ozil"]],
+    ["Kaká", "كاكا", ["kaka"]], ["Virgil van Dijk", "فان دايك", ["van dijk"]]
+  ]},
+  { id: "arabstars", name: "مشاهير عرب", kind: "wiki", prop: "P18", prompt: "مين هاد؟", items: [
+    ["Fairuz", "فيروز", ["fairuz"]], ["Umm Kulthum", "أم كلثوم", ["ام كلثوم"]], ["Abdel Halim Hafez", "عبد الحليم حافظ", ["عبد الحليم", "العندليب"]],
+    ["Amr Diab", "عمرو دياب", ["عمرو دياب", "amr diab"]], ["Nancy Ajram", "نانسي عجرم", ["نانسي"]], ["Haifa Wehbe", "هيفاء وهبي", ["هيفا وهبي", "هيفا"]],
+    ["Elissa (singer)", "إليسا", ["اليسا"]], ["Kadim Al Sahir", "كاظم الساهر", ["كاظم"]], ["Mohammed Assaf", "محمد عساف", ["عساف"]],
+    ["Adel Emam", "عادل إمام", ["عادل امام"]], ["Omar Sharif", "عمر الشريف", ["عمر شريف"]], ["Mahmoud Darwish", "محمود درويش", ["درويش"]],
+    ["Naguib Mahfouz", "نجيب محفوظ", ["محفوظ"]], ["Zaha Hadid", "زها حديد", ["زها"]], ["Rami Malek", "رامي مالك", ["rami malek"]],
+    ["Bella Hadid", "بيلا حديد", ["bella hadid"]], ["Gigi Hadid", "جيجي حديد", ["gigi hadid"]], ["Ramy Youssef", "رامي يوسف", ["ramy youssef"]],
+    ["Ahmed Zewail", "أحمد زويل", ["زويل"]], ["Edward Said", "إدوارد سعيد", ["ادوارد سعيد"]], ["Wael Kfoury", "وائل كفوري", ["وائل"]],
+    ["Ragheb Alama", "راغب علامة", ["راغب"]], ["Majida El Roumi", "ماجدة الرومي", ["ماجدة"]], ["Assala Nasri", "أصالة نصري", ["أصالة", "اصالة"]],
+    ["Mohamed Mounir", "محمد منير", ["منير"]], ["Duraid Lahham", "دريد لحام", ["دريد", "غوار"]]
+  ]},
+  { id: "worldstars", name: "مشاهير عالميين", kind: "wiki", prop: "P18", prompt: "مين هاد؟", items: [
+    ["Michael Jackson", "مايكل جاكسون", ["michael jackson"]], ["Beyoncé", "بيونسيه", ["beyonce"]], ["Taylor Swift", "تايلور سويفت", ["taylor swift"]],
+    ["Rihanna", "ريهانا", ["rihanna"]], ["Ed Sheeran", "إد شيران", ["ed sheeran"]], ["Adele", "أديل", ["adele"]],
+    ["Shakira", "شاكيرا", ["shakira"]], ["Leonardo DiCaprio", "ليوناردو دي كابريو", ["دي كابريو", "dicaprio"]], ["Tom Cruise", "توم كروز", ["tom cruise"]],
+    ["Will Smith", "ويل سميث", ["will smith"]], ["Dwayne Johnson", "ذا روك", ["دواين جونسون", "the rock"]], ["Brad Pitt", "براد بيت", ["brad pitt"]],
+    ["Jackie Chan", "جاكي شان", ["jackie chan"]], ["Keanu Reeves", "كيانو ريفز", ["keanu reeves"]], ["Oprah Winfrey", "أوبرا وينفري", ["اوبرا", "oprah"]],
+    ["Albert Einstein", "أينشتاين", ["اينشتاين", "einstein"]], ["Elon Musk", "إيلون ماسك", ["ماسك", "musk"]], ["Bill Gates", "بيل غيتس", ["بيل جيتس", "bill gates"]],
+    ["Steve Jobs", "ستيف جوبز", ["steve jobs"]], ["Nelson Mandela", "نيلسون مانديلا", ["مانديلا", "mandela"]], ["Muhammad Ali", "محمد علي", ["محمد علي كلاي", "كلاي"]],
+    ["Usain Bolt", "يوسين بولت", ["بولت", "bolt"]], ["Serena Williams", "سيرينا ويليامز", ["سيرينا", "serena"]], ["Charlie Chaplin", "شارلي شابلن", ["شابلن", "chaplin"]],
+    ["Mr. Bean", "مستر بين", ["روان أتكينسون", "rowan atkinson", "mr bean"]], ["Morgan Freeman", "مورغان فريمان", ["morgan freeman"]]
+  ]},
+  { id: "logos", name: "شعارات", kind: "wiki", prop: "P154", prompt: "شعار مين؟", items: [
+    ["Apple Inc.", "آبل", ["ابل", "apple"]], ["Nike, Inc.", "نايكي", ["nike"]], ["Adidas", "أديداس", ["اديداس", "adidas"]],
+    ["Coca-Cola", "كوكا كولا", ["كولا", "coca cola"]], ["Pepsi", "بيبسي", ["pepsi"]], ["McDonald's", "ماكدونالدز", ["ماك", "mcdonalds"]],
+    ["Starbucks", "ستاربكس", ["starbucks"]], ["YouTube", "يوتيوب", ["youtube"]], ["Instagram", "إنستغرام", ["انستا", "انستغرام", "instagram"]],
+    ["WhatsApp", "واتساب", ["واتس", "whatsapp"]], ["Netflix", "نتفليكس", ["netflix"]], ["Amazon (company)", "أمازون", ["امازون", "amazon"]],
+    ["Samsung", "سامسونج", ["سامسونغ", "samsung"]], ["Toyota", "تويوتا", ["toyota"]], ["Mercedes-Benz", "مرسيدس", ["mercedes"]],
+    ["BMW", "بي إم دبليو", ["بي ام", "bmw"]], ["Volkswagen", "فولكس فاغن", ["فولكس", "volkswagen"]], ["Ferrari", "فيراري", ["ferrari"]],
+    ["Shell plc", "شل", ["shell"]], ["IKEA", "إيكيا", ["ايكيا", "ikea"]], ["Lego", "ليغو", ["ليجو", "lego"]],
+    ["Spotify", "سبوتيفاي", ["spotify"]], ["Microsoft", "مايكروسوفت", ["microsoft"]], ["Puma (brand)", "بوما", ["puma"]],
+    ["KFC", "كنتاكي", ["kfc"]], ["Google", "غوغل", ["جوجل", "google"]], ["Audi", "أودي", ["اودي", "audi"]], ["Olympic Games", "الأولمبياد", ["الالعاب الاولمبية", "اولمبياد", "olympics"]]
+  ]}
+);
+Object.assign(DUEL_LEVELS, {
+  footballers: { mid: "Riyad Mahrez|Achraf Hakimi|Karim Benzema|Erling Haaland|Luka Modrić|Robert Lewandowski|Kevin De Bruyne|David Beckham|Zlatan Ibrahimović|Sadio Mané|Yassine Bounou", hard: "Thierry Henry|Andrés Iniesta|Hakim Ziyech|Mesut Özil|Kaká|Virgil van Dijk|Pelé|Diego Maradona" },
+  arabstars: { mid: "Elissa (singer)|Kadim Al Sahir|Mohammed Assaf|Adel Emam|Omar Sharif|Mahmoud Darwish|Wael Kfoury|Ragheb Alama|Bella Hadid|Gigi Hadid", hard: "Naguib Mahfouz|Zaha Hadid|Rami Malek|Ramy Youssef|Ahmed Zewail|Edward Said|Majida El Roumi|Assala Nasri|Mohamed Mounir|Duraid Lahham" },
+  worldstars: { mid: "Ed Sheeran|Adele|Leonardo DiCaprio|Tom Cruise|Brad Pitt|Keanu Reeves|Oprah Winfrey|Bill Gates|Steve Jobs|Usain Bolt", hard: "Nelson Mandela|Serena Williams|Charlie Chaplin|Morgan Freeman|Dwayne Johnson|Taylor Swift" },
+  logos: { mid: "Samsung|Toyota|Mercedes-Benz|BMW|Volkswagen|Ferrari|IKEA|Lego|Spotify|Puma (brand)", hard: "Shell plc|Audi|Olympic Games|KFC|Microsoft" }
+});
+// Photo categories list names with "|" (names contain spaces); emoji/flag ones with spaces
+const _itemLevel = itemLevel;
+itemLevel = function (catId, key) {
+  const L = DUEL_LEVELS[catId]; if (!L) return 0;
+  const sep = L.hard.includes("|") || L.mid.includes("|") ? "|" : " ";
+  if (L.hard.split(sep).includes(key)) return 2;
+  if (L.mid.split(sep).includes(key)) return 1;
+  return 0;
+};
