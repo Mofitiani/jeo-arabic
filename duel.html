@@ -44,12 +44,14 @@ button { cursor: pointer; }
 .credits { font-size: 12px; color: var(--muted); }
 .pic.photo { object-fit: contain; background: var(--paper); }
 /* The picture box: fills its parent; the picture is scaled to fit inside it */
-.pbox { position: relative; flex: 1; min-height: 0; width: 100%; }
-.pbox > .pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; border: 0; box-shadow: none; }
-.pbox > .pic.photo { background: var(--paper); }
-.pbox > .pic.flag { background: transparent; }
-.pbox > .pic.emoji { inset: 6%; width: 88%; height: 88%; }
-.pbox > .emo { position: absolute; inset: 0; display: grid; place-items: center; font-size: min(38vh, 300px); }
+.pbox { position: relative; flex: 1; min-height: 0; width: 100%; container-type: size; }
+/* the picture sits in the largest square that fits the box */
+.pbox > .sq { position: absolute; inset: 0; margin: auto; width: min(100cqw, 100cqh); height: min(100cqw, 100cqh); }
+.sq > .pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; border: 0; box-shadow: none; }
+.sq > .pic.photo { background: var(--paper); }
+.sq > .pic.flag { background: transparent; }
+.sq > .pic.emoji { inset: 6%; width: 88%; height: 88%; }
+.sq > .emo { position: absolute; inset: 0; display: grid; place-items: center; font-size: min(38vh, 300px); }
 .pcredit { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
 .pthumb { display: grid; place-items: center; width: 56px; height: 42px; background: var(--ink); color: var(--saffron); font-weight: 900; font-size: 13px; letter-spacing: .04em; }
 .btn.sel .pthumb { background: var(--saffron); color: var(--ink); }
@@ -174,8 +176,8 @@ button { cursor: pointer; }
 .turn .top.low .bar i { background: var(--wine); } .turn .top.low .t { color: var(--wine); }
 .turn .body { flex: 1; padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 12px; }
 .turn .picwrap { display: flex; flex-direction: column; gap: 6px; padding: 8px; background: #1B1B1B; color: var(--saffron); font-weight: 700; font-size: 16px; text-align: center; }
-.turn .picwrap .pbox { flex: none; height: 42vh; height: 42svh; }
-.turn .picwrap .pbox > .emo { font-size: 30vh; }
+.turn .picwrap .pbox { flex: none; height: 50vh; height: 50svh; max-height: calc(100vw - 56px); }
+.turn .picwrap .sq > .emo { font-size: 30vh; }
 .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .opts .btn { font-size: 17px; font-weight: 900; padding: 12px 8px; box-shadow: 3px 3px 0 var(--ink); }
 .opts.three { grid-template-columns: 1fr 1fr 1fr; }
@@ -200,6 +202,7 @@ button { cursor: pointer; }
 <script>
 // ======================= shared =======================
 const CLOCK_MS = 30000, PASS_MS = 3000;
+const TIME_NAME = ms => ms === 60000 ? "دقيقة" : "30 ثانية";
 const SB = window.supabase.createClient("https://yewosqrrzxsqwqsicipz.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlld29zcXJyenhzcXdxc2ljaXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExOTc4NDAsImV4cCI6MjEwNjc3Mzg0MH0.P5uF8RCmLht_kQZMp6GNDRmZKAjeFEcYZWkfc-x9iws",
   { auth: { persistSession: false } });
@@ -251,14 +254,16 @@ const catThumb = c => isPhoto(c) ? `<span class="pthumb" aria-hidden="true">${c.
 // "wikipage": the picture at the top of the Wikipedia article (used for cartoon characters).
 const WKEY = "mbz-wiki-v1", WIKI = store.get(WKEY) || {};
 const wk = (c, name) => (c.kind === "item" ? c.prop + ":" : "") + name;
-const wrec = (c, name) => WIKI[wk(c, name)] || {};
+// older saved pictures were 800 px: ask for the sharper size instead
+const sharp = r => r && r.url ? { ...r, url: r.url.replace("width=800", "width=1280").replace("/800px-", "/1280px-") } : (r || {});
+const wrec = (c, name) => sharp(WIKI[wk(c, name)]);
 const photoOK = (c, name) => !isPhoto(c) || !!wrec(c, name).url;
 const itemPic = (c, name) => isPhoto(c) ? picHTML("url", wrec(c, name).url) : picHTML(c.kind, name);
 const stripTags = h => String(h || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
 const getJSON = async u => (await fetch(u)).json();
 const WP = "https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1";
 async function pageImage(title) {
-  const q = await getJSON(WP + "&prop=pageimages&pilicense=any&piprop=thumbnail&pithumbsize=800&titles=" + encodeURIComponent(title));
+  const q = await getJSON(WP + "&prop=pageimages&pilicense=any&piprop=thumbnail&pithumbsize=1280&titles=" + encodeURIComponent(title));
   const pg = Object.values((q.query && q.query.pages) || {})[0], src = pg && pg.thumbnail && pg.thumbnail.source;
   return src ? { url: src, credit: "ويكيبيديا" } : null;
 }
@@ -269,7 +274,7 @@ async function commonsFile(file) {
     const md = Object.values(m.query.pages)[0].imageinfo[0].extmetadata;
     credit = [stripTags(md.Artist && md.Artist.value).slice(0, 60), md.LicenseShortName && md.LicenseShortName.value].filter(Boolean).join(" · ");
   } catch (err) {}
-  return { url: "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(file) + "?width=800", credit: (credit ? credit + " · " : "") + "ويكيميديا كومنز" };
+  return { url: "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(file) + "?width=1280", credit: (credit ? credit + " · " : "") + "ويكيميديا كومنز" };
 }
 async function wikiLookup(c, name) {
   const key = wk(c, name), hit = WIKI[key];
@@ -353,6 +358,7 @@ function initHost() {
   if (!G || !G.room) G = { room: newCode(), players: [], queue: [], picks: {}, surprise: {}, setup: {}, offer: null, match: null, streak: {}, stars: {} };
   if (!G.surprise) G.surprise = {};
   if (!G.setup) G.setup = {};
+  if (G.clockMs !== 60000) G.clockMs = CLOCK_MS;
   if (G.match && G.match.phase === "duel") G.match.running = false;   // a reload pauses the duel
   saveG(); renderHost();
   connect(G.room, "host", { msg: hostMsg, presence: ps => { G.online = Object.keys(ps); if (!M() || M().phase !== "duel") renderHost(); }, status: st => { if (st === "SUBSCRIBED") pub(); } });
@@ -453,7 +459,7 @@ function repid(a, b) {
 function startMatch() {
   const [a, b] = G.queue;
   if (!a || !b || !G.picks[a] || !G.picks[b]) return;
-  G.match = { a, b, score: { [a]: 0, [b]: 0 }, round: 0, phase: "lobby", preds: {}, log: [], diff: G.diff || "e" };
+  G.match = { a, b, score: { [a]: 0, [b]: 0 }, round: 0, phase: "lobby", preds: {}, log: [], diff: G.diff || "e", clockMs: G.clockMs || CLOCK_MS };
   nextRound();
 }
 async function nextRound() {
@@ -481,7 +487,8 @@ function startDeck(m, c, owner) {
   const order = { e: [0, 1, 2], m: [1, 2, 0], h: [2, 1, 0] }[m.diff || "e"];
   m.cat = c.id; m.owner = owner; m.deck = order.flatMap(l => shuffle(lv[l])); m.pos = 0;
   m.turn = owner ? (owner === m.a ? m.b : m.a) : m.a;       // the player facing the other's category starts
-  m.clocks = { [m.a]: CLOCK_MS, [m.b]: CLOCK_MS };
+  m.clockMs = m.clockMs || G.clockMs || CLOCK_MS;
+  m.clocks = { [m.a]: m.clockMs, [m.b]: m.clockMs };
   m.log = []; m.running = false; m.reveal = null; m.phase = "count"; m.countUntil = Date.now() + 3000;
   saveG(); renderHost(); pub();
 }
@@ -554,7 +561,7 @@ function pub() {
   const m = M();
   const state = {
     players: G.players.map(p => ({ pid: p.pid, name: p.name, g: p.g, stars: G.stars[p.pid] || 0, pick: G.surprise[p.pid] ? "random" : (G.picks[p.pid] || null) })),
-    queue: G.queue, phase: m ? m.phase : "lobby", setup: G.setup, offer: G.offer || null, theme: G.theme || null, diff: G.diff || null, draw: G.draw || null
+    queue: G.queue, phase: m ? m.phase : "lobby", clockMs: m ? m.clockMs : G.clockMs, setup: G.setup, offer: G.offer || null, theme: G.theme || null, diff: G.diff || null, draw: G.draw || null
   };
   if (m) {
     const it = (m.phase === "duel" || m.phase === "count") && m.deck ? curItem() : null, c = catById(m.cat);
@@ -608,12 +615,12 @@ function renderLobby() {
     ${a && b ? setupBar() : ""}
     <div class="versus">
       ${catCard(a, "اللاعب الأول")}
-      <div class="vs"><b>ضد</b><span style="font-weight: 700; font-size: 15px; line-height: 1.6;">أفضل من 3 جولات<br>والأسئلة بتصعب</span></div>
+      <div class="vs"><b>ضد</b><span style="font-weight: 700; font-size: 15px; line-height: 1.6;">أفضل من 3 جولات<br>والأسئلة بتصعب<br>${TIME_NAME(G.clockMs)} لكل لاعب</span></div>
       ${catCard(b, "اللاعب الثاني")}
     </div>
     <div class="row" style="justify-content: space-between;">
       <div class="queue">${wait.length ? `<span style="font-weight: 900; font-size: 20px;">بالدور:</span>` + wait.map(p => `<span class="chip">${esc(nm(p))}${G.stars[p] ? `<span class="stars">★${G.stars[p]}</span>` : ""}<button type="button" class="x" data-rm="${p}" aria-label="شيل ${esc(nm(p))}">✕</button></span>`).join("") + `<span style="font-weight: 500; font-size: 16px;">اللي بيربح بيضل، والجاي بالدور بيتحدّاه</span>` : ""}</div>
-      <div class="row"><button type="button" class="btn" data-act="reset">ابدأ من جديد</button>${setupDone ? `<button type="button" class="btn" data-act="newtheme">موضوع جديد</button>` : ""}${needRandom ? `<button type="button" class="btn" data-act="randomize">اختيار عشوائي</button>` : ""}<button type="button" class="btn dark big" data-act="start" ${ready ? "" : "disabled"}>يلا نتبارز</button></div>
+      <div class="row"><span style="font-weight: 900;">الوقت:</span>${[30000, 60000].map(ms => `<button type="button" class="btn ${G.clockMs === ms ? "sel" : ""}" data-act="clock" data-ms="${ms}" aria-pressed="${G.clockMs === ms}">${TIME_NAME(ms)}</button>`).join("")}<button type="button" class="btn" data-act="reset">ابدأ من جديد</button>${setupDone ? `<button type="button" class="btn" data-act="newtheme">موضوع جديد</button>` : ""}${needRandom ? `<button type="button" class="btn" data-act="randomize">اختيار عشوائي</button>` : ""}<button type="button" class="btn dark big" data-act="start" ${ready ? "" : "disabled"}>يلا نتبارز</button></div>
     </div>
     <div class="credits" style="color: var(--deep);">${esc(DUEL_CREDITS)}</div>
   </div></div>`;
@@ -640,7 +647,7 @@ function renderDuel() {
     <div class="stage">
       <div class="frame">
         <div class="fhead"><span class="q">${esc(c.prompt)}</span><span class="lvl">${["سهل", "متوسط", "صعب"][lvl]} ${[0, 1, 2].map(i => `<i class="${i <= lvl ? "on" : ""}"></i>`).join("")}</span></div>
-        <div class="pbox">${m.phase === "duel" ? itemPic(c, it[0]) : ""}</div>
+        <div class="pbox"><div class="sq">${m.phase === "duel" ? itemPic(c, it[0]) : ""}</div></div>
         ${credit ? `<div class="ffoot"><span class="pcredit">الصورة: ${esc(credit)}</span></div>` : ""}
         ${m.reveal ? `<span class="reveal">كان: ${esc(m.reveal)}</span>` : ""}
         ${m.phase === "duel" && !m.running ? `<div class="paused">واقف</div>` : ""}
@@ -667,7 +674,7 @@ function paintClocks() {
     const el = document.getElementById("clk-" + pid); if (!el) return;
     const ms = m.clocks[pid];
     el.querySelector("[data-t]").textContent = secs(ms);
-    el.querySelector("[data-b]").style.width = (100 * Math.max(0, ms) / CLOCK_MS) + "%";
+    el.querySelector("[data-b]").style.width = (100 * Math.max(0, ms) / (m.clockMs || CLOCK_MS)) + "%";
     el.classList.toggle("low", ms < 10000);
   });
 }
@@ -708,6 +715,7 @@ function hostClick(e) {
     else { G.players = []; G.queue = []; clearSetup(); G.match = null; G.streak = {}; G.stars = {}; }
     saveG(); renderHost(); return pub();
   }
+  if (a === "clock") { if (!m || m.phase === "lobby") { G.clockMs = b.dataset.ms === "60000" ? 60000 : 30000; saveG(); renderHost(); pub(); } return; }
   if (a === "start") return startMatch();
   if (a === "randomize") return G.offer ? randomizePicks() : randomizeSetup();
   if (a === "newtheme") { if (!m || m.phase === "lobby") { clearSetup(); saveG(); renderHost(); pub(); } return; }
@@ -792,7 +800,7 @@ function setupView() {
       <button type="button" class="btn" id="setupEdit">${gx(g, "غيّر اختيارك", "غيّري اختيارك")}</button></div>`;
   }
   return `<div class="card"><h2>${gx(g, "اختار الموضوع", "اختاري الموضوع")}</h2>
-    <div class="sub">الفئات رح تطلع من الموضوع اللي بتختاروه.</div>
+    <div class="sub">الفئات رح تطلع من الموضوع اللي بتختاروه. الوقت: ${TIME_NAME(S.clockMs)} لكل لاعب.</div>
     <div class="opts">${DUEL_THEMES.map(t => `<button type="button" class="btn ${selTheme === t.id ? "sel" : ""}" data-theme="${t.id}" aria-pressed="${selTheme === t.id}">${esc(t.name)}</button>`).join("")}</div>
     <h3>الصعوبة</h3>
     <div class="sub">من وين نبلّش؟ الأسئلة بتصعب مع الوقت.</div>
@@ -808,7 +816,7 @@ function paintMine() {
     const ms = myClockMs(el.dataset.clock);
     const t = el.querySelector(".t"), b = el.querySelector(".bar i");
     if (t) t.textContent = secs(ms);
-    if (b) b.style.width = (100 * Math.max(0, ms) / CLOCK_MS) + "%";
+    if (b) b.style.width = (100 * Math.max(0, ms) / ((S && S.clockMs) || CLOCK_MS)) + "%";
     el.classList.toggle("low", ms < 10000);
   });
 }
@@ -854,7 +862,7 @@ function render() {
         key = "turn" + S.pic;
         html = `<div class="turn"><div class="top" data-clock="${P.pid}"><span style="font-weight: 700;">دورك!</span><span class="t ltr"></span><div class="bar"><i></i></div></div>
           <div class="body">
-            <div class="picwrap"><div class="pbox">${picHTML(S.kind, S.pic)}</div><span>${esc(S.prompt)}</span></div>
+            <div class="picwrap"><div class="pbox"><div class="sq">${picHTML(S.kind, S.pic)}</div></div><span>${esc(S.prompt)}</span></div>
             <form class="ansrow" data-f="ans" autocomplete="off"><label for="f-ans" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">الجواب</label><input id="f-ans" placeholder="اكتب الجواب"><button type="submit">إبعت</button></form>
             <div class="flash ${S.last && S.last.pid === P.pid ? S.last.v : ""}">${S.last && S.last.pid === P.pid && S.last.v === "no" ? "✗ «" + esc(S.last.text) + "» غلط، جرّب كمان" : ""}</div>
             <button type="button" class="pass" id="passBtn">مرّر · −3 ثواني</button>

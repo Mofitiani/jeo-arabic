@@ -21,7 +21,7 @@ A second game on the same site: a 1v1 picture duel, played in one room with the 
 
 - Before each match, the two players choose a theme (منوّع، من عنّا، رياضة، شاشة ونجوم، عالم وسفر، فن وثقافة، ماركات وأغراض، للصغار) and a starting difficulty on their phones. If they disagree, the TV draws one player's choice at random.
 - The TV then offers 8 random categories from that theme; each player picks one (or a hidden random one). Best of 3 rounds: round 1 in player 1's category, round 2 in player 2's, a tie-breaker in a random one from the theme.
-- Each player has a 30-second clock. A right answer passes the turn; passing costs 3 seconds; whoever runs out loses the round. Pictures start at the chosen difficulty and get harder.
+- Each player has a 30-second or 1-minute clock (set on the TV in the lobby). A right answer passes the turn; passing costs 3 seconds; whoever runs out loses the round. Pictures start at the chosen difficulty and get harder.
 - If a picture is wrong or gives the answer away, the host taps صورة غلط: it's skipped with no penalty and never shown again on that TV.
 - Answer by typing; the host can also mark صح or مرّر.
 - Anyone else waits in line, predicts the winner for stars, and the winner stays to face the next challenger.
