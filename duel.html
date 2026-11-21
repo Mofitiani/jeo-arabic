@@ -236,11 +236,12 @@ const FLAG_URL = c => "https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/"
 const TWEMOJI_URL = e => "https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/" + Array.from(e).map(ch => ch.codePointAt(0).toString(16)).filter(h => h !== "fe0f").join("-") + ".svg";
 function picHTML(kind, key) {
   if (kind === "flag") return `<img class="pic flag" src="${FLAG_URL(key)}" alt="علم">`;
-  if (kind === "wiki") { const r = WIKI[key]; kind = "url"; key = r && r.url; }
+  if (kind === "wiki" || kind === "wikipage") { const r = WIKI[key]; kind = "url"; key = r && r.url; }
   if (kind === "url") return key ? `<img class="pic photo" src="${esc(key)}" alt="صورة">` : `<span class="emo" style="font-size: 32px;">…</span>`;
   return `<img class="pic" src="${TWEMOJI_URL(key)}" alt="صورة" data-e="${esc(key)}" onerror="this.outerHTML='<span class=&quot;emo&quot;>'+this.dataset.e+'</span>'">`;
 }
-const catThumb = c => c.kind === "wiki" ? `<span class="pthumb" aria-hidden="true">${c.prop === "P154" ? "LOGO" : "صور"}</span>` : picHTML(c.kind, c.items[0][0]);
+const isPhoto = c => c && (c.kind === "wiki" || c.kind === "wikipage");
+const catThumb = c => isPhoto(c) ? `<span class="pthumb" aria-hidden="true">${c.prop === "P154" ? "LOGO" : c.kind === "wikipage" ? "كرتون" : "صور"}</span>` : picHTML(c.kind, c.items[0][0]);
 
 // ---- Photos from Wikimedia Commons, found through Wikidata (looked up once, then remembered) ----
 const WKEY = "mbz-wiki-v1", WIKI = store.get(WKEY) || {};
@@ -248,6 +249,14 @@ const stripTags = h => String(h || "").replace(/<[^>]*>/g, "").replace(/\s+/g, "
 async function wikiLookup(name, prop) {
   const hit = WIKI[name];
   if (hit && (hit.url || Date.now() - hit.t < 864e5)) return hit;          // failures are retried after a day
+  if (prop === "page") {                                                     // the picture at the top of a Wikipedia article
+    try {
+      const q = await (await fetch("https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=pageimages&pilicense=any&piprop=thumbnail&pithumbsize=640&titles=" + encodeURIComponent(name))).json();
+      const pg = Object.values((q.query && q.query.pages) || {})[0], src = pg && pg.thumbnail && pg.thumbnail.source;
+      WIKI[name] = src ? { url: src, credit: "ويكيبيديا", t: Date.now() } : { url: null, t: Date.now() };
+    } catch (err) { WIKI[name] = { url: null, t: Date.now() }; }
+    store.set(WKEY, WIKI); return WIKI[name];
+  }
   try {
     const q = await (await fetch("https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&origin=*&language=en&limit=5&search=" + encodeURIComponent(name))).json();
     const ids = (q.search || []).map(x => x.id); if (!ids.length) throw 0;
@@ -268,9 +277,9 @@ async function wikiLookup(name, prop) {
 }
 // Look up every photo in a category, a few at a time; also warms the browser's image cache
 async function prefetchCat(catId) {
-  const c = catById(catId); if (!c || c.kind !== "wiki") return;
+  const c = catById(catId); if (!isPhoto(c)) return;
   const list = c.items.map(i => i[0]); let k = 0;
-  await Promise.all(Array.from({ length: 6 }, async () => { while (k < list.length) { const r = await wikiLookup(list[k++], c.prop); if (r.url) new Image().src = r.url; } }));
+  await Promise.all(Array.from({ length: 6 }, async () => { while (k < list.length) { const r = await wikiLookup(list[k++], c.kind === "wikipage" ? "page" : c.prop); if (r.url) new Image().src = r.url; } }));
 }
 
 // Fuzzy matching (same rules as جيو!)
@@ -388,11 +397,11 @@ async function nextRound() {
   else if (m.round === 2) { cat = G.picks[m.b]; owner = m.b; }
   else { const pool = DUEL_CATS.filter(c => c.id !== G.picks[m.a] && c.id !== G.picks[m.b]); cat = pool[Math.floor(Math.random() * pool.length)].id; }
   const c = catById(cat);
-  if (c.kind === "wiki") {
+  if (isPhoto(c)) {
     m.phase = "loading"; m.cat = cat; renderLoading(c); pub();
     await Promise.race([prefetchCat(cat), new Promise(r => setTimeout(r, 12000))]);
     if (c.items.filter(it => WIKI[it[0]] && WIKI[it[0]].url).length < 8) {   // offline or too few photos: swap in a picture category
-      cat = DUEL_CATS.filter(x => x.kind !== "wiki" && x.id !== G.picks[m.a] && x.id !== G.picks[m.b])[0].id;
+      cat = DUEL_CATS.filter(x => !isPhoto(x) && x.id !== G.picks[m.a] && x.id !== G.picks[m.b])[0].id;
       return startDeck(m, catById(cat), owner);
     }
   }
@@ -401,7 +410,7 @@ async function nextRound() {
 function startDeck(m, c, owner) {
   const cat = c.id;
   // Progressive difficulty: all easy items first, then medium, then hard; shuffled inside each level
-  const lv = [[], [], []]; c.items.forEach((it, i) => { if (c.kind !== "wiki" || (WIKI[it[0]] && WIKI[it[0]].url)) lv[itemLevel(c.id, it[0])].push(i); });
+  const lv = [[], [], []]; c.items.forEach((it, i) => { if (!isPhoto(c) || (WIKI[it[0]] && WIKI[it[0]].url)) lv[itemLevel(c.id, it[0])].push(i); });
   m.cat = cat; m.owner = owner; m.deck = [...shuffle(lv[0]), ...shuffle(lv[1]), ...shuffle(lv[2])]; m.pos = 0;
   m.turn = owner ? (owner === m.a ? m.b : m.a) : m.a;       // the player facing the other's category starts
   m.clocks = { [m.a]: CLOCK_MS, [m.b]: CLOCK_MS };
@@ -475,7 +484,7 @@ function pub() {
   if (m) {
     const it = (m.phase === "duel" || m.phase === "count") && m.deck ? curItem() : null, c = catById(m.cat);
     Object.assign(state, { a: m.a, b: m.b, score: m.score, round: m.round, cat: m.cat, owner: m.owner, turn: m.turn, running: m.running,
-      clocks: m.clocks, kind: c.kind === "wiki" ? "url" : c.kind, pic: it ? (c.kind === "wiki" ? (WIKI[it[0]] || {}).url : it[0]) : null, prompt: c.prompt, level: it ? curLevel() : 0, lastOut: m.lastOut || null,
+      clocks: m.clocks, kind: isPhoto(c) ? "url" : c.kind, pic: it ? (isPhoto(c) ? (WIKI[it[0]] || {}).url : it[0]) : null, prompt: c.prompt, level: it ? curLevel() : 0, lastOut: m.lastOut || null,
       winner: m.winner || null, roundWinner: m.roundWinner || null, preds: m.preds, last: m.log[m.log.length - 1] || null, streak: m.winner ? G.streak[m.winner] : 0 });
   }
   send("state", state);
@@ -542,7 +551,7 @@ function renderDuel() {
           <span class="lvl">${["سهل", "متوسط", "صعب"][lvl]} ${[0, 1, 2].map(i => `<i class="${i <= lvl ? "on" : ""}"></i>`).join("")}</span>
           ${m.phase === "duel" ? picHTML(c.kind, it[0]) : ""}
           <span class="q">${esc(c.prompt)}</span>
-          ${c.kind === "wiki" && WIKI[it[0]] && WIKI[it[0]].credit ? `<span class="pcredit">الصورة: ${esc(WIKI[it[0]].credit)} · ويكيميديا كومنز</span>` : ""}
+          ${isPhoto(c) && WIKI[it[0]] && WIKI[it[0]].credit ? `<span class="pcredit">الصورة: ${esc(WIKI[it[0]].credit)}${c.kind === "wiki" ? " · ويكيميديا كومنز" : ""}</span>` : ""}
           ${m.reveal ? `<span class="reveal">كان: ${esc(m.reveal)}</span>` : ""}
           ${m.phase === "duel" && !m.running ? `<div class="paused">واقف</div>` : ""}
         </div>

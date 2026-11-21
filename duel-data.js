@@ -189,3 +189,50 @@ itemLevel = function (catId, key) {
   if (L.mid.split(sep).includes(key)) return 1;
   return 0;
 };
+
+// Character categories: pictures from each character's English Wikipedia article, fetched by the TV at game time.
+// kind "wikipage": the item's picture is the article title. Nothing is stored in this repo except the titles.
+DUEL_CATS.push(
+  { id: "oldcartoons", name: "كرتون زمان", kind: "wikipage", prompt: "مين هالشخصية؟", items: [
+    ["Captain Tsubasa", "كابتن ماجد", ["ماجد", "تسوباسا"]], ["UFO Robot Grendizer", "غرندايزر", ["جريندايزر", "غريندايزر", "grendizer"]],
+    ["Jimmy Kudo", "كونان", ["المحقق كونان", "شينيتشي", "كودو"]], ["Heidi, Girl of the Alps", "هايدي", ["heidi"]],
+    ["Future Boy Conan", "عدنان ولينا", ["عدنان", "لينا"]], ["Nobody's Boy: Remi", "ريمي", ["remi"]],
+    ["Doraemon (character)", "دورايمون", ["دوريمون", "doraemon"]], ["Maya the Bee", "زينة", ["النحلة زينة", "مايا", "زينة ونحول"]],
+    ["Popeye", "باباي", ["بوباي", "popeye"]], ["Tom Cat", "توم", ["توم وجيري", "tom"]], ["Jerry Mouse", "جيري", ["توم وجيري", "jerry"]],
+    ["The Smurfs", "السنافر", ["سنافر", "سنفور", "smurfs"]], ["Hamtaro", "هامتارو", ["hamtaro"]], ["Mowgli", "ماوكلي", ["موغلي", "mowgli"]],
+    ["Pinocchio", "بينوكيو", ["pinocchio"]], ["Alice (Alice's Adventures in Wonderland)", "أليس", ["اليس", "أليس في بلاد العجائب", "alice"]]
+  ]},
+  { id: "worldcartoons", name: "كرتون عالمي", kind: "wikipage", prompt: "مين هالشخصية؟", items: [
+    ["Mickey Mouse", "ميكي ماوس", ["ميكي", "mickey"]], ["SpongeBob SquarePants (character)", "سبونج بوب", ["سبونج بوب", "spongebob"]],
+    ["Bugs Bunny", "باغز باني", ["بقز باني", "bugs bunny"]], ["Homer Simpson", "هومر سيمبسون", ["هومر", "homer"]], ["Bart Simpson", "بارت سيمبسون", ["بارت", "bart"]],
+    ["Scooby-Doo (character)", "سكوبي دو", ["سكوبي", "scooby"]], ["Shrek (character)", "شريك", ["شريك", "shrek"]], ["Elsa (Frozen)", "إلسا", ["السا", "elsa"]],
+    ["Buzz Lightyear", "باز", ["باز لايتيير", "buzz"]], ["Sheriff Woody", "وودي", ["woody"]], ["Simba", "سيمبا", ["simba"]],
+    ["Winnie-the-Pooh", "ويني الدبدوب", ["ويني", "بو", "pooh"]], ["Garfield (character)", "غارفيلد", ["جارفيلد", "garfield"]],
+    ["Donald Duck", "دونالد داك", ["البطوط", "بطوط", "donald"]], ["Goofy", "غوفي", ["بندق", "goofy"]], ["Olaf (Frozen)", "أولاف", ["اولاف", "olaf"]],
+    ["Stitch (Lilo & Stitch)", "ستيتش", ["stitch"]], ["Minions (Despicable Me)", "المينيونز", ["مينيونز", "minions"]], ["Aladdin (Disney character)", "علاء الدين", ["علاء الدين", "aladdin"]],
+    ["Peppa Pig", "بيبا", ["بيبا بيغ", "peppa"]]
+  ]},
+  { id: "anime", name: "أنمي", kind: "wikipage", prompt: "مين هالشخصية؟", items: [
+    ["Pikachu", "بيكاتشو", ["pikachu"]], ["Goku", "غوكو", ["جوكو", "goku"]], ["Naruto Uzumaki", "ناروتو", ["naruto"]],
+    ["Monkey D. Luffy", "لوفي", ["luffy"]], ["Ash Ketchum", "آش", ["اش", "ساتوشي", "ash"]], ["Sailor Moon (character)", "سيلر مون", ["sailor moon"]],
+    ["Astro Boy (character)", "أسترو بوي", ["استرو", "astro boy"]], ["Hello Kitty", "هالو كيتي", ["hello kitty"]], ["Light Yagami", "لايت ياغامي", ["لايت", "light"]],
+    ["Eren Yeager", "إيرين", ["ايرين", "eren"]], ["Vegeta", "فيجيتا", ["vegeta"]], ["Mewtwo", "ميوتو", ["mewtwo"]],
+    ["Edward Elric", "إدوارد إلريك", ["ادوارد", "edward"]], ["Totoro", "توتورو", ["totoro"]]
+  ]},
+  { id: "heroes", name: "أبطال وشخصيات أفلام", kind: "wikipage", prompt: "مين هالشخصية؟", items: [
+    ["Spider-Man", "سبايدرمان", ["الرجل العنكبوت", "spiderman"]], ["Batman", "باتمان", ["الرجل الوطواط", "batman"]], ["Superman", "سوبرمان", ["superman"]],
+    ["Iron Man", "آيرون مان", ["ايرون مان", "الرجل الحديدي", "iron man"]], ["Captain America", "كابتن أمريكا", ["كابتن امريكا", "captain america"]],
+    ["Hulk", "هالك", ["hulk"]], ["Wonder Woman", "وندر وومان", ["المرأة الخارقة", "wonder woman"]], ["Joker (character)", "الجوكر", ["جوكر", "joker"]],
+    ["Harry Potter (character)", "هاري بوتر", ["هاري", "harry potter"]], ["Hermione Granger", "هيرميون", ["هرمايني", "hermione"]],
+    ["Darth Vader", "دارث فيدر", ["darth vader"]], ["Yoda", "يودا", ["yoda"]], ["Jack Sparrow", "جاك سبارو", ["jack sparrow"]],
+    ["Gandalf", "غاندالف", ["جاندالف", "gandalf"]], ["Thanos", "ثانوس", ["thanos"]], ["Black Panther (character)", "بلاك بانثر", ["النمر الأسود", "black panther"]],
+    ["Wolverine (character)", "وولفرين", ["wolverine"]], ["Mario", "ماريو", ["mario"]], ["Sonic the Hedgehog (character)", "سونيك", ["sonic"]],
+    ["Lara Croft", "لارا كروفت", ["lara croft"]]
+  ]}
+);
+Object.assign(DUEL_LEVELS, {
+  oldcartoons:   { mid: "Heidi, Girl of the Alps|Nobody's Boy: Remi|Doraemon (character)|Maya the Bee|The Smurfs|Popeye", hard: "Future Boy Conan|Hamtaro|Mowgli|Alice (Alice's Adventures in Wonderland)" },
+  worldcartoons: { mid: "Scooby-Doo (character)|Buzz Lightyear|Sheriff Woody|Garfield (character)|Goofy|Olaf (Frozen)|Stitch (Lilo & Stitch)", hard: "Winnie-the-Pooh|Aladdin (Disney character)|Peppa Pig|Minions (Despicable Me)" },
+  anime:         { mid: "Ash Ketchum|Sailor Moon (character)|Hello Kitty|Vegeta|Mewtwo", hard: "Astro Boy (character)|Light Yagami|Eren Yeager|Edward Elric|Totoro" },
+  heroes:        { mid: "Captain America|Wonder Woman|Joker (character)|Hermione Granger|Darth Vader|Yoda|Jack Sparrow|Thanos", hard: "Gandalf|Black Panther (character)|Wolverine (character)|Lara Croft" }
+});

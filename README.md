@@ -25,3 +25,5 @@ A second game on the same site: a 1v1 picture duel, played in one room with the 
 - Anyone else waits in line, predicts the winner for stars, and the winner stays to face the next challenger.
 
 `duel-data.js` holds the categories, items and difficulty levels. Flags come from flag-icons (MIT) and other pictures from Twemoji (CC BY 4.0); credits are shown in the lobby.
+
+Character categories (`kind: "wikipage"`) store only English Wikipedia article titles. The TV fetches each article's lead picture at game time and keeps it in its own browser storage; no images are stored in this repo or on the site.
