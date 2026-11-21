@@ -236,3 +236,90 @@ Object.assign(DUEL_LEVELS, {
   anime:         { mid: "Ash Ketchum|Sailor Moon (character)|Hello Kitty|Vegeta|Mewtwo", hard: "Astro Boy (character)|Light Yagami|Eren Yeager|Edward Elric|Totoro" },
   heroes:        { mid: "Captain America|Wonder Woman|Joker (character)|Hermione Granger|Darth Vader|Yoda|Jack Sparrow|Thanos", hard: "Gandalf|Black Panther (character)|Wolverine (character)|Lara Croft" }
 });
+
+// More photo categories (titles only; pictures load from Wikipedia / Wikimedia Commons at game time)
+DUEL_CATS.push(
+  { id: "maps", name: "حزّر الدولة من الخريطة", kind: "wiki", prop: "P242", prompt: "شو هالدولة؟", items: [
+    ["Italy", "إيطاليا", ["ايطاليا", "italy"]], ["Chile", "تشيلي", ["chile"]], ["Japan", "اليابان", ["japan"]], ["Egypt", "مصر", ["egypt"]],
+    ["Saudi Arabia", "السعودية", ["saudi"]], ["Brazil", "البرازيل", ["brazil"]], ["India", "الهند", ["india"]], ["Australia", "أستراليا", ["استراليا", "australia"]],
+    ["Canada", "كندا", ["canada"]], ["Mexico", "المكسيك", ["mexico"]], ["France", "فرنسا", ["france"]], ["Spain", "إسبانيا", ["اسبانيا", "spain"]],
+    ["Turkey", "تركيا", ["turkey"]], ["United Kingdom", "بريطانيا", ["المملكة المتحدة", "uk"]], ["Norway", "النرويج", ["norway"]], ["Morocco", "المغرب", ["morocco"]],
+    ["Libya", "ليبيا", ["libya"]], ["Somalia", "الصومال", ["somalia"]], ["Madagascar", "مدغشقر", ["madagascar"]], ["Iceland", "آيسلندا", ["ايسلندا", "iceland"]],
+    ["New Zealand", "نيوزيلندا", ["new zealand"]], ["Indonesia", "إندونيسيا", ["اندونيسيا", "indonesia"]], ["Argentina", "الأرجنتين", ["ارجنتين", "argentina"]], ["South Africa", "جنوب أفريقيا", ["جنوب افريقيا", "south africa"]],
+    ["Greece", "اليونان", ["greece"]], ["Sudan", "السودان", ["sudan"]], ["Iraq", "العراق", ["iraq"]], ["Yemen", "اليمن", ["yemen"]],
+    ["Oman", "عُمان", ["عمان", "oman"]], ["Mongolia", "منغوليا", ["mongolia"]]
+  ]},
+  { id: "landmarks", name: "معالم العالم", kind: "wikipage", prompt: "شو هالمَعلم؟", items: [
+    ["Eiffel Tower", "برج إيفل", ["ايفل", "برج ايفل"]], ["Burj Khalifa", "برج خليفة", ["خليفة"]], ["Taj Mahal", "تاج محل", ["taj mahal"]], ["Colosseum", "الكولوسيوم", ["كولوسيوم", "المدرج الروماني"]],
+    ["Petra", "البتراء", ["بترا", "petra"]], ["Great Pyramid of Giza", "الأهرامات", ["الاهرامات", "الهرم", "اهرامات الجيزة"]], ["Dome of the Rock", "قبة الصخرة", ["قبة الصخرة المشرفة"]], ["Statue of Liberty", "تمثال الحرية", ["الحرية"]],
+    ["Big Ben", "بيغ بن", ["بيج بن", "big ben"]], ["Great Wall of China", "سور الصين العظيم", ["سور الصين"]], ["Sydney Opera House", "دار أوبرا سيدني", ["اوبرا سيدني"]], ["Christ the Redeemer (statue)", "تمثال المسيح الفادي", ["المسيح الفادي", "ريو"]],
+    ["Machu Picchu", "ماتشو بيتشو", ["machu picchu"]], ["Leaning Tower of Pisa", "برج بيزا المائل", ["برج بيزا", "بيزا"]], ["Hagia Sophia", "آيا صوفيا", ["ايا صوفيا"]], ["Alhambra", "قصر الحمراء", ["الحمراء", "alhambra"]],
+    ["Sagrada Família", "ساغرادا فاميليا", ["ساجرادا فاميليا", "sagrada familia"]], ["Stonehenge", "ستونهنج", ["stonehenge"]], ["Mount Rushmore", "جبل راشمور", ["راشمور"]], ["Golden Gate Bridge", "جسر البوابة الذهبية", ["جولدن جيت", "golden gate"]],
+    ["Tower Bridge", "جسر البرج", ["تاور بريدج", "tower bridge"]], ["Neuschwanstein Castle", "قلعة نويشفانشتاين", ["نويشفانشتاين"]], ["Angkor Wat", "أنغكور وات", ["انغكور وات", "angkor"]], ["Chichen Itza", "تشيتشن إيتزا", ["تشيتشن ايتزا"]],
+    ["Moai", "تماثيل جزيرة الفصح", ["جزيرة الفصح", "موآي", "moai"]], ["Saint Basil's Cathedral", "كاتدرائية القديس باسيل", ["القديس باسيل"]], ["Great Sphinx of Giza", "أبو الهول", ["ابو الهول", "sphinx"]], ["Al-Aqsa Mosque", "المسجد الأقصى", ["الاقصى", "المسجد الاقصى"]],
+    ["Atomium", "أتوميوم", ["اتوميوم", "atomium"]], ["Petronas Towers", "برجا بتروناس", ["بتروناس", "petronas"]]
+  ]},
+  { id: "palcities", name: "مدن فلسطين", kind: "wikipage", prompt: "شو هالمدينة؟", items: [
+    ["Jerusalem", "القدس", ["قدس"]], ["Nablus", "نابلس", []], ["Hebron", "الخليل", ["خليل"]], ["Bethlehem", "بيت لحم", []],
+    ["Ramallah", "رام الله", ["رام الله"]], ["Jenin", "جنين", []], ["Jericho", "أريحا", ["اريحا"]], ["Gaza City", "غزة", ["غزه"]],
+    ["Haifa", "حيفا", []], ["Jaffa", "يافا", []], ["Acre, Israel", "عكا", []], ["Nazareth", "الناصرة", ["ناصرة"]],
+    ["Tulkarm", "طولكرم", []], ["Qalqilya", "قلقيلية", []], ["Safed", "صفد", []], ["Tiberias", "طبريا", []],
+    ["Lod", "اللد", ["لد"]], ["Ramla", "الرملة", ["رملة"]], ["Beersheba", "بئر السبع", ["بير السبع"]], ["Khan Yunis", "خان يونس", []]
+  ]},
+  { id: "ourdishes", name: "أكلات من عنّا", kind: "wikipage", prompt: "شو هالأكلة؟", items: [
+    ["Maqluba", "مقلوبة", []], ["Musakhan", "مسخن", []], ["Knafeh", "كنافة", ["كنافه"]], ["Mansaf", "منسف", []],
+    ["Falafel", "فلافل", ["طعمية"]], ["Hummus", "حمص", ["حمص بطحينة"]], ["Shakshouka", "شكشوكة", []], ["Kibbeh", "كبة", ["كبه"]],
+    ["Mujaddara", "مجدرة", ["مجدّرة"]], ["Fattoush", "فتوش", []], ["Tabbouleh", "تبولة", []], ["Baklava", "بقلاوة", []],
+    ["Qatayef", "قطايف", []], ["Ful medames", "فول مدمس", ["فول"]], ["Shawarma", "شاورما", []], ["Manakish", "مناقيش", ["منقوشة", "منقوشة زعتر"]],
+    ["Mulukhiyah", "ملوخية", []], ["Kofta", "كفتة", []], ["Fatteh", "فتة", ["فته"]], ["Maamoul", "معمول", []],
+    ["Mahshi", "محشي", ["كوسا محشي", "ورق عنب"]], ["Sfiha", "صفيحة", ["صفيحه", "لحم بعجين"]]
+  ]},
+  { id: "instruments", name: "آلات موسيقية", kind: "wikipage", prompt: "شو هالآلة؟", items: [
+    ["Oud", "عود", []], ["Qanun (instrument)", "قانون", []], ["Goblet drum", "دربكة", ["طبلة", "دربوكة"]], ["Ney", "ناي", []],
+    ["Riq", "رق", ["دف"]], ["Buzuq", "بزق", []], ["Rebab", "ربابة", ["رباب"]], ["Violin", "كمان", ["كمنجة"]],
+    ["Accordion", "أكورديون", ["اكورديون"]], ["Harp", "هارب", ["قيثارة"]], ["Bagpipes", "قربة", ["مزمار القربة", "bagpipes"]], ["Sitar", "سيتار", []],
+    ["Didgeridoo", "ديدجيريدو", []], ["Saxophone", "ساكسفون", ["ساكس"]], ["Trumpet", "ترومبيت", ["بوق"]], ["Xylophone", "إكسيليفون", ["اكسيليفون", "زيلوفون"]],
+    ["Banjo", "بانجو", []], ["Cello", "تشيلو", []], ["Tabla", "طبلة هندية", ["تبلا"]], ["Mijwiz", "مجوز", ["مجوز"]], ["Piano", "بيانو", []], ["Guitar", "غيتار", ["جيتار", "قيتار"]]
+  ]},
+  { id: "oddanimals", name: "حيوانات غريبة", kind: "wikipage", prompt: "شو هالحيوان؟", items: [
+    ["Axolotl", "أكسولوتل", ["اكسولوتل", "سمندل مكسيكي"]], ["Pangolin", "بنغولين", ["آكل النمل الحرشفي", "بانجولين"]], ["Aye-aye", "آي آي", ["اي اي", "aye aye"]], ["Okapi", "أوكابي", ["اوكابي"]],
+    ["Narwhal", "نروال", ["كركدن البحر", "narwhal"]], ["Blobfish", "سمكة البلوب", ["بلوب فيش", "blobfish"]], ["Tarsier", "ترسير", ["تارسير"]], ["Shoebill", "أبو مركوب", ["ابو مركوب"]],
+    ["Fennec fox", "فنك", ["ثعلب الفنك", "فنيك"]], ["Capybara", "كابيبارا", []], ["Platypus", "خلد الماء", ["بلاتيبوس", "منقار البط"]], ["Star-nosed mole", "الخلد نجمي الأنف", ["خلد نجمي"]],
+    ["Tapir", "تابير", ["تابير"]], ["Quokka", "كوكا", ["quokka"]], ["Sloth", "كسلان", ["حيوان الكسلان"]], ["Mantis shrimp", "جمبري السرعوف", ["روبيان السرعوف"]],
+    ["Komodo dragon", "تنين كومودو", ["كومودو"]], ["Saiga antelope", "ظبي السايغا", ["سايغا"]], ["Proboscis monkey", "القرد الخرطومي", ["قرد خرطومي", "قرد الانف"]], ["Red panda", "الباندا الحمراء", ["باندا حمراء"]],
+    ["Chameleon", "حرباء", ["حربا"]], ["Pufferfish", "سمكة منتفخة", ["سمكة البالون", "سمكة النفاخ"]]
+  ]},
+  { id: "cars", name: "سيارات من الشارع", kind: "wikipage", prompt: "شو هالسيارة؟", items: [
+    ["Volkswagen Beetle", "فولكس فاغن بيتل", ["خنفسة", "فولكس", "بيتل"]], ["Mini", "ميني", ["ميني كوبر"]], ["Ford Mustang", "موستانغ", ["موستنج", "mustang"]], ["Toyota Land Cruiser", "لاند كروزر", ["لاندكروزر", "جكسار"]],
+    ["Humvee", "همر", ["هامر", "hummer"]], ["Mercedes-Benz G-Class", "جي كلاس", ["مرسيدس جي", "جي كلاس"]], ["Lamborghini Countach", "لامبورغيني", ["لامبورجيني", "كونتاش"]], ["DeLorean DMC-12", "ديلوريان", ["delorean"]],
+    ["Fiat 500", "فيات 500", ["فيات"]], ["Tesla Model S", "تيسلا", ["تسلا", "tesla"]], ["Range Rover", "رينج روفر", ["رنج"]], ["Nissan Patrol", "باترول", ["نيسان باترول"]],
+    ["Toyota Hilux", "هايلكس", ["هيلوكس", "بكب تويوتا"]], ["Mercedes-Benz W123", "مرسيدس", ["مرسيدس 230", "مرسيدس تكسي"]], ["Peugeot 404", "بيجو 404", ["بيجو"]], ["Volkswagen Type 2", "فولكس باص", ["فان فولكس", "باص فولكس"]],
+    ["Toyota Corolla", "كورولا", ["تويوتا كورولا"]]
+  ]},
+  { id: "paintings", name: "لوحات مشهورة", kind: "wikipage", prompt: "شو اسم اللوحة أو مين رسمها؟", items: [
+    ["Mona Lisa", "الموناليزا", ["موناليزا", "دافنشي", "ليوناردو"]], ["The Starry Night", "ليلة النجوم", ["الليلة المرصعة بالنجوم", "فان غوخ", "فان جوخ"]], ["The Scream", "الصرخة", ["مونك"]],
+    ["Girl with a Pearl Earring", "الفتاة ذات القرط اللؤلؤي", ["الفتاة ذات القرط", "فيرمير"]], ["The Last Supper (Leonardo)", "العشاء الأخير", ["العشاء الاخير", "دافنشي"]], ["The Birth of Venus", "مولد فينوس", ["ولادة فينوس", "بوتيتشيلي"]],
+    ["Guernica (Picasso)", "غيرنيكا", ["جيرنيكا", "بيكاسو"]], ["The Persistence of Memory", "إصرار الذاكرة", ["الساعات الذائبة", "دالي"]], ["The Kiss (Klimt)", "القبلة", ["كليمت"]],
+    ["American Gothic", "القوطية الأمريكية", ["القوطية الامريكية", "غرانت وود"]], ["The Great Wave off Kanagawa", "الموجة العظيمة", ["موجة كاناغاوا", "هوكوساي"]], ["The Creation of Adam", "خلق آدم", ["خلق ادم", "مايكل أنجلو", "مايكل انجلو"]],
+    ["Las Meninas", "وصيفات الشرف", ["لاس مينيناس", "فيلاسكيز"]], ["The Night Watch", "دورية الليل", ["حراسة الليل", "رامبرانت"]], ["Sunflowers (Van Gogh series)", "عباد الشمس", ["دوار الشمس", "فان غوخ", "فان جوخ"]],
+    ["Impression, Sunrise", "انطباع شروق الشمس", ["انطباع", "مونيه", "مونه"]]
+  ]},
+  { id: "dress", name: "أزياء تقليدية", kind: "wikipage", prompt: "شو هاللبس؟", items: [
+    ["Keffiyeh", "كوفية", ["حطة", "شماغ", "حطة وعقال"]], ["Thawb", "ثوب", ["دشداشة", "ثوب رجالي"]], ["Kimono", "كيمونو", []], ["Sari", "ساري", []],
+    ["Kilt", "كيلت", ["تنورة اسكتلندية"]], ["Dirndl", "دريندل", []], ["Hanbok", "هانبوك", []], ["Sombrero", "سومبريرو", []],
+    ["Fez", "طربوش", ["طربوش"]], ["Turban", "عمامة", ["عمة"]], ["Abaya", "عباءة", ["عباية"]], ["Poncho", "بونشو", []],
+    ["Lederhosen", "ليدرهوزن", []], ["Qipao", "تشيباو", ["شيونغسام"]], ["Palestinian costumes", "ثوب فلسطيني مطرز", ["ثوب مطرز", "تطريز", "ثوب فلاحي"]], ["Kaftan", "قفطان", []],
+    ["Burnous", "برنس", ["برنوس"]]
+  ]}
+);
+Object.assign(DUEL_LEVELS, {
+  maps:        { mid: "Mexico|Spain|Turkey|United Kingdom|Norway|Morocco|Libya|Somalia|New Zealand|Greece|Argentina", hard: "Madagascar|Iceland|Indonesia|South Africa|Sudan|Iraq|Yemen|Oman|Mongolia|Chile" },
+  landmarks:   { mid: "Sydney Opera House|Christ the Redeemer (statue)|Machu Picchu|Hagia Sophia|Alhambra|Golden Gate Bridge|Tower Bridge|Petronas Towers|Moai|Great Sphinx of Giza", hard: "Sagrada Família|Stonehenge|Mount Rushmore|Neuschwanstein Castle|Angkor Wat|Chichen Itza|Saint Basil's Cathedral|Atomium" },
+  palcities:   { mid: "Hebron|Ramallah|Jenin|Jericho|Acre, Israel|Nazareth", hard: "Tulkarm|Qalqilya|Safed|Tiberias|Lod|Ramla|Beersheba|Khan Yunis" },
+  ourdishes:   { mid: "Shakshouka|Kibbeh|Mujaddara|Fattoush|Qatayef|Ful medames|Manakish|Mulukhiyah|Kofta", hard: "Fatteh|Maamoul|Mahshi|Sfiha|Musakhan" },
+  instruments: { mid: "Qanun (instrument)|Ney|Riq|Accordion|Harp|Cello|Xylophone", hard: "Buzuq|Rebab|Bagpipes|Sitar|Didgeridoo|Banjo|Tabla|Mijwiz" },
+  oddanimals:  { mid: "Axolotl|Narwhal|Fennec fox|Pangolin|Okapi|Tapir|Quokka|Blobfish", hard: "Aye-aye|Tarsier|Shoebill|Star-nosed mole|Mantis shrimp|Saiga antelope|Proboscis monkey" },
+  cars:        { mid: "Mercedes-Benz G-Class|Lamborghini Countach|Range Rover|Nissan Patrol|Toyota Hilux|Fiat 500|Toyota Corolla", hard: "DeLorean DMC-12|Mercedes-Benz W123|Peugeot 404|Volkswagen Type 2" },
+  paintings:   { mid: "Girl with a Pearl Earring|The Last Supper (Leonardo)|The Birth of Venus|Guernica (Picasso)|The Persistence of Memory|The Creation of Adam", hard: "The Kiss (Klimt)|American Gothic|The Great Wave off Kanagawa|Las Meninas|The Night Watch|Impression, Sunrise|Sunflowers (Van Gogh series)" },
+  dress:       { mid: "Kilt|Sari|Sombrero|Fez|Turban|Abaya|Poncho|Kaftan", hard: "Dirndl|Hanbok|Lederhosen|Qipao|Burnous|Palestinian costumes" }
+});
