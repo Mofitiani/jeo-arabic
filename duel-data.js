@@ -213,7 +213,7 @@ DUEL_CATS.push(
     ["Peppa Pig", "بيبا", ["بيبا بيغ", "peppa"]]
   ]},
   { id: "anime", name: "أنمي", kind: "wikipage", prompt: "مين هالشخصية؟", items: [
-    ["Pikachu", "بيكاتشو", ["pikachu"]], ["Goku", "غوكو", ["جوكو", "goku"]], ["Naruto Uzumaki", "ناروتو", ["naruto"]],
+    ["Pikachu", "بيكاتشو", ["pikachu"]], ["Tanjiro Kamado", "تانجيرو", ["tanjiro"]], ["Goku", "غوكو", ["جوكو", "goku"]], ["Naruto Uzumaki", "ناروتو", ["naruto"]],
     ["Monkey D. Luffy", "لوفي", ["luffy"]], ["Ash Ketchum", "آش", ["اش", "ساتوشي", "ash"]], ["Sailor Moon (character)", "سيلر مون", ["sailor moon"]],
     ["Astro Boy (character)", "أسترو بوي", ["استرو", "astro boy"]], ["Hello Kitty", "هالو كيتي", ["hello kitty"]], ["Light Yagami", "لايت ياغامي", ["لايت", "light"]],
     ["Eren Yeager", "إيرين", ["ايرين", "eren"]], ["Vegeta", "فيجيتا", ["vegeta"]], ["Mewtwo", "ميوتو", ["mewtwo"]],
@@ -233,7 +233,7 @@ DUEL_CATS.push(
 Object.assign(DUEL_LEVELS, {
   oldcartoons:   { mid: "Heidi, Girl of the Alps|Nobody's Boy: Remi|Doraemon (character)|Maya the Bee|The Smurfs|Popeye", hard: "Future Boy Conan|Hamtaro|Mowgli|Alice (Alice's Adventures in Wonderland)" },
   worldcartoons: { mid: "Scooby-Doo (character)|Buzz Lightyear|Sheriff Woody|Garfield (character)|Goofy|Olaf (Frozen)|Stitch (Lilo & Stitch)", hard: "Winnie-the-Pooh|Aladdin (Disney character)|Peppa Pig|Minions (Despicable Me)" },
-  anime:         { mid: "Ash Ketchum|Sailor Moon (character)|Hello Kitty|Vegeta|Mewtwo", hard: "Astro Boy (character)|Light Yagami|Eren Yeager|Edward Elric|Totoro" },
+  anime:         { mid: "Ash Ketchum|Sailor Moon (character)|Hello Kitty|Vegeta|Mewtwo", hard: "Astro Boy (character)|Light Yagami|Eren Yeager|Edward Elric|Totoro|Tanjiro Kamado" },
   heroes:        { mid: "Captain America|Wonder Woman|Joker (character)|Hermione Granger|Darth Vader|Yoda|Jack Sparrow|Thanos", hard: "Gandalf|Black Panther (character)|Wolverine (character)|Lara Croft" }
 });
 
@@ -314,7 +314,7 @@ DUEL_CATS.push(
 );
 Object.assign(DUEL_LEVELS, {
   maps:        { mid: "Mexico|Spain|Turkey|United Kingdom|Norway|Morocco|Libya|Somalia|New Zealand|Greece|Argentina", hard: "Madagascar|Iceland|Indonesia|South Africa|Sudan|Iraq|Yemen|Oman|Mongolia|Chile" },
-  landmarks:   { mid: "Sydney Opera House|Christ the Redeemer (statue)|Machu Picchu|Hagia Sophia|Alhambra|Golden Gate Bridge|Tower Bridge|Petronas Towers|Moai|Great Sphinx of Giza", hard: "Sagrada Família|Stonehenge|Mount Rushmore|Neuschwanstein Castle|Angkor Wat|Chichen Itza|Saint Basil's Cathedral|Atomium" },
+  landmarks:   { mid: "Sydney Opera House|Christ the Redeemer (statue)|Machu Picchu|Hagia Sophia|Alhambra|Golden Gate Bridge|Tower Bridge|Petronas Towers|Moai", hard: "Sagrada Família|Stonehenge|Mount Rushmore|Neuschwanstein Castle|Angkor Wat|Chichen Itza|Saint Basil's Cathedral|Atomium" },
   palcities:   { mid: "Hebron|Ramallah|Jenin|Jericho|Acre, Israel|Nazareth", hard: "Tulkarm|Qalqilya|Safed|Tiberias|Lod|Ramla|Beersheba|Khan Yunis" },
   ourdishes:   { mid: "Shakshouka|Kibbeh|Mujaddara|Fattoush|Qatayef|Ful medames|Manakish|Mulukhiyah|Kofta", hard: "Fatteh|Maamoul|Mahshi|Sfiha|Musakhan" },
   instruments: { mid: "Qanun (instrument)|Ney|Riq|Accordion|Harp|Cello|Xylophone", hard: "Buzuq|Rebab|Bagpipes|Sitar|Didgeridoo|Banjo|Tabla|Mijwiz" },
@@ -323,3 +323,265 @@ Object.assign(DUEL_LEVELS, {
   paintings:   { mid: "Girl with a Pearl Earring|The Last Supper (Leonardo)|The Birth of Venus|Guernica (Picasso)|The Persistence of Memory|The Creation of Adam", hard: "The Kiss (Klimt)|American Gothic|The Great Wave off Kanagawa|Las Meninas|The Night Watch|Impression, Sunrise|Sunflowers (Van Gogh series)" },
   dress:       { mid: "Kilt|Sari|Sombrero|Fez|Turban|Abaya|Poncho|Kaftan", hard: "Dirndl|Hanbok|Lederhosen|Qipao|Burnous|Palestinian costumes" }
 });
+
+// ======================================================================
+// Overhaul: specific categories, themes, and cleaner photos.
+// kind "item": an English Wikipedia title → its Wikidata item → photo (P18), logo (P154) or map (P242) on Commons.
+// kind "wikipage" stays only for fictional characters (lead picture of their Wikipedia article).
+// ======================================================================
+(function () {
+  // Broad people categories are replaced by specific ones below
+  ["arabstars", "worldstars", "footballers", "logos"].forEach(id => { const i = DUEL_CATS.findIndex(c => c.id === id); if (i >= 0) DUEL_CATS.splice(i, 1); });
+  // Non-character photo categories switch to curated Wikidata photos
+  DUEL_CATS.forEach(c => {
+    if (c.kind === "wiki") { c.kind = "item"; }
+    if (c.kind === "wikipage" && !["oldcartoons", "worldcartoons", "anime", "heroes"].includes(c.id)) { c.kind = "item"; c.prop = "P18"; }
+  });
+  const tag = (id, mid, hard) => { DUEL_LEVELS[id] = { mid: mid.join("|"), hard: hard.join("|") }; };
+  const people = (id, name, prompt, rows, mid, hard) => { DUEL_CATS.push({ id, name, kind: "item", prop: "P18", prompt, items: rows }); tag(id, mid, hard); };
+
+  people("egyptcinema", "نجوم السينما المصرية", "مين هالنجم؟", [
+    ["Adel Emam", "عادل إمام", ["عادل امام", "الزعيم"]], ["Omar Sharif", "عمر الشريف", ["عمر شريف"]], ["Ahmed Zaki", "أحمد زكي", ["احمد زكي"]],
+    ["Faten Hamama", "فاتن حمامة", ["فاتن"]], ["Soad Hosny", "سعاد حسني", ["سعاد"]], ["Ahmed Helmy", "أحمد حلمي", ["احمد حلمي"]],
+    ["Mohamed Henedi", "محمد هنيدي", ["هنيدي"]], ["Karim Abdel Aziz", "كريم عبد العزيز", ["كريم"]], ["Mona Zaki", "منى زكي", ["منى"]],
+    ["Yousra", "يسرا", []], ["Nour El-Sherif", "نور الشريف", []], ["Mahmoud Abdel Aziz", "محمود عبد العزيز", []],
+    ["Hend Sabry", "هند صبري", ["هند"]], ["Ahmed Ezz (actor)", "أحمد عز", ["احمد عز"]], ["Mohamed Ramadan (actor)", "محمد رمضان", ["رمضان"]],
+    ["Ismail Yassine", "إسماعيل ياسين", ["اسماعيل ياسين"]], ["Rushdy Abaza", "رشدي أباظة", ["رشدي اباظة"]], ["Yehia El-Fakharany", "يحيى الفخراني", ["الفخراني"]]
+  ], ["Ahmed Helmy", "Mohamed Henedi", "Karim Abdel Aziz", "Mona Zaki", "Yousra", "Hend Sabry", "Ahmed Ezz (actor)", "Mohamed Ramadan (actor)"],
+     ["Nour El-Sherif", "Mahmoud Abdel Aziz", "Ismail Yassine", "Rushdy Abaza", "Yehia El-Fakharany", "Faten Hamama"]);
+
+  people("syriandrama", "نجوم الدراما السورية", "مين هالنجم؟", [
+    ["Duraid Lahham", "دريد لحام", ["دريد", "غوار"]], ["Bassem Yakhour", "باسم ياخور", ["ياخور"]], ["Taim Hasan", "تيم حسن", ["تيم"]],
+    ["Kosai Khauli", "قصي خولي", ["قصي"]], ["Abed Fahd", "عابد فهد", ["عابد"]], ["Jamal Suliman", "جمال سليمان", ["جمال"]],
+    ["Sulaf Fawakherji", "سلاف فواخرجي", ["سلاف"]], ["Amal Arafa", "أمل عرفة", ["امل عرفة"]], ["Kinda Alloush", "كندة علوش", ["كندة"]],
+    ["Mona Wassef", "منى واصف", ["منى واصف"]], ["Ayman Zeidan", "أيمن زيدان", ["ايمن زيدان"]], ["Bassam Kousa", "بسام كوسا", ["بسام"]],
+    ["Ghassan Massoud", "غسان مسعود", ["غسان"]], ["Nihad Qal'i", "نهاد قلعي", ["حسني البورظان"]], ["Yasser Al-Azma", "ياسر العظمة", ["مرايا"]]
+  ], ["Kosai Khauli", "Abed Fahd", "Jamal Suliman", "Sulaf Fawakherji", "Amal Arafa", "Kinda Alloush"],
+     ["Mona Wassef", "Ayman Zeidan", "Bassam Kousa", "Ghassan Massoud", "Nihad Qal'i", "Yasser Al-Azma"]);
+
+  people("lebsingers", "مطربين لبنانيين", "مين هالمطرب؟", [
+    ["Fairuz", "فيروز", []], ["Wadih El Safi", "وديع الصافي", ["وديع"]], ["Sabah (singer)", "صباح", ["الشحرورة"]],
+    ["Majida El Roumi", "ماجدة الرومي", ["ماجدة"]], ["Nancy Ajram", "نانسي عجرم", ["نانسي"]], ["Haifa Wehbe", "هيفاء وهبي", ["هيفا"]],
+    ["Elissa (singer)", "إليسا", ["اليسا"]], ["Ragheb Alama", "راغب علامة", ["راغب"]], ["Wael Kfoury", "وائل كفوري", ["وائل"]],
+    ["Assi El Hallani", "عاصي الحلاني", ["عاصي"]], ["Melhem Barakat", "ملحم بركات", ["ملحم"]], ["Marwan Khoury", "مروان خوري", ["مروان"]],
+    ["Myriam Fares", "ميريام فارس", ["ميريام"]], ["Najwa Karam", "نجوى كرم", ["نجوى"]], ["Nawal Al Zoghbi", "نوال الزغبي", ["نوال"]],
+    ["Carole Samaha", "كارول سماحة", ["كارول"]], ["Ziad Rahbani", "زياد الرحباني", ["زياد"]], ["Marcel Khalife", "مارسيل خليفة", ["مارسيل"]]
+  ], ["Wadih El Safi", "Sabah (singer)", "Majida El Roumi", "Ragheb Alama", "Wael Kfoury", "Najwa Karam"],
+     ["Assi El Hallani", "Melhem Barakat", "Marwan Khoury", "Nawal Al Zoghbi", "Carole Samaha", "Ziad Rahbani", "Marcel Khalife"]);
+
+  people("gulfstars", "نجوم الخليج", "مين هالنجم؟", [
+    ["Mohammed Abdu", "محمد عبده", ["فنان العرب"]], ["Abdul Majeed Abdullah", "عبد المجيد عبد الله", ["عبدالمجيد"]], ["Rashed Al Majed", "راشد الماجد", ["راشد"]],
+    ["Nabeel Shuail", "نبيل شعيل", ["نبيل"]], ["Hussain Al Jassmi", "حسين الجسمي", ["الجسمي"]], ["Ahlam (singer)", "أحلام", ["احلام"]],
+    ["Balqees Fathi", "بلقيس", ["بلقيس فتحي"]], ["Abdulhussain Abdulredha", "عبد الحسين عبد الرضا", ["عبدالحسين"]], ["Nasser Al-Qasabi", "ناصر القصبي", ["القصبي"]],
+    ["Hayat Al-Fahad", "حياة الفهد", ["حياة"]], ["Souad Abdullah", "سعاد عبد الله", ["سعاد عبدالله"]], ["Talal Maddah", "طلال مداح", ["طلال"]],
+    ["Abdallah Al Rowaished", "عبدالله الرويشد", ["الرويشد"]], ["Aseel Abu Bakr", "أصيل أبو بكر", ["اصيل"]], ["Majid Al Mohandis", "ماجد المهندس", ["المهندس"]]
+  ], ["Nabeel Shuail", "Hussain Al Jassmi", "Ahlam (singer)", "Balqees Fathi", "Majid Al Mohandis"],
+     ["Abdulhussain Abdulredha", "Nasser Al-Qasabi", "Hayat Al-Fahad", "Souad Abdullah", "Talal Maddah", "Abdallah Al Rowaished", "Aseel Abu Bakr"]);
+
+  people("palart", "فن وثقافة فلسطينية", "مين هاد؟", [
+    ["Mohammed Assaf", "محمد عساف", ["عساف"]], ["Mahmoud Darwish", "محمود درويش", ["درويش"]], ["Ghassan Kanafani", "غسان كنفاني", ["كنفاني"]],
+    ["Edward Said", "إدوارد سعيد", ["ادوارد سعيد"]], ["Hiam Abbass", "هيام عباس", ["هيام"]], ["Saleh Bakri", "صالح بكري", ["صالح"]],
+    ["Mohammad Bakri", "محمد بكري", ["بكري"]], ["Elia Suleiman", "إيليا سليمان", ["ايليا"]], ["Hany Abu-Assad", "هاني أبو أسعد", ["ابو اسعد"]],
+    ["Reem Banna", "ريم بنا", ["ريم"]], ["Mona Hatoum", "منى حاطوم", ["حاطوم"]], ["Bella Hadid", "بيلا حديد", ["بيلا"]],
+    ["Gigi Hadid", "جيجي حديد", ["جيجي"]], ["Fadwa Tuqan", "فدوى طوقان", ["فدوى"]], ["Samih al-Qasim", "سميح القاسم", ["سميح"]],
+    ["Ali Suliman", "علي سليمان", []], ["Elyanna", "إليانا", ["اليانا"]], ["Saint Levant", "سانت ليفانت", ["saint levant"]]
+  ], ["Edward Said", "Hiam Abbass", "Elia Suleiman", "Bella Hadid", "Gigi Hadid", "Fadwa Tuqan", "Samih al-Qasim"],
+     ["Saleh Bakri", "Mohammad Bakri", "Hany Abu-Assad", "Reem Banna", "Mona Hatoum", "Ali Suliman", "Elyanna", "Saint Levant"]);
+
+  people("hollywood", "هوليوود", "مين هالنجم؟", [
+    ["Leonardo DiCaprio", "دي كابريو", ["ليوناردو", "dicaprio"]], ["Tom Cruise", "توم كروز", []], ["Brad Pitt", "براد بيت", []], ["Angelina Jolie", "أنجلينا جولي", ["انجلينا"]],
+    ["Johnny Depp", "جوني ديب", []], ["Will Smith", "ويل سميث", []], ["Denzel Washington", "دينزل واشنطن", ["دنزل"]], ["Morgan Freeman", "مورغان فريمان", ["مورجان فريمان"]],
+    ["Meryl Streep", "ميريل ستريب", []], ["Scarlett Johansson", "سكارليت جوهانسون", []], ["Robert Downey Jr.", "روبرت داوني جونيور", ["داوني"]], ["Keanu Reeves", "كيانو ريفز", []],
+    ["Zendaya", "زندايا", []], ["Tom Hanks", "توم هانكس", []], ["Jennifer Lawrence", "جينيفر لورانس", []], ["Margot Robbie", "مارغو روبي", ["مارجو روبي"]],
+    ["Ryan Reynolds", "رايان رينولدز", []], ["Chris Hemsworth", "كريس هيمسورث", []], ["Nicole Kidman", "نيكول كيدمان", []], ["Al Pacino", "آل باتشينو", ["ال باتشينو"]]
+  ], ["Johnny Depp", "Denzel Washington", "Meryl Streep", "Scarlett Johansson", "Robert Downey Jr.", "Zendaya", "Margot Robbie", "Ryan Reynolds"],
+     ["Jennifer Lawrence", "Chris Hemsworth", "Nicole Kidman", "Al Pacino", "Morgan Freeman"]);
+
+  people("popstars", "نجوم البوب العالمي", "مين هالمغني؟", [
+    ["Michael Jackson", "مايكل جاكسون", []], ["Beyoncé", "بيونسيه", []], ["Taylor Swift", "تايلور سويفت", []], ["Rihanna", "ريهانا", []],
+    ["Ed Sheeran", "إد شيران", ["اد شيران"]], ["Adele", "أديل", ["اديل"]], ["Shakira", "شاكيرا", []], ["Justin Bieber", "جاستن بيبر", ["بيبر"]],
+    ["Billie Eilish", "بيلي آيليش", ["بيلي ايليش"]], ["Ariana Grande", "أريانا غراندي", ["اريانا"]], ["Lady Gaga", "ليدي غاغا", ["ليدي جاجا"]], ["Bruno Mars", "برونو مارس", []],
+    ["The Weeknd", "ذا ويكند", ["ويكند"]], ["Dua Lipa", "دوا ليبا", []], ["Eminem", "إيمينيم", ["امينيم"]], ["Madonna", "مادونا", []],
+    ["Elvis Presley", "إلفيس بريسلي", ["الفيس"]], ["Freddie Mercury", "فريدي ميركوري", ["فريدي"]], ["Bob Marley", "بوب مارلي", []], ["Celine Dion", "سيلين ديون", []]
+  ], ["Billie Eilish", "Ariana Grande", "Lady Gaga", "Bruno Mars", "The Weeknd", "Dua Lipa", "Eminem", "Madonna"],
+     ["Elvis Presley", "Freddie Mercury", "Bob Marley", "Celine Dion"]);
+
+  people("creators", "يوتيوبرز ومؤثرين", "مين هاد؟", [
+    ["MrBeast", "مستر بيست", ["mr beast"]], ["PewDiePie", "بيوديباي", ["pewdiepie"]], ["Khaby Lame", "خابي لام", ["khaby"]], ["KSI", "كي إس آي", ["ksi"]],
+    ["Logan Paul", "لوغان بول", ["logan paul"]], ["Joe Hattab", "جو حطاب", ["حطاب"]], ["Anas Bukhash", "أنس بوخش", ["انس بوخش"]], ["Ahmad Al-Shugairi", "أحمد الشقيري", ["الشقيري"]],
+    ["Bassem Youssef", "باسم يوسف", ["باسم"]], ["Kim Kardashian", "كيم كارداشيان", []], ["Cristiano Ronaldo", "رونالدو", ["كريستيانو"]], ["Huda Kattan", "هدى قطان", ["هدى بيوتي"]],
+    ["Casey Neistat", "كيسي نايستات", []], ["Markiplier", "ماركيبلاير", []], ["Dude Perfect", "ديود بيرفكت", []]
+  ], ["Logan Paul", "Joe Hattab", "Anas Bukhash", "Kim Kardashian", "Huda Kattan"],
+     ["Casey Neistat", "Markiplier", "Dude Perfect", "Ahmad Al-Shugairi", "KSI"]);
+
+  people("arabplayers", "لاعبين عرب", "مين هاللاعب؟", [
+    ["Mohamed Salah", "محمد صلاح", ["صلاح"]], ["Riyad Mahrez", "رياض محرز", ["محرز"]], ["Achraf Hakimi", "أشرف حكيمي", ["حكيمي"]], ["Yassine Bounou", "ياسين بونو", ["بونو"]],
+    ["Hakim Ziyech", "حكيم زياش", ["زياش"]], ["Sofyan Amrabat", "سفيان أمرابط", ["امرابط"]], ["Mohamed Aboutrika", "محمد أبو تريكة", ["ابو تريكة"]], ["Youssef En-Nesyri", "يوسف النصيري", ["النصيري"]],
+    ["Omar Abdulrahman", "عموري", ["عمر عبد الرحمن"]], ["Salem Al-Dawsari", "سالم الدوسري", ["الدوسري"]], ["Younis Mahmoud", "يونس محمود", ["يونس"]], ["Sami Al-Jaber", "سامي الجابر", ["الجابر"]],
+    ["Essam El Hadary", "عصام الحضري", ["الحضري"]], ["Ismaël Bennacer", "إسماعيل بن ناصر", ["بن ناصر"]], ["Wessam Abou Ali", "وسام أبو علي", ["ابو علي"]], ["Oday Dabbagh", "عدي الدباغ", ["الدباغ"]],
+    ["Mohamed Zidan", "محمد زيدان", []], ["Ahmed Hossam Mido", "ميدو", ["احمد حسام"]]
+  ], ["Hakim Ziyech", "Sofyan Amrabat", "Mohamed Aboutrika", "Youssef En-Nesyri", "Omar Abdulrahman", "Salem Al-Dawsari"],
+     ["Younis Mahmoud", "Sami Al-Jaber", "Essam El Hadary", "Ismaël Bennacer", "Wessam Abou Ali", "Oday Dabbagh", "Mohamed Zidan", "Ahmed Hossam Mido"]);
+
+  people("footballnow", "نجوم الكرة اليوم", "مين هاللاعب؟", [
+    ["Lionel Messi", "ميسي", ["ليونيل ميسي"]], ["Cristiano Ronaldo", "رونالدو", ["كريستيانو"]], ["Kylian Mbappé", "مبابي", []], ["Erling Haaland", "هالاند", ["هولاند"]],
+    ["Vinícius Júnior", "فينيسيوس", ["فينيسيوس جونيور"]], ["Jude Bellingham", "بيلينغهام", ["بيلينجهام"]], ["Harry Kane", "هاري كين", ["كين"]], ["Robert Lewandowski", "ليفاندوفسكي", []],
+    ["Kevin De Bruyne", "دي بروين", []], ["Neymar", "نيمار", []], ["Luka Modrić", "مودريتش", []], ["Virgil van Dijk", "فان دايك", []],
+    ["Lamine Yamal", "لامين يامال", ["يامال"]], ["Pedri", "بيدري", []], ["Jamal Musiala", "موسيالا", []], ["Bukayo Saka", "ساكا", []],
+    ["Son Heung-min", "سون هيونغ مين", ["سون"]], ["Rodri", "رودري", []], ["Antoine Griezmann", "غريزمان", ["جريزمان"]], ["Mohamed Salah", "محمد صلاح", ["صلاح"]]
+  ], ["Vinícius Júnior", "Jude Bellingham", "Harry Kane", "Robert Lewandowski", "Kevin De Bruyne", "Luka Modrić", "Lamine Yamal"],
+     ["Virgil van Dijk", "Pedri", "Jamal Musiala", "Bukayo Saka", "Son Heung-min", "Rodri", "Antoine Griezmann"]);
+
+  people("legends", "أساطير الكرة", "مين هالأسطورة؟", [
+    ["Pelé", "بيليه", []], ["Diego Maradona", "مارادونا", []], ["Zinedine Zidane", "زيدان", ["زين الدين زيدان"]], ["Ronaldo (Brazilian footballer)", "رونالدو الظاهرة", ["رونالدو", "الظاهرة"]],
+    ["Ronaldinho", "رونالدينيو", []], ["Franz Beckenbauer", "بيكنباور", []], ["Johan Cruyff", "كرويف", []], ["Paolo Maldini", "مالديني", []],
+    ["Thierry Henry", "تييري هنري", ["هنري"]], ["David Beckham", "بيكهام", []], ["Kaká", "كاكا", []], ["Andrés Iniesta", "إنييستا", ["انيستا"]],
+    ["Xavi", "تشافي", ["شافي"]], ["Francesco Totti", "توتي", []], ["Gianluigi Buffon", "بوفون", []], ["Ferenc Puskás", "بوشكاش", []],
+    ["Eusébio", "أوزيبيو", ["اوزيبيو"]], ["George Best", "جورج بيست", []], ["Roberto Baggio", "باجيو", ["باجو"]], ["Zlatan Ibrahimović", "زلاتان", ["ابراهيموفيتش"]]
+  ], ["Franz Beckenbauer", "Johan Cruyff", "Paolo Maldini", "Kaká", "Andrés Iniesta", "Xavi", "Francesco Totti", "Gianluigi Buffon"],
+     ["Ferenc Puskás", "Eusébio", "George Best", "Roberto Baggio"]);
+
+  people("coaches", "مدربين", "مين هالمدرب؟", [
+    ["Pep Guardiola", "غوارديولا", ["بيب", "جوارديولا"]], ["Jürgen Klopp", "كلوب", ["يورغن كلوب"]], ["José Mourinho", "مورينيو", []], ["Carlo Ancelotti", "أنشيلوتي", ["انشيلوتي"]],
+    ["Alex Ferguson", "فيرغسون", ["فيرجسون", "السير أليكس"]], ["Arsène Wenger", "فينغر", ["فينجر"]], ["Diego Simeone", "سيميوني", []], ["Antonio Conte", "كونتي", []],
+    ["Hassan Shehata", "حسن شحاتة", ["المعلم"]], ["Walid Regragui", "وليد الركراكي", ["الركراكي"]], ["Mikel Arteta", "أرتيتا", ["ارتيتا"]], ["Xabi Alonso", "تشابي ألونسو", ["ألونسو"]],
+    ["Hansi Flick", "هانزي فليك", ["فليك"]], ["Thomas Tuchel", "توخيل", []], ["Luis Enrique", "لويس إنريكي", ["انريكي"]]
+  ], ["Alex Ferguson", "Arsène Wenger", "Diego Simeone", "Antonio Conte", "Walid Regragui"],
+     ["Hassan Shehata", "Mikel Arteta", "Xabi Alonso", "Hansi Flick", "Thomas Tuchel", "Luis Enrique"]);
+
+  // Niche photo categories
+  DUEL_CATS.push({ id: "arablandmarks", name: "معالم عربية", kind: "item", prop: "P18", prompt: "شو هالمَعلم؟", items: [
+    ["Petra", "البتراء", ["بترا"]], ["Dome of the Rock", "قبة الصخرة", []], ["Al-Aqsa Mosque", "المسجد الأقصى", ["الاقصى"]], ["Burj Khalifa", "برج خليفة", []],
+    ["Great Pyramid of Giza", "الأهرامات", ["الاهرامات", "الهرم"]], ["Great Sphinx of Giza", "أبو الهول", ["ابو الهول"]], ["Baalbek", "بعلبك", ["قلعة بعلبك"]], ["Jeita Grotto", "مغارة جعيتا", ["جعيتا"]],
+    ["Umayyad Mosque", "الجامع الأموي", ["المسجد الاموي"]], ["Wadi Rum", "وادي رم", []], ["Hassan II Mosque", "مسجد الحسن الثاني", ["الحسن الثاني"]], ["Chefchaouen", "شفشاون", []],
+    ["Sheikh Zayed Grand Mosque", "جامع الشيخ زايد", ["مسجد الشيخ زايد"]], ["Hegra (Mada'in Salih)", "مدائن صالح", ["الحجر"]], ["Krak des Chevaliers", "قلعة الحصن", ["قلعة الفرسان"]], ["Citadel of Aleppo", "قلعة حلب", []],
+    ["Jerash", "جرش", []], ["Carthage", "قرطاج", []], ["Kingdom Centre", "برج المملكة", []], ["Church of the Nativity", "كنيسة المهد", []]
+  ]});
+  tag("arablandmarks", ["Baalbek", "Jeita Grotto", "Umayyad Mosque", "Wadi Rum", "Hassan II Mosque", "Sheikh Zayed Grand Mosque", "Church of the Nativity"],
+      ["Chefchaouen", "Hegra (Mada'in Salih)", "Krak des Chevaliers", "Citadel of Aleppo", "Jerash", "Carthage", "Kingdom Centre"]);
+  // World landmarks no longer repeat the Arab ones
+  const lm = DUEL_CATS.find(c => c.id === "landmarks");
+  lm.items = lm.items.filter(it => !["Petra", "Dome of the Rock", "Al-Aqsa Mosque", "Burj Khalifa", "Great Pyramid of Giza", "Great Sphinx of Giza"].includes(it[0]));
+
+  DUEL_CATS.push({ id: "birds", name: "طيور", kind: "item", prop: "P18", prompt: "شو هالطير؟", items: [
+    ["Palestine sunbird", "عصفور الشمس الفلسطيني", ["عصفور الشمس"]], ["Eurasian hoopoe", "هدهد", ["الهدهد"]], ["European bee-eater", "وروار", ["الوروار"]], ["Common kingfisher", "رفراف", ["صياد السمك"]],
+    ["Barn owl", "بومة", ["بومة الحظائر"]], ["Griffon vulture", "نسر", ["النسر الاسمر"]], ["Greater flamingo", "فلامنغو", ["نحام"]], ["Indian peafowl", "طاووس", []],
+    ["Great white pelican", "بجع", ["بجعة"]], ["White stork", "لقلق", ["اللقلق"]], ["Toco toucan", "طوقان", ["توكان"]], ["Kiwi (bird)", "كيوي", []],
+    ["Common ostrich", "نعامة", []], ["Atlantic puffin", "بفن", ["البفن"]], ["Bald eagle", "نسر أصلع", ["النسر الاصلع"]], ["Sulphur-crested cockatoo", "كوكاتو", []],
+    ["Mute swan", "بجعة بيضاء", ["تم", "بجعة"]], ["European robin", "أبو الحناء", ["ابو الحنا", "روبن"]], ["Emperor penguin", "بطريق", ["البطريق"]], ["Scarlet macaw", "ببغاء المكاو", ["مكاو", "ببغاء"]]
+  ]});
+  tag("birds", ["European bee-eater", "Common kingfisher", "Griffon vulture", "Great white pelican", "White stork", "Toco toucan", "Kiwi (bird)"],
+      ["Palestine sunbird", "Atlantic puffin", "Sulphur-crested cockatoo", "European robin", "Scarlet macaw"]);
+
+  DUEL_CATS.push({ id: "vintage", name: "أغراض زمان", kind: "item", prop: "P18", prompt: "شو هاد؟", items: [
+    ["Cassette tape", "كاسيت", ["شريط كاسيت", "شريط"]], ["Floppy disk", "فلوبي", ["ديسكيت", "قرص مرن"]], ["Walkman", "ووكمان", []], ["Rotary dial", "تلفون أبو قرص", ["تلفون قديم", "هاتف بقرص"]],
+    ["VHS", "فيديو كاسيت", ["شريط فيديو", "vhs"]], ["Game Boy", "غيم بوي", ["جيم بوي"]], ["Polaroid camera", "بولارويد", ["كاميرا فورية"]], ["Typewriter", "آلة كاتبة", ["الة كاتبة"]],
+    ["Phonograph", "غراموفون", ["فونوغراف", "حاكي"]], ["Pager", "بيجر", ["بليب"]], ["Nokia 3310", "نوكيا 3310", ["نوكيا"]], ["Atari 2600", "أتاري", ["اتاري"]],
+    ["Tamagotchi", "تاماغوتشي", ["تماغوتشي"]], ["Rubik's Cube", "مكعب روبيك", ["روبيك"]], ["Kerosene lamp", "لمبة كاز", ["قنديل", "سراج"]], ["Primus stove", "بابور", ["بابور كاز", "بريموس"]],
+    ["Cathode-ray tube", "تلفزيون قديم", ["شاشة"]], ["Slide projector", "بروجكتر", ["عارض شرائح"]], ["Compact Disc", "سي دي", ["cd", "قرص مدمج"]], ["Sega Genesis", "سيغا", ["سيجا"]]
+  ]});
+  tag("vintage", ["Walkman", "Rotary dial", "VHS", "Polaroid camera", "Typewriter", "Pager", "Atari 2600", "Compact Disc"],
+      ["Phonograph", "Tamagotchi", "Kerosene lamp", "Primus stove", "Cathode-ray tube", "Slide projector", "Sega Genesis"]);
+
+  DUEL_CATS.push({ id: "applogos", name: "شعارات تطبيقات", kind: "item", prop: "P154", prompt: "شعار أي تطبيق؟", items: [
+    ["WhatsApp", "واتساب", ["واتس"]], ["Instagram", "إنستغرام", ["انستا", "انستغرام"]], ["TikTok", "تيك توك", []], ["Snapchat", "سناب شات", ["سناب"]],
+    ["Telegram (software)", "تلغرام", ["تيليجرام"]], ["YouTube", "يوتيوب", []], ["Spotify", "سبوتيفاي", []], ["Netflix", "نتفليكس", []],
+    ["Uber", "أوبر", ["اوبر"]], ["Facebook", "فيسبوك", []], ["Twitter", "تويتر", ["اكس", "x"]], ["Discord", "ديسكورد", []],
+    ["Pinterest", "بنترست", []], ["Google Maps", "خرائط جوجل", ["خرائط غوغل"]], ["Gmail", "جيميل", []], ["Shazam (application)", "شازام", []],
+    ["Duolingo", "دولينجو", ["دوولينغو"]], ["Zoom (software)", "زوم", []], ["Microsoft Teams", "تيمز", ["مايكروسوفت تيمز"]], ["LinkedIn", "لينكدإن", ["لينكد ان"]]
+  ]});
+  tag("applogos", ["Telegram (software)", "Spotify", "Uber", "Discord", "Pinterest", "Google Maps", "Gmail"], ["Shazam (application)", "Duolingo", "Zoom (software)", "Microsoft Teams", "LinkedIn"]);
+
+  DUEL_CATS.push({ id: "carlogos", name: "شعارات سيارات", kind: "item", prop: "P154", prompt: "شعار أي سيارة؟", items: [
+    ["Mercedes-Benz", "مرسيدس", []], ["BMW", "بي إم دبليو", ["بي ام"]], ["Toyota", "تويوتا", []], ["Volkswagen", "فولكس فاغن", ["فولكس"]],
+    ["Audi", "أودي", ["اودي"]], ["Ferrari", "فيراري", []], ["Lamborghini", "لامبورغيني", ["لامبورجيني"]], ["Porsche", "بورش", []],
+    ["Hyundai", "هيونداي", ["هونداي"]], ["Kia", "كيا", []], ["Honda", "هوندا", []], ["Nissan", "نيسان", []],
+    ["Mitsubishi Motors", "ميتسوبيشي", []], ["Subaru", "سوبارو", []], ["Peugeot", "بيجو", []], ["Renault", "رينو", []],
+    ["Chevrolet", "شفروليه", ["شيفروليه"]], ["Ford Motor Company", "فورد", []], ["Tesla, Inc.", "تيسلا", ["تسلا"]], ["Maserati", "مازيراتي", []]
+  ]});
+  tag("carlogos", ["Lamborghini", "Porsche", "Hyundai", "Kia", "Honda", "Nissan", "Peugeot"], ["Mitsubishi Motors", "Subaru", "Renault", "Chevrolet", "Maserati"]);
+
+  // Arab flags: a quick subset of the flags list
+  const flags = DUEL_CATS.find(c => c.id === "flags");
+  DUEL_CATS.push({ id: "arabflags", name: "أعلام عربية", kind: "flag", prompt: "علم أي دولة؟", items: flags.items.filter(it => "ps jo lb sy eg sa ae qa kw bh om ye iq ma dz tn ly sd".split(" ").includes(it[0])) });
+  tag("arabflags", ["ae", "qa", "kw", "iq", "ma", "dz", "tn", "ye"], ["bh", "om", "ly", "sd"]);
+  DUEL_LEVELS.arabflags = { mid: "ae qa kw iq ma dz tn ye", hard: "bh om ly sd" };
+})();
+
+// Themes: the two players pick one before each match; the match offers 8 random categories from it
+const DUEL_THEMES = [
+  { id: "mix", name: "منوّع" }, { id: "arab", name: "من عنّا" }, { id: "sport", name: "رياضة" }, { id: "screen", name: "شاشة ونجوم" },
+  { id: "world", name: "عالم وسفر" }, { id: "culture", name: "فن وثقافة" }, { id: "brands", name: "ماركات وأغراض" }, { id: "kids", name: "للصغار" }
+];
+const CAT_THEMES = {
+  flags: ["world"], capitals: ["world"], arabflags: ["arab", "world"], maps: ["world"], landmarks: ["world"], arablandmarks: ["arab", "world"],
+  palcities: ["arab"], ourdishes: ["arab", "culture"], instruments: ["culture"], oddanimals: ["world"], birds: ["world", "kids"],
+  cars: ["brands"], carlogos: ["brands"], applogos: ["brands"], vintage: ["brands", "culture"], paintings: ["culture"], dress: ["culture", "world"],
+  oldcartoons: ["arab", "screen", "kids"], worldcartoons: ["screen", "kids"], anime: ["screen"], heroes: ["screen"],
+  egyptcinema: ["arab", "screen"], syriandrama: ["arab", "screen"], lebsingers: ["arab", "screen"], gulfstars: ["arab", "screen"], palart: ["arab", "culture"],
+  hollywood: ["screen"], popstars: ["screen"], creators: ["screen"],
+  arabplayers: ["sport", "arab"], footballnow: ["sport"], legends: ["sport"], coaches: ["sport"],
+  animals: ["kids"], fruitveg: ["kids"], food: ["kids"], sports: ["kids", "sport"], transport: ["kids"], nature: ["kids"], home: ["kids"]
+};
+DUEL_CATS.forEach(c => { c.themes = CAT_THEMES[c.id] || ["kids"]; });
+// منوّع = everything except the kids-only sets
+const themeCats = themeId => DUEL_CATS.filter(c => themeId === "mix" ? !(c.themes.length === 1 && c.themes[0] === "kids") : c.themes.includes(themeId));
+
+// More sport, culture and brand categories so every theme has at least 8
+(function () {
+  const add = (c, themes, mid, hard) => { c.themes = themes; DUEL_CATS.push(c); DUEL_LEVELS[c.id] = { mid: mid.join("|"), hard: hard.join("|") }; };
+  add({ id: "clubs", name: "شعارات أندية", kind: "item", prop: "P154", prompt: "شعار أي نادي؟", items: [
+    ["Real Madrid CF", "ريال مدريد", ["الريال"]], ["FC Barcelona", "برشلونة", ["البارسا"]], ["Manchester United F.C.", "مانشستر يونايتد", ["اليونايتد", "مان يونايتد"]], ["Liverpool F.C.", "ليفربول", []],
+    ["Juventus FC", "يوفنتوس", ["اليوفي"]], ["FC Bayern Munich", "بايرن ميونخ", ["البايرن"]], ["Chelsea F.C.", "تشيلسي", []], ["Arsenal F.C.", "آرسنال", ["ارسنال"]],
+    ["Paris Saint-Germain F.C.", "باريس سان جيرمان", ["باريس", "psg"]], ["Manchester City F.C.", "مانشستر سيتي", ["السيتي", "مان سيتي"]], ["AC Milan", "ميلان", ["اي سي ميلان"]], ["Inter Milan", "إنتر ميلان", ["انتر"]],
+    ["Al Ahly SC", "الأهلي المصري", ["الاهلي"]], ["Zamalek SC", "الزمالك", []], ["Al Hilal SFC", "الهلال", []], ["Al Nassr FC", "النصر", []],
+    ["Borussia Dortmund", "دورتموند", ["بوروسيا دورتموند"]], ["Atlético Madrid", "أتلتيكو مدريد", ["اتلتيكو"]], ["Raja CA", "الرجاء", ["الرجاء البيضاوي"]], ["Espérance Sportive de Tunis", "الترجي", ["الترجي التونسي"]]
+  ]}, ["sport", "brands"], ["Juventus FC", "Chelsea F.C.", "Arsenal F.C.", "Paris Saint-Germain F.C.", "AC Milan", "Al Ahly SC", "Al Hilal SFC", "Al Nassr FC"],
+     ["Inter Milan", "Zamalek SC", "Borussia Dortmund", "Atlético Madrid", "Raja CA", "Espérance Sportive de Tunis"]);
+
+  add({ id: "athletes", name: "أبطال رياضات تانية", kind: "item", prop: "P18", prompt: "مين هالبطل؟", items: [
+    ["Muhammad Ali", "محمد علي كلاي", ["محمد علي"]], ["Michael Jordan", "مايكل جوردان", ["جوردان"]], ["LeBron James", "ليبرون جيمس", ["ليبرون"]], ["Usain Bolt", "يوسين بولت", ["بولت"]],
+    ["Roger Federer", "فيدرر", ["روجر فيدرر"]], ["Rafael Nadal", "نادال", []], ["Novak Djokovic", "ديوكوفيتش", []], ["Serena Williams", "سيرينا ويليامز", ["سيرينا"]],
+    ["Lewis Hamilton", "لويس هاميلتون", ["هاميلتون"]], ["Michael Schumacher", "شوماخر", []], ["Mike Tyson", "مايك تايسون", ["تايسون"]], ["Ons Jabeur", "أنس جابر", ["انس جابر"]],
+    ["Tiger Woods", "تايغر وودز", ["تايجر وودز"]], ["Michael Phelps", "مايكل فيلبس", ["فيلبس"]], ["Kobe Bryant", "كوبي براينت", ["كوبي"]], ["Hicham El Guerrouj", "هشام الكروج", ["الكروج"]],
+    ["Khabib Nurmagomedov", "حبيب نورمحمدوف", ["حبيب"]], ["Simone Biles", "سيمون بايلز", []], ["Max Verstappen", "فيرستابن", []], ["Mutaz Essa Barshim", "معتز برشم", ["برشم"]]
+  ]}, ["sport"], ["Roger Federer", "Rafael Nadal", "Novak Djokovic", "Serena Williams", "Lewis Hamilton", "Michael Schumacher", "Mike Tyson", "Kobe Bryant"],
+     ["Ons Jabeur", "Tiger Woods", "Michael Phelps", "Hicham El Guerrouj", "Khabib Nurmagomedov", "Simone Biles", "Max Verstappen", "Mutaz Essa Barshim"]);
+
+  add({ id: "stadiums", name: "ملاعب", kind: "item", prop: "P18", prompt: "شو هالملعب؟", items: [
+    ["Santiago Bernabéu Stadium", "سانتياغو برنابيو", ["البرنابيو", "برنابيو"]], ["Camp Nou", "كامب نو", []], ["Old Trafford", "أولد ترافورد", ["اولد ترافورد"]], ["Anfield", "آنفيلد", ["انفيلد"]],
+    ["Wembley Stadium", "ويمبلي", []], ["Maracanã Stadium", "ماراكانا", []], ["San Siro", "سان سيرو", []], ["Allianz Arena", "أليانز أرينا", ["اليانز ارينا"]],
+    ["Signal Iduna Park", "سيغنال إيدونا بارك", ["ملعب دورتموند"]], ["Lusail Stadium", "استاد لوسيل", ["لوسيل"]], ["Al Bayt Stadium", "استاد البيت", ["البيت"]], ["Cairo International Stadium", "استاد القاهرة", []],
+    ["King Fahd International Stadium", "استاد الملك فهد", ["ملعب الملك فهد"]], ["Stade Mohammed V", "مركب محمد الخامس", ["محمد الخامس"]], ["La Bombonera", "لا بومبونيرا", ["بومبونيرا"]], ["Estadio Azteca", "أزتيكا", ["ازتيكا"]]
+  ]}, ["sport", "world"], ["Wembley Stadium", "Maracanã Stadium", "San Siro", "Allianz Arena", "Lusail Stadium"],
+     ["Signal Iduna Park", "Al Bayt Stadium", "Cairo International Stadium", "King Fahd International Stadium", "Stade Mohammed V", "La Bombonera", "Estadio Azteca"]);
+
+  add({ id: "foodbrands", name: "ماركات أكل وشرب", kind: "item", prop: "P154", prompt: "شعار أي ماركة؟", items: [
+    ["Coca-Cola", "كوكا كولا", ["كولا"]], ["Pepsi", "بيبسي", []], ["McDonald's", "ماكدونالدز", ["ماك"]], ["KFC", "كنتاكي", ["kfc"]],
+    ["Starbucks", "ستاربكس", []], ["Burger King", "برغر كنغ", ["برجر كنج"]], ["Nutella", "نوتيلا", []], ["Red Bull", "ريد بول", []],
+    ["Nestlé", "نستله", ["نستلة"]], ["Pizza Hut", "بيتزا هت", []], ["Domino's", "دومينوز", []], ["Subway (restaurant)", "صب واي", []],
+    ["Lay's", "ليز", ["شيبس ليز"]], ["Kinder (brand)", "كيندر", []], ["Almarai", "المراعي", []], ["Heinz", "هاينز", []],
+    ["Dunkin'", "دانكن", ["دانكن دونتس"]], ["Baskin-Robbins", "باسكن روبنز", []], ["Costa Coffee", "كوستا", ["كوستا كوفي"]], ["Nescafé", "نسكافيه", []]
+  ]}, ["brands"], ["Starbucks", "Burger King", "Nutella", "Red Bull", "Nestlé", "Pizza Hut", "Domino's", "Nescafé"],
+     ["Subway (restaurant)", "Lay's", "Kinder (brand)", "Almarai", "Heinz", "Dunkin'", "Baskin-Robbins", "Costa Coffee"]);
+
+  add({ id: "fashion", name: "ماركات أزياء", kind: "item", prop: "P154", prompt: "شعار أي ماركة؟", items: [
+    ["Nike, Inc.", "نايكي", ["نايك"]], ["Adidas", "أديداس", ["اديداس"]], ["Puma (brand)", "بوما", []], ["Gucci", "غوتشي", ["جوتشي", "قوتشي"]],
+    ["Chanel", "شانيل", []], ["Louis Vuitton", "لويس فيتون", []], ["Zara (retailer)", "زارا", []], ["H&M", "إتش آند إم", ["h&m", "اتش اند ام"]],
+    ["Rolex", "رولكس", []], ["Lacoste", "لاكوست", []], ["Versace", "فيرساتشي", []], ["Prada", "برادا", []],
+    ["Under Armour", "أندر آرمر", ["اندر ارمر"]], ["New Balance", "نيو بالانس", []], ["Ralph Lauren Corporation", "رالف لورين", ["بولو"]], ["Converse (shoe company)", "كونفرس", []]
+  ]}, ["brands"], ["Gucci", "Chanel", "Louis Vuitton", "Zara (retailer)", "Rolex", "Lacoste"],
+     ["Versace", "Prada", "Under Armour", "New Balance", "Ralph Lauren Corporation", "Converse (shoe company)"]);
+
+  add({ id: "gadgets", name: "أجهزة", kind: "item", prop: "P18", prompt: "شو هالجهاز؟", items: [
+    ["IPhone (1st generation)", "آيفون", ["ايفون", "iphone"]], ["PlayStation 2", "بلايستيشن 2", ["بلاي ستيشن", "بلايستيشن"]], ["Nintendo Switch", "نينتندو سويتش", ["سويتش"]], ["Xbox 360", "إكس بوكس", ["اكس بوكس"]],
+    ["Apple Watch", "ساعة أبل", ["ابل ووتش"]], ["AirPods", "إيربودز", ["ايربودز"]], ["IPod", "آيبود", ["ايبود"]], ["BlackBerry", "بلاكبيري", []],
+    ["Kindle", "كيندل", []], ["Segway", "سيغواي", ["سيجواي"]], ["GoPro", "غو برو", ["جو برو"]], ["Oculus Rift", "نظارة واقع افتراضي", ["vr", "اوكولوس"]],
+    ["Amazon Echo", "أمازون إيكو", ["اليكسا", "ايكو"]], ["Nintendo 64", "نينتندو 64", ["نينتندو"]], ["Sony Walkman", "ووكمان", []], ["DJI Mavic", "درون", ["طائرة درون"]]
+  ]}, ["brands"], ["Apple Watch", "AirPods", "IPod", "BlackBerry", "Kindle", "Nintendo 64"],
+     ["Segway", "GoPro", "Oculus Rift", "Amazon Echo", "Sony Walkman", "DJI Mavic"]);
+
+  // Extra theme tags for existing categories
+  const more = { landmarks: ["culture"], arablandmarks: ["culture"], lebsingers: ["culture"], egyptcinema: ["culture"], transport: ["brands"], home: ["brands"] };
+  DUEL_CATS.forEach(c => (more[c.id] || []).forEach(t => c.themes.includes(t) || c.themes.push(t)));
+})();

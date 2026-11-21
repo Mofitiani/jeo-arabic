@@ -42,10 +42,15 @@ button { cursor: pointer; }
 .pic.flag { border: 4px solid var(--ink); background: var(--paper); box-shadow: 10px 10px 0 var(--ink); }
 .emo { display: block; text-align: center; line-height: 1; }
 .credits { font-size: 12px; color: var(--muted); }
-.pic.photo { object-fit: contain; background: #000; border: 4px solid var(--ink); }
-.frame .pic.photo { width: min(560px, 92%); height: min(52vh, 460px); }
-.turn .picrow .pic.photo { width: 96px; height: 96px; border-width: 2px; }
-.pcredit { position: absolute; bottom: 8px; inset-inline: 12px; text-align: center; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pic.photo { object-fit: contain; background: var(--paper); }
+/* The picture box: fills its parent; the picture is scaled to fit inside it */
+.pbox { position: relative; flex: 1; min-height: 0; width: 100%; }
+.pbox > .pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; border: 0; box-shadow: none; }
+.pbox > .pic.photo { background: var(--paper); }
+.pbox > .pic.flag { background: transparent; }
+.pbox > .pic.emoji { inset: 6%; width: 88%; height: 88%; }
+.pbox > .emo { position: absolute; inset: 0; display: grid; place-items: center; font-size: min(38vh, 300px); }
+.pcredit { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
 .pthumb { display: grid; place-items: center; width: 56px; height: 42px; background: var(--ink); color: var(--saffron); font-weight: 900; font-size: 13px; letter-spacing: .04em; }
 .btn.sel .pthumb { background: var(--saffron); color: var(--ink); }
 
@@ -78,46 +83,42 @@ button { cursor: pointer; }
 .stars { color: var(--deep); font-size: 14px; margin-inline-start: 6px; }
 
 /* duel */
-.duel { flex: 1; display: flex; flex-direction: column; background: var(--ink); color: var(--paper); }
-.dtop { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 24px; padding: 24px 48px 0; }
-.dtop .side { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; }
-.dtop .side.b { justify-content: flex-end; }
-.pip { width: 18px; height: 18px; border: 2px solid #5A5A5A; }
+.duel { height: 100vh; height: 100svh; min-height: 0; display: flex; flex-direction: column; background: var(--ink); color: var(--paper); }
+.dtop { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: stretch; gap: 20px; padding: 16px 32px 0; }
+.pip { width: 16px; height: 16px; border: 2px solid #5A5A5A; display: inline-block; }
 .pip.on { background: var(--saffron); border-color: var(--saffron); }
-.dcat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.dcat .meta { font-weight: 700; font-size: 16px; color: var(--muted); }
-.dcat .name { padding: 6px 18px; background: var(--saffron); color: var(--ink); font-weight: 900; font-size: 24px; line-height: 1.5; }
-.dmain { flex: 1; display: grid; grid-template-columns: 320px minmax(0, 1fr) 320px; gap: 32px; padding: 28px 48px 24px; }
-.clock { display: flex; flex-direction: column; justify-content: space-between; padding: 28px 24px; background: var(--grey); color: var(--muted); box-shadow: 10px 10px 0 #000; transition: background .15s; }
-.clock.on { background: var(--saffron); color: var(--ink); box-shadow: 10px 10px 0 var(--paper); }
-.clock .tag { align-self: flex-start; padding: 4px 12px; border: 2px solid #5A5A5A; font-weight: 700; font-size: 16px; line-height: 1.5; }
-.clock.on .tag { background: var(--ink); color: var(--saffron); border-color: var(--ink); }
-.clock .nm { font-weight: 900; font-size: 48px; line-height: 1.3; color: var(--paper); overflow-wrap: anywhere; }
+.clock.on .pip { border-color: var(--ink); } .clock.on .pip.on { background: var(--ink); }
+.dcat { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; }
+.dcat .meta { font-weight: 700; font-size: 15px; color: var(--muted); }
+.dcat .name { padding: 4px 18px; background: var(--saffron); color: var(--ink); font-weight: 900; font-size: 26px; line-height: 1.5; }
+.clock { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 16px; padding: 12px 18px; background: var(--grey); color: var(--muted); box-shadow: 6px 6px 0 #000; transition: background .15s; }
+.clock.on { background: var(--saffron); color: var(--ink); box-shadow: 6px 6px 0 var(--paper); }
+.clock .who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.clock .tag { font-weight: 700; font-size: 14px; line-height: 1.4; display: flex; align-items: center; gap: 6px; }
+.clock .nm { font-weight: 900; font-size: 30px; line-height: 1.3; color: var(--paper); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .clock.on .nm { color: var(--ink); }
-.clock .t { font-weight: 900; font-size: 120px; line-height: 1; text-align: center; color: var(--paper); font-variant-numeric: tabular-nums; }
+.clock .t { font-weight: 900; font-size: 72px; line-height: 1; color: var(--paper); font-variant-numeric: tabular-nums; }
 .clock.on .t { color: var(--ink); }
 .clock.low .t { color: var(--red); }
-.clock .bar { height: 16px; background: var(--grey2); display: flex; }
+.clock .bar { grid-column: 1 / -1; height: 10px; background: var(--grey2); display: flex; }
 .clock.on .bar { background: rgba(17,17,17,.2); }
 .clock .bar i { display: block; height: 100%; background: var(--muted); }
 .clock.on .bar i { background: var(--ink); }
 .clock.low .bar i { background: var(--wine); }
-.stage { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.frame { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px; background: #1B1B1B; border: 4px solid var(--saffron); position: relative; }
-.frame .pic.flag { width: min(460px, 90%); aspect-ratio: 4 / 3; height: auto; }
-.frame img.pic:not(.flag) { width: min(320px, 70%); aspect-ratio: 1; height: auto; }
-.frame .emo { font-size: 240px; }
+.stage { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 16px 32px 12px; }
+.frame { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px; background: #1B1B1B; border: 4px solid var(--saffron); position: relative; }
+.fhead, .ffoot { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .frame .q { font-weight: 700; font-size: 22px; color: var(--saffron); }
-.frame .lvl { position: absolute; top: 12px; inset-inline-start: 12px; display: flex; gap: 4px; align-items: center; font-weight: 700; font-size: 14px; color: var(--muted); }
+.frame .lvl { display: flex; gap: 4px; align-items: center; font-weight: 700; font-size: 14px; color: var(--muted); }
 .frame .lvl i { width: 14px; height: 14px; border: 2px solid var(--muted); display: inline-block; }
 .frame .lvl i.on { background: var(--saffron); border-color: var(--saffron); }
-.frame .paused { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(17,17,17,.88); font-weight: 900; font-size: 64px; color: var(--saffron); }
-.frame .reveal { padding: 6px 16px; background: var(--paper); color: var(--ink); font-weight: 900; font-size: 26px; }
-.log { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; min-height: 40px; }
+.frame .paused { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(17,17,17,.88); font-weight: 900; font-size: 64px; color: var(--saffron); z-index: 2; }
+.frame .reveal { position: absolute; bottom: 48px; left: 50%; transform: translateX(-50%); z-index: 1; padding: 6px 16px; background: var(--ink); color: var(--saffron); border: 3px solid var(--saffron); font-weight: 900; font-size: 26px; white-space: nowrap; }
+.log { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; min-height: 36px; }
 .log span { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: #1C1C1C; border: 2px solid var(--grey2); font-weight: 700; font-size: 16px; }
 .log .v { padding: 0 6px; }
 .log .v.ok { background: var(--green); } .log .v.no { background: var(--wine); } .log .v.pass { background: #555; }
-.dbot { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 16px 48px 24px; border-top: 3px solid var(--saffron); flex-wrap: wrap; }
+.dbot { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 32px 14px; border-top: 3px solid var(--saffron); flex-wrap: wrap; }
 .dbot .hint { font-weight: 700; font-size: 16px; color: var(--muted); }
 .dbot .btn.ghost { background: transparent; color: var(--paper); border-color: var(--paper); box-shadow: none; }
 .count { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(17,17,17,.82); color: var(--saffron); font-weight: 900; font-size: 260px; line-height: 1; }
@@ -133,7 +134,10 @@ button { cursor: pointer; }
 .sbox .n { font-weight: 900; font-size: 28px; line-height: 1.4; }
 .sbox .s { font-weight: 900; font-size: 88px; line-height: 1; }
 .nextcat { padding: 10px 20px; background: var(--paper); border: 4px dashed var(--ink); font-weight: 900; font-size: 36px; line-height: 1.3; }
-@media (max-width: 1000px) { .dmain { grid-template-columns: 1fr; } .versus { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { .versus { grid-template-columns: 1fr; } .clock .t { font-size: 48px; } .clock .nm { font-size: 22px; } }
+.setupbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; background: var(--ink); color: var(--paper); box-shadow: 6px 6px 0 var(--paper); }
+.setupbar b { color: var(--saffron); font-weight: 900; font-size: 22px; }
+.setupbar .chip { background: transparent; color: var(--paper); border-color: #5A5A5A; font-size: 16px; padding: 2px 10px; }
 
 /* ---------- PHONE ---------- */
 .pl { min-height: 100svh; display: flex; flex-direction: column; background: var(--ink); }
@@ -169,13 +173,13 @@ button { cursor: pointer; }
 .turn .top .bar i { display: block; height: 100%; background: var(--ink); }
 .turn .top.low .bar i { background: var(--wine); } .turn .top.low .t { color: var(--wine); }
 .turn .body { flex: 1; padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 12px; }
-.turn .picrow { display: flex; align-items: center; gap: 12px; padding: 10px; background: #1B1B1B; color: var(--saffron); font-weight: 700; font-size: 16px; }
-.turn .picrow .pic.flag { width: 96px; height: 72px; border-width: 2px; box-shadow: none; }
-.turn .picrow img.pic:not(.flag) { width: 72px; height: 72px; }
-.turn .picrow .emo { font-size: 60px; }
-.mic { flex: 1; min-height: 150px; border: 4px solid var(--ink); background: var(--ink); color: var(--saffron); box-shadow: 8px 8px 0 var(--saffron); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-weight: 900; font-size: 28px; }
-.mic.on { background: var(--saffron); color: var(--ink); box-shadow: 8px 8px 0 var(--ink); }
-.mic small { font-weight: 500; font-size: 14px; }
+.turn .picwrap { display: flex; flex-direction: column; gap: 6px; padding: 8px; background: #1B1B1B; color: var(--saffron); font-weight: 700; font-size: 16px; text-align: center; }
+.turn .picwrap .pbox { flex: none; height: 42vh; height: 42svh; }
+.turn .picwrap .pbox > .emo { font-size: 30vh; }
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.opts .btn { font-size: 17px; font-weight: 900; padding: 12px 8px; box-shadow: 3px 3px 0 var(--ink); }
+.opts.three { grid-template-columns: 1fr 1fr 1fr; }
+.card h3 { margin: 6px 0 0; font-weight: 900; font-size: 20px; line-height: 1.4; }
 .ansrow { display: flex; gap: 10px; }
 .ansrow input { flex: 1; min-width: 0; padding: 12px; border: 3px solid var(--ink); font-weight: 700; font-size: 20px; color: var(--ink); background: var(--paper); }
 .ansrow button { padding: 12px 16px; background: var(--ink); color: var(--saffron); border: 0; font-weight: 900; font-size: 18px; }
@@ -200,7 +204,7 @@ const SB = window.supabase.createClient("https://yewosqrrzxsqwqsicipz.supabase.c
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlld29zcXJyenhzcXdxc2ljaXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExOTc4NDAsImV4cCI6MjEwNjc3Mzg0MH0.P5uF8RCmLht_kQZMp6GNDRmZKAjeFEcYZWkfc-x9iws",
   { auth: { persistSession: false } });
 let ch = null, connArgs = null, connOK = false, retryTimer = null;
-const EVENTS = ["join", "pick", "ans", "pass", "pred", "hello", "state"];
+const EVENTS = ["join", "setup", "pick", "ans", "pass", "pred", "hello", "state"];
 function connect(room, key, h) {
   connArgs = [room, key, h];
   const c = SB.channel("mbz-" + room, { config: { broadcast: { self: false }, presence: { key } } });
@@ -236,50 +240,63 @@ const FLAG_URL = c => "https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/"
 const TWEMOJI_URL = e => "https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/" + Array.from(e).map(ch => ch.codePointAt(0).toString(16)).filter(h => h !== "fe0f").join("-") + ".svg";
 function picHTML(kind, key) {
   if (kind === "flag") return `<img class="pic flag" src="${FLAG_URL(key)}" alt="علم">`;
-  if (kind === "wiki" || kind === "wikipage") { const r = WIKI[key]; kind = "url"; key = r && r.url; }
   if (kind === "url") return key ? `<img class="pic photo" src="${esc(key)}" alt="صورة">` : `<span class="emo" style="font-size: 32px;">…</span>`;
-  return `<img class="pic" src="${TWEMOJI_URL(key)}" alt="صورة" data-e="${esc(key)}" onerror="this.outerHTML='<span class=&quot;emo&quot;>'+this.dataset.e+'</span>'">`;
+  return `<img class="pic emoji" src="${TWEMOJI_URL(key)}" alt="صورة" data-e="${esc(key)}" onerror="this.outerHTML='<span class=&quot;emo&quot;>'+this.dataset.e+'</span>'">`;
 }
-const isPhoto = c => c && (c.kind === "wiki" || c.kind === "wikipage");
+const isPhoto = c => c && (c.kind === "item" || c.kind === "wikipage" || c.kind === "wiki");
 const catThumb = c => isPhoto(c) ? `<span class="pthumb" aria-hidden="true">${c.prop === "P154" ? "LOGO" : c.kind === "wikipage" ? "كرتون" : "صور"}</span>` : picHTML(c.kind, c.items[0][0]);
 
-// ---- Photos from Wikimedia Commons, found through Wikidata (looked up once, then remembered) ----
+// ---- Photos from Wikimedia Commons (looked up once, then remembered on this device) ----
+// "item": the Wikipedia article's Wikidata item → its curated photo (P18), logo (P154) or map (P242).
+// "wikipage": the picture at the top of the Wikipedia article (used for cartoon characters).
 const WKEY = "mbz-wiki-v1", WIKI = store.get(WKEY) || {};
+const wk = (c, name) => (c.kind === "item" ? c.prop + ":" : "") + name;
+const wrec = (c, name) => WIKI[wk(c, name)] || {};
+const photoOK = (c, name) => !isPhoto(c) || !!wrec(c, name).url;
+const itemPic = (c, name) => isPhoto(c) ? picHTML("url", wrec(c, name).url) : picHTML(c.kind, name);
 const stripTags = h => String(h || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
-async function wikiLookup(name, prop) {
-  const hit = WIKI[name];
-  if (hit && (hit.url || Date.now() - hit.t < 864e5)) return hit;          // failures are retried after a day
-  if (prop === "page") {                                                     // the picture at the top of a Wikipedia article
-    try {
-      const q = await (await fetch("https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=pageimages&pilicense=any&piprop=thumbnail&pithumbsize=640&titles=" + encodeURIComponent(name))).json();
-      const pg = Object.values((q.query && q.query.pages) || {})[0], src = pg && pg.thumbnail && pg.thumbnail.source;
-      WIKI[name] = src ? { url: src, credit: "ويكيبيديا", t: Date.now() } : { url: null, t: Date.now() };
-    } catch (err) { WIKI[name] = { url: null, t: Date.now() }; }
-    store.set(WKEY, WIKI); return WIKI[name];
-  }
+const getJSON = async u => (await fetch(u)).json();
+const WP = "https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1";
+async function pageImage(title) {
+  const q = await getJSON(WP + "&prop=pageimages&pilicense=any&piprop=thumbnail&pithumbsize=800&titles=" + encodeURIComponent(title));
+  const pg = Object.values((q.query && q.query.pages) || {})[0], src = pg && pg.thumbnail && pg.thumbnail.source;
+  return src ? { url: src, credit: "ويكيبيديا" } : null;
+}
+async function commonsFile(file) {
+  let credit = "";
   try {
-    const q = await (await fetch("https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&origin=*&language=en&limit=5&search=" + encodeURIComponent(name))).json();
-    const ids = (q.search || []).map(x => x.id); if (!ids.length) throw 0;
-    const e = await (await fetch("https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&origin=*&props=claims&ids=" + ids.join("|"))).json();
-    let file = null;
-    for (const id of ids) { const cl = e.entities && e.entities[id] && e.entities[id].claims && e.entities[id].claims[prop]; if (cl && cl[0] && cl[0].mainsnak.datavalue) { file = cl[0].mainsnak.datavalue.value; break; } }
-    if (!file) throw 0;
-    let credit = "";
-    try {
-      const m = await (await fetch("https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&prop=imageinfo&iiprop=extmetadata&titles=File:" + encodeURIComponent(file))).json();
-      const pg = Object.values(m.query.pages)[0], md = pg.imageinfo[0].extmetadata;
-      credit = [stripTags(md.Artist && md.Artist.value).slice(0, 60), md.LicenseShortName && md.LicenseShortName.value].filter(Boolean).join(" · ");
-    } catch (err) {}
-    WIKI[name] = { url: "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(file) + "?width=640", credit, t: Date.now() };
-  } catch (err) { WIKI[name] = { url: null, t: Date.now() }; }
+    const m = await getJSON("https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&prop=imageinfo&iiprop=extmetadata&titles=File:" + encodeURIComponent(file));
+    const md = Object.values(m.query.pages)[0].imageinfo[0].extmetadata;
+    credit = [stripTags(md.Artist && md.Artist.value).slice(0, 60), md.LicenseShortName && md.LicenseShortName.value].filter(Boolean).join(" · ");
+  } catch (err) {}
+  return { url: "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(file) + "?width=800", credit: (credit ? credit + " · " : "") + "ويكيميديا كومنز" };
+}
+async function wikiLookup(c, name) {
+  const key = wk(c, name), hit = WIKI[key];
+  if (hit && (hit.url || hit.bad || Date.now() - hit.t < 864e5)) return hit;   // failures are retried after a day; bad pictures never
+  let rec = null;
+  try {
+    if (c.kind === "item") {
+      const q = await getJSON(WP + "&prop=pageprops&ppprop=wikibase_item&titles=" + encodeURIComponent(name));
+      const pg = Object.values((q.query && q.query.pages) || {})[0], qid = pg && pg.pageprops && pg.pageprops.wikibase_item;
+      if (qid) {
+        const e = await getJSON("https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&origin=*&props=claims&ids=" + qid);
+        const cl = ((e.entities && e.entities[qid] && e.entities[qid].claims) || {})[c.prop] || [];
+        const best = cl.find(x => x.rank === "preferred" && x.mainsnak.datavalue) || cl.find(x => x.rank !== "deprecated" && x.mainsnak.datavalue);
+        if (best) rec = await commonsFile(best.mainsnak.datavalue.value);
+      }
+      if (!rec) rec = await pageImage(name);           // no curated picture: fall back to the article's picture
+    } else rec = await pageImage(name);
+  } catch (err) {}
+  WIKI[key] = rec ? { ...rec, t: Date.now() } : { url: null, t: Date.now() };
   store.set(WKEY, WIKI);
-  return WIKI[name];
+  return WIKI[key];
 }
 // Look up every photo in a category, a few at a time; also warms the browser's image cache
 async function prefetchCat(catId) {
   const c = catById(catId); if (!isPhoto(c)) return;
   const list = c.items.map(i => i[0]); let k = 0;
-  await Promise.all(Array.from({ length: 6 }, async () => { while (k < list.length) { const r = await wikiLookup(list[k++], c.kind === "wikipage" ? "page" : c.prop); if (r.url) new Image().src = r.url; } }));
+  await Promise.all(Array.from({ length: 6 }, async () => { while (k < list.length) { const r = await wikiLookup(c, list[k++]); if (r.url) new Image().src = r.url; } }));
 }
 
 // Fuzzy matching (same rules as جيو!)
@@ -333,8 +350,9 @@ const sfx = {
 
 function initHost() {
   G = store.get(HKEY);
-  if (!G || !G.room) G = { room: newCode(), players: [], queue: [], picks: {}, match: null, streak: {}, stars: {} };
+  if (!G || !G.room) G = { room: newCode(), players: [], queue: [], picks: {}, surprise: {}, setup: {}, offer: null, match: null, streak: {}, stars: {} };
   if (!G.surprise) G.surprise = {};
+  if (!G.setup) G.setup = {};
   if (G.match && G.match.phase === "duel") G.match.running = false;   // a reload pauses the duel
   saveG(); renderHost();
   connect(G.room, "host", { msg: hostMsg, presence: ps => { G.online = Object.keys(ps); if (!M() || M().phase !== "duel") renderHost(); }, status: st => { if (st === "SUBSCRIBED") pub(); } });
@@ -357,14 +375,21 @@ function hostMsg(ev, p) {
   }
   if (!pf(pid)) return;
   const m = M();
+  const front = G.queue.slice(0, 2), lobby = !m || m.phase === "lobby";
+  if (ev === "setup") {
+    if (!lobby || G.offer || !front.includes(pid)) return;
+    const theme = DUEL_THEMES.some(t => t.id === p.theme) ? p.theme : null, diff = ["e", "m", "h"].includes(p.diff) ? p.diff : null;
+    G.setup[pid] = { theme, diff, ok: !!(p.ok && theme && diff) };
+    resolveSetup(); saveG(); renderHost(); return pub();
+  }
   if (ev === "pick") {
-    if (m && m.phase !== "lobby" && (pid === m.a || pid === m.b)) return;          // locked once the match starts
-    const [a, b] = G.queue;
-    const opp = pid === a ? b : pid === b ? a : null;
+    if (!lobby || !G.offer || !front.includes(pid)) return;                      // pick only after the theme is settled, and before the match
+    const [a, b] = front;
+    const opp = pid === a ? b : a;
     let id;
     if (p.cat === "random") { id = randomCat([G.picks[opp]]); G.surprise[pid] = true; }
     else {
-      const cat = catById(p.cat); if (!cat) return;
+      const cat = catById(p.cat); if (!cat || !G.offer.includes(cat.id)) return;
       if (opp && G.picks[opp] === cat.id) {
         if (!G.surprise[opp]) return;                                             // can't take the opponent's category
         G.picks[opp] = randomCat([cat.id]); prefetchCat(G.picks[opp]);            // their hidden random pick moves aside
@@ -383,8 +408,29 @@ function hostMsg(ev, p) {
   if (ev === "pass") doPass();
 }
 
-// A random category, avoiding the ones given
-function randomCat(avoid) { const pool = DUEL_CATS.filter(c => !avoid.includes(c.id)); return pool[Math.floor(Math.random() * pool.length)].id; }
+// Theme and difficulty: once both players are ready, settle them (a draw when they chose differently) and offer 8 random categories
+const THEME_NAME = id => (DUEL_THEMES.find(t => t.id === id) || {}).name || "";
+const DIFF_NAME = { e: "سهل", m: "متوسط", h: "صعب" };
+const pickOne = a => a[Math.floor(Math.random() * a.length)];
+function resolveSetup() {
+  const [a, b] = G.queue; if (!a || !b || G.offer) return;
+  const sa = G.setup[a], sb = G.setup[b]; if (!sa || !sb || !sa.ok || !sb.ok) return;
+  const tBy = sa.theme === sb.theme ? null : pickOne([a, b]), dBy = sa.diff === sb.diff ? null : pickOne([a, b]);
+  G.theme = G.setup[tBy || a].theme; G.diff = G.setup[dBy || a].diff;
+  G.draw = (tBy || dBy) ? { tBy, dBy } : null;
+  G.offer = shuffle(themeCats(G.theme)).slice(0, 8).map(c => c.id);
+  G.picks = {}; G.surprise = {};
+  if (G.draw) sfx.pass();
+}
+function clearSetup() { G.setup = {}; G.offer = null; G.theme = null; G.diff = null; G.draw = null; G.picks = {}; G.surprise = {}; }
+// TV button: fill in whatever the two players haven't chosen yet
+function randomizeSetup() {
+  G.queue.slice(0, 2).forEach(pid => { const s = G.setup[pid] || {}; G.setup[pid] = { theme: s.theme || pickOne(DUEL_THEMES).id, diff: s.diff || pickOne(["e", "m", "h"]), ok: true }; });
+  resolveSetup(); saveG(); renderHost(); pub();
+}
+const themePool = () => G.theme ? themeCats(G.theme) : DUEL_CATS;
+// A random category from the theme, avoiding the ones given
+function randomCat(avoid) { const pool = themePool().filter(c => !avoid.includes(c.id)); return (pool.length ? pickOne(pool) : pickOne(DUEL_CATS.filter(c => !avoid.includes(c.id)))).id; }
 // TV button: random surprise categories for whichever of the two players hasn't picked
 function randomizePicks() {
   const [a, b] = G.queue;
@@ -397,6 +443,8 @@ function repid(a, b) {
   G.players = G.players.filter((x, i, arr) => arr.findIndex(y => y.pid === x.pid) === i);
   G.queue = G.queue.map(x => x === a ? b : x).filter((x, i, arr) => arr.indexOf(x) === i);
   if (a in G.picks) { G.picks[b] = G.picks[a]; delete G.picks[a]; }
+  if (a in G.setup) { G.setup[b] = G.setup[a]; delete G.setup[a]; }
+  if (a in G.surprise) { G.surprise[b] = G.surprise[a]; delete G.surprise[a]; }
   const m = M();
   if (m) { ["a", "b", "turn"].forEach(k => { if (m[k] === a) m[k] = b; }); if (a in m.clocks) { m.clocks[b] = m.clocks[a]; delete m.clocks[a]; } if (a in m.score) { m.score[b] = m.score[a]; delete m.score[a]; } }
 }
@@ -405,31 +453,33 @@ function repid(a, b) {
 function startMatch() {
   const [a, b] = G.queue;
   if (!a || !b || !G.picks[a] || !G.picks[b]) return;
-  G.match = { a, b, score: { [a]: 0, [b]: 0 }, round: 0, phase: "lobby", preds: {}, log: [] };
+  G.match = { a, b, score: { [a]: 0, [b]: 0 }, round: 0, phase: "lobby", preds: {}, log: [], diff: G.diff || "e" };
   nextRound();
 }
 async function nextRound() {
   const m = M(); m.round++;
   let cat, owner = null;
+  const used = [G.picks[m.a], G.picks[m.b]];
   if (m.round === 1) { cat = G.picks[m.a]; owner = m.a; }
   else if (m.round === 2) { cat = G.picks[m.b]; owner = m.b; }
-  else { const pool = DUEL_CATS.filter(c => c.id !== G.picks[m.a] && c.id !== G.picks[m.b]); cat = pool[Math.floor(Math.random() * pool.length)].id; }
+  else cat = m.decider || randomCat(used);
   const c = catById(cat);
   if (isPhoto(c)) {
     m.phase = "loading"; m.cat = cat; renderLoading(c); pub();
     await Promise.race([prefetchCat(cat), new Promise(r => setTimeout(r, 12000))]);
-    if (c.items.filter(it => WIKI[it[0]] && WIKI[it[0]].url).length < 8) {   // offline or too few photos: swap in a picture category
-      cat = DUEL_CATS.filter(x => !isPhoto(x) && x.id !== G.picks[m.a] && x.id !== G.picks[m.b])[0].id;
-      return startDeck(m, catById(cat), owner);
+    if (c.items.filter(it => photoOK(c, it[0])).length < 8) {   // offline or too few photos: swap in a random picture category
+      const pool = themePool().filter(x => !isPhoto(x) && !used.includes(x.id)), all = DUEL_CATS.filter(x => !isPhoto(x) && !used.includes(x.id));
+      return startDeck(m, pickOne(pool.length ? pool : all), owner);
     }
   }
   startDeck(m, c, owner);
 }
 function startDeck(m, c, owner) {
-  const cat = c.id;
-  // Progressive difficulty: all easy items first, then medium, then hard; shuffled inside each level
-  const lv = [[], [], []]; c.items.forEach((it, i) => { if (!isPhoto(c) || (WIKI[it[0]] && WIKI[it[0]].url)) lv[itemLevel(c.id, it[0])].push(i); });
-  m.cat = cat; m.owner = owner; m.deck = [...shuffle(lv[0]), ...shuffle(lv[1]), ...shuffle(lv[2])]; m.pos = 0;
+  // Progressive difficulty from the chosen start level (shuffled inside each level):
+  // easy → medium → hard; medium → hard → easy; hard → medium → easy
+  const lv = [[], [], []]; c.items.forEach((it, i) => { if (photoOK(c, it[0])) lv[itemLevel(c.id, it[0])].push(i); });
+  const order = { e: [0, 1, 2], m: [1, 2, 0], h: [2, 1, 0] }[m.diff || "e"];
+  m.cat = c.id; m.owner = owner; m.deck = order.flatMap(l => shuffle(lv[l])); m.pos = 0;
   m.turn = owner ? (owner === m.a ? m.b : m.a) : m.a;       // the player facing the other's category starts
   m.clocks = { [m.a]: CLOCK_MS, [m.b]: CLOCK_MS };
   m.log = []; m.running = false; m.reveal = null; m.phase = "count"; m.countUntil = Date.now() + 3000;
@@ -439,7 +489,15 @@ function renderLoading(c) {
   $("#app").innerHTML = `<div class="tv dots"><div class="pad res"><span class="tag">الجولة ${M().round}</span><h2 class="extrude">${esc(c.name)}</h2><div style="font-weight: 700; font-size: 26px;">عم نحمّل الصور…</div><div class="row"><button type="button" class="btn" data-act="restart">إعادة المبارزة</button></div></div></div>`;
 }
 function curItem() { const m = M(), c = catById(m.cat); return c.items[m.deck[m.pos % m.deck.length]]; }
-function curLevel() { const m = M(); return m.pos >= m.deck.length ? 2 : itemLevel(m.cat, curItem()[0]); }
+function curLevel() { const m = M(); return itemLevel(m.cat, curItem()[0]); }
+// TV button for a wrong or unclear picture: skip it with no penalty and never show it again on this TV
+function badPicture() {
+  const m = M(), c = catById(m.cat), it = curItem();
+  if (isPhoto(c)) { WIKI[wk(c, it[0])] = { url: null, bad: true, t: Date.now() }; store.set(WKEY, WIKI); }
+  if (m.deck.length > 1) m.deck.splice(m.pos % m.deck.length, 1); else advance();
+  m.reveal = null; m.lastTick = Date.now();
+  saveG(); renderDuel(); pub();
+}
 function advance() { const m = M(); m.pos++; }
 function addLog(pid, text, v) { const m = M(); m.log.push({ pid, text, v }); if (m.log.length > 4) m.log.shift(); }
 
@@ -472,8 +530,7 @@ function endMatch() {
   // Winner stays at the front, the loser goes to the back of the line, both choose again
   const m = M(), w = m.winner, l = other(w);
   G.queue = [w, ...G.queue.filter(x => x !== w && x !== l), l];
-  delete G.picks[w]; delete G.picks[l]; delete G.surprise[w]; delete G.surprise[l];
-  const [na, nb] = G.queue; if (na && nb && G.picks[na] && G.picks[na] === G.picks[nb]) delete G.picks[nb];   // the new pair can't share a category
+  clearSetup();                                         // the new pair chooses a theme, a difficulty and categories again
   G.match = null; saveG(); renderHost(); pub();
 }
 function tick() {
@@ -497,12 +554,12 @@ function pub() {
   const m = M();
   const state = {
     players: G.players.map(p => ({ pid: p.pid, name: p.name, g: p.g, stars: G.stars[p.pid] || 0, pick: G.surprise[p.pid] ? "random" : (G.picks[p.pid] || null) })),
-    queue: G.queue, phase: m ? m.phase : "lobby"
+    queue: G.queue, phase: m ? m.phase : "lobby", setup: G.setup, offer: G.offer || null, theme: G.theme || null, diff: G.diff || null, draw: G.draw || null
   };
   if (m) {
     const it = (m.phase === "duel" || m.phase === "count") && m.deck ? curItem() : null, c = catById(m.cat);
     Object.assign(state, { a: m.a, b: m.b, score: m.score, round: m.round, cat: m.cat, owner: m.owner, turn: m.turn, running: m.running,
-      clocks: m.clocks, kind: isPhoto(c) ? "url" : c.kind, pic: it ? (isPhoto(c) ? (WIKI[it[0]] || {}).url : it[0]) : null, prompt: c.prompt, level: it ? curLevel() : 0, lastOut: m.lastOut || null,
+      clocks: m.clocks, kind: isPhoto(c) ? "url" : c.kind, pic: it ? (isPhoto(c) ? wrec(c, it[0]).url : it[0]) : null, prompt: c.prompt, level: it ? curLevel() : 0, lastOut: m.lastOut || null,
       winner: m.winner || null, roundWinner: m.roundWinner || null, preds: m.preds, last: m.log[m.log.length - 1] || null, streak: m.winner ? G.streak[m.winner] : 0 });
   }
   send("state", state);
@@ -518,23 +575,37 @@ function renderHost() {
 }
 function catCard(pid, label) {
   if (!pid) return `<div class="pcard empty"><span class="lbl">${label}</span><span class="who" style="color: rgba(17,17,17,.35);">…</span><span class="lbl">بنستنى لاعب</span></div>`;
-  const c = catById(G.picks[pid]), g = gOf(pid);
-  if (c && G.surprise[pid]) return `<div class="pcard"><span class="lbl">${label}</span><span class="who">${esc(nm(pid))}</span>
+  const c = catById(G.picks[pid]), g = gOf(pid), ok = `<span style="font-weight: 700; font-size: 16px; color: var(--green);">✓ ${gx(g, "جاهز", "جاهزة")}`;
+  const head = `<span class="lbl">${label}</span><span class="who">${esc(nm(pid))}</span>`;
+  if (!G.offer) {                                    // step 1: theme and difficulty
+    const st = G.setup[pid];
+    if (st && st.ok) return `<div class="pcard">${head}<div class="cat"><div><div style="font-weight: 700; font-size: 14px; color: var(--paper);">${gx(g, "اختار", "اختارت")}</div><div class="cn">${esc(THEME_NAME(st.theme))} · ${DIFF_NAME[st.diff]}</div></div></div>${ok}</span></div>`;
+    return `<div class="pcard">${head}<div class="cat wait"><div class="cn">${gx(g, "عم يختار الموضوع والصعوبة…", "عم تختار الموضوع والصعوبة…")}</div></div><span class="lbl">على التلفون</span></div>`;
+  }
+  if (c && G.surprise[pid]) return `<div class="pcard">${head}
     <div class="cat"><span class="pthumb" style="font-size: 26px;">؟</span><div><div style="font-weight: 700; font-size: 14px; color: var(--paper);">${gx(g, "فئته", "فئتها")}</div><div class="cn">مفاجأة</div></div></div>
-    <span style="font-weight: 700; font-size: 16px; color: var(--green);">✓ ${gx(g, "جاهز", "جاهزة")} · فئة عشوائية بتنكشف بجولتها</span></div>`;
-  return `<div class="pcard"><span class="lbl">${label}</span><span class="who">${esc(nm(pid))}</span>
-    ${c ? `<div class="cat">${catThumb(c)}<div><div style="font-weight: 700; font-size: 14px; color: var(--paper);">${gx(g, "فئته", "فئتها")}</div><div class="cn">${esc(c.name)}</div></div></div>
-          <span style="font-weight: 700; font-size: 16px; color: var(--green);">✓ ${gx(g, "جاهز", "جاهزة")}</span>`
-        : `<div class="cat wait"><div class="cn">${gx(g, "عم يختار…", "عم تختار…")}</div></div><span style="font-weight: 700; font-size: 16px;">${gx(g, "بيختار", "بتختار")} من ${DUEL_CATS.length} فئات بالصور</span>`}</div>`;
+    ${ok} · فئة عشوائية بتنكشف بجولتها</span></div>`;
+  return `<div class="pcard">${head}
+    ${c ? `<div class="cat">${catThumb(c)}<div><div style="font-weight: 700; font-size: 14px; color: var(--paper);">${gx(g, "فئته", "فئتها")}</div><div class="cn">${esc(c.name)}</div></div></div>${ok}</span>`
+        : `<div class="cat wait"><div class="cn">${gx(g, "عم يختار فئته…", "عم تختار فئتها…")}</div></div><span class="lbl">${gx(g, "بيختار", "بتختار")} من ${G.offer.length} فئات</span>`}</div>`;
+}
+function setupBar() {
+  if (!G.offer) return `<div class="setupbar"><span style="font-weight: 700;">كل لاعب بيختار موضوع وصعوبة على تلفونه. إذا اختلفوا، القرعة بتقرّر.</span></div>`;
+  const d = G.draw, who = pid => pid ? `قرعة: ${esc(nm(pid))}` : "";
+  return `<div class="setupbar"><span>الموضوع</span><b>${esc(THEME_NAME(G.theme))}</b>${d && d.tBy ? `<span class="chip">${who(d.tBy)}</span>` : ""}
+    <span style="margin-inline-start: 12px;">الصعوبة</span><b>${DIFF_NAME[G.diff]}</b>${d && d.dBy ? `<span class="chip">${who(d.dBy)}</span>` : ""}
+    <span style="flex-basis: 100%; height: 0;"></span><span style="font-weight: 700;">الفئات:</span>${G.offer.map(id => `<span class="chip">${esc(catById(id).name)}</span>`).join("")}<span class="chip">فئة مفاجأة</span></div>`;
 }
 function renderLobby() {
   const [a, b] = G.queue, wait = G.queue.slice(2), ready = a && b && G.picks[a] && G.picks[b];
+  const setupDone = a && b && G.offer, needRandom = a && b && (!G.offer || !G.picks[a] || !G.picks[b]);
   $("#app").innerHTML = `<div class="tv dots"><div class="pad lobby">
     <div class="lhead">
       <h1 class="extrude">مبارزة</h1>
       <div class="codebox"><div class="qr" id="qr"></div><div><div style="font-weight: 700; font-size: 14px; color: var(--paper);">رمز الغرفة</div><div class="code ltr">${G.room}</div>
         <div style="font-weight: 500; font-size: 13px; color: var(--paper);">امسح الرمز بتلفونك</div></div></div>
     </div>
+    ${a && b ? setupBar() : ""}
     <div class="versus">
       ${catCard(a, "اللاعب الأول")}
       <div class="vs"><b>ضد</b><span style="font-weight: 700; font-size: 15px; line-height: 1.6;">أفضل من 3 جولات<br>والأسئلة بتصعب</span></div>
@@ -542,7 +613,7 @@ function renderLobby() {
     </div>
     <div class="row" style="justify-content: space-between;">
       <div class="queue">${wait.length ? `<span style="font-weight: 900; font-size: 20px;">بالدور:</span>` + wait.map(p => `<span class="chip">${esc(nm(p))}${G.stars[p] ? `<span class="stars">★${G.stars[p]}</span>` : ""}<button type="button" class="x" data-rm="${p}" aria-label="شيل ${esc(nm(p))}">✕</button></span>`).join("") + `<span style="font-weight: 500; font-size: 16px;">اللي بيربح بيضل، والجاي بالدور بيتحدّاه</span>` : ""}</div>
-      <div class="row"><button type="button" class="btn" data-act="reset">ابدأ من جديد</button>${a && b && (!G.picks[a] || !G.picks[b]) ? `<button type="button" class="btn" data-act="randomize">اختيار عشوائي</button>` : ""}<button type="button" class="btn dark big" data-act="start" ${ready ? "" : "disabled"}>يلا نتبارز</button></div>
+      <div class="row"><button type="button" class="btn" data-act="reset">ابدأ من جديد</button>${setupDone ? `<button type="button" class="btn" data-act="newtheme">موضوع جديد</button>` : ""}${needRandom ? `<button type="button" class="btn" data-act="randomize">اختيار عشوائي</button>` : ""}<button type="button" class="btn dark big" data-act="start" ${ready ? "" : "disabled"}>يلا نتبارز</button></div>
     </div>
     <div class="credits" style="color: var(--deep);">${esc(DUEL_CREDITS)}</div>
   </div></div>`;
@@ -551,40 +622,37 @@ function renderLobby() {
 function clockHTML(pid) {
   const m = M(), on = m.turn === pid && m.phase === "duel", g = gOf(pid);
   const tag = on ? gx(g, "دوره", "دورها") : gx(g, "بيستنى", "بتستنى");
-  return `<div class="clock ${on ? "on" : ""}" id="clk-${pid}"><div style="display: flex; flex-direction: column; gap: 4px;"><span class="tag">${tag}</span><span class="nm">${esc(nm(pid))}</span></div>
+  const pips = [0, 1].map(i => `<span class="pip ${m.score[pid] > i ? "on" : ""}"></span>`).join("");
+  return `<div class="clock ${on ? "on" : ""}" id="clk-${pid}"><div class="who"><span class="tag">${tag} ${pips}</span><span class="nm">${esc(nm(pid))}</span></div>
     <div class="t ltr" data-t></div><div class="bar"><i data-b></i></div></div>`;
 }
 function renderDuel() {
   const m = M(), c = catById(m.cat), it = curItem(), lvl = curLevel();
-  const pips = pid => [0, 1].map(i => `<span class="pip ${m.score[pid] > i ? "on" : ""}"></span>`).join("");
   const ownerTxt = m.owner ? "فئة " + nm(m.owner) : "فئة عشوائية";
+  const credit = isPhoto(c) ? wrec(c, it[0]).credit : "";
   const log = m.log.map(l => `<span>${esc(nm(l.pid))}${l.text ? ` · «${esc(l.text)}»` : ""}<span class="v ${l.v}">${l.v === "ok" ? "✓" : l.v === "no" ? "✗" : "مرّر −3"}</span></span>`).join("");
   $("#app").innerHTML = `<div class="tv duel">
     <div class="dtop">
-      <div class="side">${esc(nm(m.a))} ${pips(m.a)}</div>
-      <div class="dcat"><span class="meta">الجولة ${m.round} من 3 · ${esc(ownerTxt)}</span><span class="name">${esc(c.name)}</span></div>
-      <div class="side b">${pips(m.b)} ${esc(nm(m.b))}</div>
-    </div>
-    <div class="dmain">
       ${clockHTML(m.a)}
-      <div class="stage">
-        <div class="frame">
-          <span class="lvl">${["سهل", "متوسط", "صعب"][lvl]} ${[0, 1, 2].map(i => `<i class="${i <= lvl ? "on" : ""}"></i>`).join("")}</span>
-          ${m.phase === "duel" ? picHTML(c.kind, it[0]) : ""}
-          <span class="q">${esc(c.prompt)}</span>
-          ${isPhoto(c) && WIKI[it[0]] && WIKI[it[0]].credit ? `<span class="pcredit">الصورة: ${esc(WIKI[it[0]].credit)}${c.kind === "wiki" ? " · ويكيميديا كومنز" : ""}</span>` : ""}
-          ${m.reveal ? `<span class="reveal">كان: ${esc(m.reveal)}</span>` : ""}
-          ${m.phase === "duel" && !m.running ? `<div class="paused">واقف</div>` : ""}
-        </div>
-        <div class="log">${log}</div>
-      </div>
+      <div class="dcat"><span class="meta">الجولة ${m.round} من 3 · ${esc(ownerTxt)}</span><span class="name">${esc(c.name)}</span></div>
       ${clockHTML(m.b)}
+    </div>
+    <div class="stage">
+      <div class="frame">
+        <div class="fhead"><span class="q">${esc(c.prompt)}</span><span class="lvl">${["سهل", "متوسط", "صعب"][lvl]} ${[0, 1, 2].map(i => `<i class="${i <= lvl ? "on" : ""}"></i>`).join("")}</span></div>
+        <div class="pbox">${m.phase === "duel" ? itemPic(c, it[0]) : ""}</div>
+        ${credit ? `<div class="ffoot"><span class="pcredit">الصورة: ${esc(credit)}</span></div>` : ""}
+        ${m.reveal ? `<span class="reveal">كان: ${esc(m.reveal)}</span>` : ""}
+        ${m.phase === "duel" && !m.running ? `<div class="paused">واقف</div>` : ""}
+      </div>
+      <div class="log">${log}</div>
     </div>
     <div class="dbot">
       <span class="hint">الجواب الصح بيقلب الدور. التمرير بيكلّف 3 ثواني. اللي بيخلص وقته بيخسر الجولة.</span>
       <div class="row">
         <button type="button" class="btn ok" data-act="right">صح</button>
         <button type="button" class="btn" data-act="pass">مرّر</button>
+        <button type="button" class="btn ghost" data-act="badpic" title="بتتخطّى الصورة بدون خصم، وما بترجع تطلع">صورة غلط</button>
         <button type="button" class="btn ghost" data-act="pause">${m.running ? "وقّف" : "كمّل"}</button>
         <button type="button" class="btn ghost" data-act="restart">إعادة المبارزة</button>
       </div>
@@ -628,7 +696,7 @@ function renderResult() {
 }
 function hostClick(e) {
   const rm = e.target.closest("[data-rm]");
-  if (rm) { const p = rm.dataset.rm; G.players = G.players.filter(x => x.pid !== p); G.queue = G.queue.filter(x => x !== p); delete G.picks[p]; saveG(); renderHost(); return pub(); }
+  if (rm) { const p = rm.dataset.rm; G.players = G.players.filter(x => x.pid !== p); G.queue = G.queue.filter(x => x !== p); delete G.picks[p]; delete G.setup[p]; saveG(); renderHost(); return pub(); }
   const b = e.target.closest("[data-act]"); if (!b) return;
   const a = b.dataset.act, m = M();
   if (a === "restart" || a === "reset") {
@@ -636,31 +704,32 @@ function hostClick(e) {
       b.dataset.sure = "1"; const was = b.textContent; b.textContent = a === "reset" ? "بتمسح كل شي؟ اضغط كمان مرة" : "متأكد؟ اضغط كمان مرة";
       setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.textContent = was; } }, 3000); return;
     }
-    if (a === "restart") { G.match = null; }   // players, line and categories stay
-    else { G.players = []; G.queue = []; G.picks = {}; G.surprise = {}; G.match = null; G.streak = {}; G.stars = {}; }
+    if (a === "restart") { G.match = null; }   // players, line, theme and categories stay
+    else { G.players = []; G.queue = []; clearSetup(); G.match = null; G.streak = {}; G.stars = {}; }
     saveG(); renderHost(); return pub();
   }
   if (a === "start") return startMatch();
-  if (a === "randomize") return randomizePicks();
+  if (a === "randomize") return G.offer ? randomizePicks() : randomizeSetup();
+  if (a === "newtheme") { if (!m || m.phase === "lobby") { clearSetup(); saveG(); renderHost(); pub(); } return; }
   if (a === "next") return nextRound();
   if (a === "done") return endMatch();
   if (!m || m.phase !== "duel") return;
   if (a === "pause") { m.running = !m.running; m.lastTick = Date.now(); saveG(); renderDuel(); return pub(); }
   if (!m.running) return;
   if (a === "right") answer("", true);
+  if (a === "badpic") badPicture();
   if (a === "pass") doPass();
 }
 
 // ======================= PHONE =======================
 const PKEY = "mbz-player-v1";
-let P, S = null, lastState = 0, stateAt = 0, lastView = "", pickG = null, editing = false, rec = null, micOn = false, flashMsg = null;
+let P, S = null, lastState = 0, stateAt = 0, lastView = "", pickG = null, editing = false, selTheme = null, selDiff = null;
 const me = () => S && S.players.find(x => x.pid === P.pid);
 const spName = pid => ((S && S.players.find(x => x.pid === pid)) || {}).name || "";
 const spG = pid => ((S && S.players.find(x => x.pid === pid)) || {}).g || "m";
 const myG = () => P.g === "f" ? "f" : "m";
 const inMatch = () => S && S.a && (S.a === P.pid || S.b === P.pid);
 const opp = () => S.a === P.pid ? S.b : S.a;
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 function initPlayer() {
   P = store.get(PKEY) || {}; if (!P.pid) P.pid = rid(); store.set(PKEY, P);
@@ -676,7 +745,6 @@ function initPlayer() {
       if (!me() && P.name && P.g && !editing) send("join", { pid: P.pid, name: P.name, g: P.g });
       const mineNow = S.phase === "duel" && S.turn === P.pid;
       if (mineNow && !wasMine && navigator.vibrate) navigator.vibrate(80);
-      if (!mineNow) stopMic();
       render();
     },
     status: st => { if (st === "SUBSCRIBED") { if (P.name && P.g) send("join", { pid: P.pid, name: P.name, g: P.g }); send("hello", {}); } render(); }
@@ -702,23 +770,36 @@ function onTap(e) {
   const c = e.target.closest("[data-cat]"); if (c && !c.disabled) { send("pick", { pid: P.pid, cat: c.dataset.cat }); c.classList.add("sel"); }
   const pr = e.target.closest("[data-pred]"); if (pr) { send("pred", { pid: P.pid, who: pr.dataset.pred }); pr.classList.add("sel"); }
   if (e.target.closest("#passBtn")) send("pass", { pid: P.pid });
-  if (e.target.closest("#micBtn")) micOn ? stopMic() : startMic();
+  const th = e.target.closest("[data-theme]"); if (th) { selTheme = th.dataset.theme; sendSetup(false); }
+  const df = e.target.closest("[data-diff]"); if (df) { selDiff = df.dataset.diff; sendSetup(false); }
+  if (e.target.closest("#setupOk") && selTheme && selDiff) sendSetup(true);
+  if (e.target.closest("#setupEdit")) sendSetup(false);
   if (e.target.closest("#rename")) { editing = true; pickG = P.g; lastView = ""; render(); }
 }
 
-// Speak answers hands-free during your turn: every phrase heard is sent as an answer
-function startMic() {
-  if (!SR) return;
-  try { rec && rec.abort(); } catch (e) {}
-  rec = new SR(); rec.lang = "ar-JO"; rec.continuous = true; rec.interimResults = false;
-  rec.onresult = e => { for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) { const t = e.results[i][0].transcript.trim(); if (t) send("ans", { pid: P.pid, text: t }); } };
-  rec.onend = () => { if (micOn && S && S.phase === "duel" && S.turn === P.pid) { try { rec.start(); } catch (e) { micOn = false; render(); } } else { micOn = false; paintMic(); } };
-  rec.onerror = () => {};
-  try { rec.start(); micOn = true; } catch (e) { micOn = false; }
-  paintMic();
+// Theme and difficulty choices go to the TV as they're made; تمام locks them in
+function sendSetup(ok) { send("setup", { pid: P.pid, theme: selTheme, diff: selDiff, ok }); if (S && S.setup) S.setup[P.pid] = { theme: selTheme, diff: selDiff, ok }; lastView = ""; render(); }
+function setupView() {
+  const g = myG(), mine = (S.setup || {})[P.pid] || {};
+  if (selTheme === null && mine.theme) selTheme = mine.theme;
+  if (selDiff === null && mine.diff) selDiff = mine.diff;
+  const oppId = S.queue[S.queue.indexOf(P.pid) === 0 ? 1 : 0];
+  if (mine.ok) {
+    const os = (S.setup || {})[oppId];
+    return `<div class="msg"><div class="big">${gx(g, "تمام!", "تمام!")}</div>
+      <span class="badge">${esc(THEME_NAME(mine.theme))} · ${DIFF_NAME[mine.diff]}</span>
+      <div class="sub">${oppId ? (os && os.ok ? "" : `بنستنى ${esc(spName(oppId))}…`) : "بنستنى خصم…"}<br>إذا اختلفتوا، القرعة بتقرّر</div>
+      <button type="button" class="btn" id="setupEdit">${gx(g, "غيّر اختيارك", "غيّري اختيارك")}</button></div>`;
+  }
+  return `<div class="card"><h2>${gx(g, "اختار الموضوع", "اختاري الموضوع")}</h2>
+    <div class="sub">الفئات رح تطلع من الموضوع اللي بتختاروه.</div>
+    <div class="opts">${DUEL_THEMES.map(t => `<button type="button" class="btn ${selTheme === t.id ? "sel" : ""}" data-theme="${t.id}" aria-pressed="${selTheme === t.id}">${esc(t.name)}</button>`).join("")}</div>
+    <h3>الصعوبة</h3>
+    <div class="sub">من وين نبلّش؟ الأسئلة بتصعب مع الوقت.</div>
+    <div class="opts three">${["e", "m", "h"].map(d => `<button type="button" class="btn ${selDiff === d ? "sel" : ""}" data-diff="${d}" aria-pressed="${selDiff === d}">${DIFF_NAME[d]}</button>`).join("")}</div>
+    <button type="button" class="send" id="setupOk" ${selTheme && selDiff ? "" : "disabled"} style="margin-top: 8px;">تمام</button>
+  </div>`;
 }
-function stopMic() { micOn = false; try { rec && rec.stop(); } catch (e) {} paintMic(); }
-function paintMic() { const b = document.getElementById("micBtn"); if (b) { b.classList.toggle("on", micOn); b.querySelector("span").textContent = micOn ? "عم بسمع… احكي" : "احكي الجواب"; } }
 
 // Local countdown between updates so the clock on the phone moves smoothly
 function myClockMs(pid) { if (!S || !S.clocks) return 0; let ms = S.clocks[pid]; if (S.phase === "duel" && S.running && S.turn === pid) ms -= Date.now() - stateAt; return ms; }
@@ -736,9 +817,10 @@ function catPicker(locked) {
   const pos = S.queue.indexOf(P.pid), oppId = pos === 0 ? S.queue[1] : pos === 1 ? S.queue[0] : null;
   const oppPick = oppId ? (S.players.find(x => x.pid === oppId) || {}).pick : null;
   const mine = (me() || {}).pick, g = myG();
+  const draw = S.draw ? [S.draw.tBy && "الموضوع", S.draw.dBy && "الصعوبة"].filter(Boolean).join(" و") : "";
   return `<div class="card"><h2>${gx(g, "اختار فئتك", "اختاري فئتك")}</h2>
-    <div class="sub">جولة كاملة رح تكون بفئتك، والصور بتصعب مع الوقت.</div>
-    <div class="cats"><button type="button" class="btn ${mine === "random" ? "sel" : ""}" data-cat="random" style="grid-column: 1 / -1;"><span class="pthumb" style="font-size: 22px;">؟</span>${gx(g, "فاجئني: فئة عشوائية", "فاجئيني: فئة عشوائية")}</button>${DUEL_CATS.map(c => `<button type="button" class="btn ${mine === c.id ? "sel" : ""}" data-cat="${c.id}" ${(oppPick === c.id || locked) ? "disabled" : ""}>${catThumb(c)}${esc(c.name)}</button>`).join("")}</div>
+    <div class="sub"><b>${esc(THEME_NAME(S.theme))} · ${DIFF_NAME[S.diff]}</b>${draw ? ` (${draw} بالقرعة)` : ""}. جولة كاملة رح تكون بفئتك.</div>
+    <div class="cats"><button type="button" class="btn ${mine === "random" ? "sel" : ""}" data-cat="random" style="grid-column: 1 / -1;"><span class="pthumb" style="font-size: 22px;">؟</span>${gx(g, "فاجئني: فئة عشوائية", "فاجئيني: فئة عشوائية")}</button>${S.offer.map(catById).map(c => `<button type="button" class="btn ${mine === c.id ? "sel" : ""}" data-cat="${c.id}" ${(oppPick === c.id || locked) ? "disabled" : ""}>${catThumb(c)}${esc(c.name)}</button>`).join("")}</div>
     ${oppPick && oppPick !== "random" ? `<div class="sub" style="font-weight: 700;">${gx(g, "ما بتقدر تختار", "ما بتقدري تختاري")} فئة ${esc(spName(oppId))} (${esc(catById(oppPick).name)})</div>` : ""}
   </div>`;
 }
@@ -772,9 +854,8 @@ function render() {
         key = "turn" + S.pic;
         html = `<div class="turn"><div class="top" data-clock="${P.pid}"><span style="font-weight: 700;">دورك!</span><span class="t ltr"></span><div class="bar"><i></i></div></div>
           <div class="body">
-            <div class="picrow">${picHTML(S.kind, S.pic)}<span>${esc(S.prompt)}</span></div>
-            ${SR ? `<button type="button" class="mic ${micOn ? "on" : ""}" id="micBtn"><span>${micOn ? "عم بسمع… احكي" : "احكي الجواب"}</span><small>احكي وبينبعت الجواب لحاله</small></button>` : ""}
-            <form class="ansrow" data-f="ans" autocomplete="off"><label for="f-ans" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">الجواب</label><input id="f-ans" placeholder="أو اكتب الجواب"><button type="submit">إبعت</button></form>
+            <div class="picwrap"><div class="pbox">${picHTML(S.kind, S.pic)}</div><span>${esc(S.prompt)}</span></div>
+            <form class="ansrow" data-f="ans" autocomplete="off"><label for="f-ans" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">الجواب</label><input id="f-ans" placeholder="اكتب الجواب"><button type="submit">إبعت</button></form>
             <div class="flash ${S.last && S.last.pid === P.pid ? S.last.v : ""}">${S.last && S.last.pid === P.pid && S.last.v === "no" ? "✗ «" + esc(S.last.text) + "» غلط، جرّب كمان" : ""}</div>
             <button type="button" class="pass" id="passBtn">مرّر · −3 ثواني</button>
           </div></div>`;
@@ -794,17 +875,18 @@ function render() {
     const w = S.phase === "matchEnd" ? S.winner : S.roundWinner, won = w === P.pid;
     key = "res" + S.phase + w;
     if (inMatch()) html = `<div class="msg ${won ? "gold" : ""}"><div class="big">${won ? (S.phase === "matchEnd" ? gx(g, "ربحت المبارزة!", "ربحتي المبارزة!") : gx(g, "ربحت الجولة!", "ربحتي الجولة!")) : (S.phase === "matchEnd" ? gx(g, "خسرت المبارزة", "خسرتي المبارزة") : gx(g, "خسرت الجولة", "خسرتي الجولة"))}</div>
-      <div class="sub">${S.phase === "matchEnd" ? (won ? gx(g, "إنت بتضل، وبتختار فئة جديدة", "إنتي بتضلي، وبتختاري فئة جديدة") : gx(g, "رجعت عالدور", "رجعتي عالدور")) : "الجولة الجاية قريبًا"}</div></div>`;
+      <div class="sub">${S.phase === "matchEnd" ? (won ? gx(g, "إنت بتضل، وبتختار موضوع وفئة من جديد", "إنتي بتضلي، وبتختاري موضوع وفئة من جديد") : gx(g, "رجعت عالدور", "رجعتي عالدور")) : "الجولة الجاية قريبًا"}</div></div>`;
     else html = `<div class="msg"><div class="big">${esc(spName(w))} ${S.phase === "matchEnd" ? gx(spG(w), "ربح المبارزة", "ربحت المبارزة") : gx(spG(w), "ربح الجولة", "ربحت الجولة")}</div>
       ${S.phase === "matchEnd" && S.preds && S.preds[P.pid] ? `<div class="sub">${S.preds[P.pid] === w ? "توقّعك صح! ★" : "توقّعك ما زبط"}</div>` : ""}</div>`;
   } else {
-    // lobby: the two at the front of the line pick categories; everyone else can pick early
+    // lobby: the two at the front of the line choose a theme and difficulty, then a category each; everyone else waits
     const pos = S.queue.indexOf(P.pid);
-    if (pos <= 1 && pos >= 0) { key = "pick" + (m && m.pick) + JSON.stringify(S.players.map(p => p.pick)); html = catPicker(false); }
-    else { key = "queue" + pos + (m && m.pick); html = `<div class="msg"><div class="big">${gx(g, "إنت بالدور", "إنتي بالدور")}</div><div class="sub">قدّامك ${Math.max(0, pos - 1)} ${pos - 1 === 1 ? "لاعب" : "لاعبين"}</div></div>` + catPicker(false).replace('class="card"', 'class="card" style="flex: 0 0 auto;"'); }
+    if (pos <= 1 && pos >= 0 && !S.offer) { key = "setup" + JSON.stringify(S.setup || {}) + S.queue.slice(0, 2); html = setupView(); }
+    else if (pos <= 1 && pos >= 0) { selTheme = selDiff = null; key = "pick" + (m && m.pick) + JSON.stringify(S.players.map(p => p.pick)) + S.offer; html = catPicker(false); }
+    else { selTheme = selDiff = null; key = "queue" + pos; html = `<div class="msg"><div class="big">${gx(g, "إنت بالدور", "إنتي بالدور")}</div><div class="sub">قدّامك ${Math.max(0, pos - 1)} ${pos - 1 === 1 ? "لاعب" : "لاعبين"}</div>${S.offer ? `<span class="badge">${esc(THEME_NAME(S.theme))} · ${DIFF_NAME[S.diff]}</span>` : ""}<div class="sub">لما تبلّش المبارزة ${gx(g, "بتقدر تتوقّع", "بتقدري تتوقّعي")} مين رح يربح</div></div>`; }
   }
   const isForm = key === "code" || key === "name" || key.startsWith("turn");
-  if (key !== lastView || !isForm) { body.innerHTML = html; if (key.startsWith("turn") && !SR) { const i = $("#f-ans"); if (i) i.focus(); } }
+  if (key !== lastView || !isForm) { body.innerHTML = html; if (key.startsWith("turn") && key !== lastView) { const i = $("#f-ans"); if (i) i.focus(); } }
   else if (key.startsWith("turn")) { const fl = body.querySelector(".flash"); if (fl) { const tmp = document.createElement("div"); tmp.innerHTML = html; const nf = tmp.querySelector(".flash"); fl.className = nf.className; fl.innerHTML = nf.innerHTML; } }
   lastView = key;
   foot.innerHTML = joined ? `<button type="button" class="linkbtn" id="rename">تغيير الاسم</button>` : "";

@@ -230,8 +230,6 @@ button { cursor: pointer; }
 .voicehelp { flex-basis: 100%; max-width: 560px; padding: 8px 12px; background: var(--paper); border: 3px solid var(--wine); color: var(--wine); font-weight: 700; font-size: 14px; line-height: 1.6; }
 
 /* mic */
-.btn.mic { align-self: flex-start; }
-.micst { font-weight: 700; font-size: 14px; min-height: 1.4em; }
 
 @media (prefers-reduced-motion: reduce) { .slab.s-ready, .bar .live, .ov.shake, .ov.shake .wcard { animation: none; } * { transition: none !important; } }
 </style>
@@ -790,7 +788,7 @@ const COPY = {
 "الجواب"
 ],
 "intro.answerB": [
-"أول واحد بيضغط عنده 20 ثانية يكتب الجواب أو يحكيه. الجواب الغلط بينقص من نقاطه، وبيرجع الدور للباقي."
+"أول واحد بيضغط عنده 20 ثانية يكتب الجواب. الجواب الغلط بينقص من نقاطه، وبيرجع الدور للباقي."
 ],
 "intro.wagerT": [
 "الرهان"
@@ -1609,23 +1607,6 @@ let P, S = null, lastState = 0, penaltyUntil = 0, pending = false, sentWager = n
     lastView = "", editingName = false, wasWinner = false, sentAns = null, ansDeadline = 0, pickG = null,
     votePick = null, voteEditing = false;
 
-// ---------- Speaking an answer instead of typing it (browser speech recognition) ----------
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let rec = null;
-function micButton() { return SR ? `<button type="button" class="btn mic" id="micBtn">${th("mic.start")}</button><span class="micst" id="micSt" aria-live="polite"></span>` : ""; }
-function startMic() {
-  const inp = document.querySelector("form[data-f=ans] input, form[data-f=fanswer] input"), st = document.getElementById("micSt");
-  if (!SR || !inp) return;
-  try { if (rec) rec.abort(); } catch (e) {}
-  rec = new SR(); rec.lang = "ar-JO"; rec.interimResults = true; rec.maxAlternatives = 1;
-  let heard = false;
-  rec.onresult = e => { heard = true; inp.value = Array.from(e.results).map(r => r[0].transcript).join(" ").trim(); };
-  rec.onerror = () => { if (st) st.textContent = t("mic.error", null, meG()); };
-  rec.onend = () => { rec = null; const b = document.getElementById("micBtn"); if (b) b.classList.remove("sel"); if (st && heard) st.textContent = ""; };
-  try { rec.start(); if (st) st.textContent = t("mic.listening"); const b = document.getElementById("micBtn"); if (b) b.classList.add("sel"); }
-  catch (e) { if (st) st.textContent = t("mic.error", null, meG()); }
-}
-
 const meG = () => P.g === "f" ? "f" : "m";
 const sp = pid => S && S.players.find(x => x.pid === pid);
 const spName = pid => (sp(pid) || {}).name || "";
@@ -1652,7 +1633,6 @@ function initPlayer() {
       tb.classList.toggle("sel", votePick.includes(id)); tb.setAttribute("aria-pressed", String(votePick.includes(id)));
     }
     if (e.target.closest("#voteEdit")) { voteEditing = true; votePick = null; lastView = ""; renderPlayer(); }
-    if (e.target.closest("#micBtn")) startMic();
     const c = e.target.closest("[data-claim]");
     if (c && S) {
       const old = sp(c.dataset.claim); if (!old) return;
@@ -1827,7 +1807,7 @@ function renderPlayer() {
       else { key = "fw"; html = form("fwager", t("pfinal.title"), t("pfinal.wagerLabel", { max: num(myScore) }), t("wager.phoneSend"), { numeric: true, placeholder: "0", sub: `<span>${esc(S.cat)}</span>` }); }
     } else if (F.stage === "answer") {
       if (F.a.includes(P.pid) || sentFin.answer != null) { key = "fa-done"; html = msg(t("phone.sent"), ""); }
-      else { key = "fa"; html = form("fanswer", t("pfinal.answerTitle", null, g), t("phone.answerLabel"), t("pfinal.answerSend"), { extra: micButton() }); }
+      else { key = "fa"; html = form("fanswer", t("pfinal.answerTitle", null, g), t("phone.answerLabel"), t("pfinal.answerSend"), {}); }
     } else { key = "fr"; html = msg(t("pfinal.look", null, g), t("pfinal.lookSub")); }
   } else if (S.phase === "lobby") {
     const mine = (S.votes || {})[P.pid];
@@ -1863,7 +1843,7 @@ function renderPlayer() {
     if (S.answering && sentAns == null) {
       if (lastView !== "ans") ansDeadline = S.ansLeft ? Date.now() + S.ansLeft : 0;
       key = "ans"; html = form("ans", t("phone.yourTurn", null, g), t("phone.answerLabel"), t("phone.send"), {
-        track: !!S.ansLeft, sub: `<span>${esc(S.cat)} · ${num(S.val)}</span><span id="ptSecs"></span>`, extra: micButton()
+        track: !!S.ansLeft, sub: `<span>${esc(S.cat)} · ${num(S.val)}</span><span id="ptSecs"></span>`
       });
     } else { key = "ans-sent"; html = msg(t("phone.sent"), S.judging ? t("phone.reviewing") : ""); }
   } else if (S.phase === "clue" && S.wagerFor) {
