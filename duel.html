@@ -334,6 +334,7 @@ const sfx = {
 function initHost() {
   G = store.get(HKEY);
   if (!G || !G.room) G = { room: newCode(), players: [], queue: [], picks: {}, match: null, streak: {}, stars: {} };
+  if (!G.surprise) G.surprise = {};
   if (G.match && G.match.phase === "duel") G.match.running = false;   // a reload pauses the duel
   saveG(); renderHost();
   connect(G.room, "host", { msg: hostMsg, presence: ps => { G.online = Object.keys(ps); if (!M() || M().phase !== "duel") renderHost(); }, status: st => { if (st === "SUBSCRIBED") pub(); } });
@@ -357,12 +358,20 @@ function hostMsg(ev, p) {
   if (!pf(pid)) return;
   const m = M();
   if (ev === "pick") {
-    const cat = catById(p.cat); if (!cat) return;
     if (m && m.phase !== "lobby" && (pid === m.a || pid === m.b)) return;          // locked once the match starts
     const [a, b] = G.queue;
     const opp = pid === a ? b : pid === b ? a : null;
-    if (opp && G.picks[opp] === cat.id) return;                                    // can't take the opponent's category
-    G.picks[pid] = cat.id; saveG(); renderHost(); prefetchCat(cat.id); return pub();
+    let id;
+    if (p.cat === "random") { id = randomCat([G.picks[opp]]); G.surprise[pid] = true; }
+    else {
+      const cat = catById(p.cat); if (!cat) return;
+      if (opp && G.picks[opp] === cat.id) {
+        if (!G.surprise[opp]) return;                                             // can't take the opponent's category
+        G.picks[opp] = randomCat([cat.id]); prefetchCat(G.picks[opp]);            // their hidden random pick moves aside
+      }
+      id = cat.id; G.surprise[pid] = false;
+    }
+    G.picks[pid] = id; saveG(); renderHost(); prefetchCat(id); return pub();
   }
   if (ev === "pred") {
     if (!m || pid === m.a || pid === m.b || m.phase === "matchEnd") return;
@@ -372,6 +381,15 @@ function hostMsg(ev, p) {
   if (!m || m.phase !== "duel" || !m.running || pid !== m.turn) return;
   if (ev === "ans") answer(String(p.text || "").slice(0, 60), false);
   if (ev === "pass") doPass();
+}
+
+// A random category, avoiding the ones given
+function randomCat(avoid) { const pool = DUEL_CATS.filter(c => !avoid.includes(c.id)); return pool[Math.floor(Math.random() * pool.length)].id; }
+// TV button: random surprise categories for whichever of the two players hasn't picked
+function randomizePicks() {
+  const [a, b] = G.queue;
+  [a, b].forEach((pid, i) => { if (pid && !G.picks[pid]) { const o = i ? a : b; G.picks[pid] = randomCat([G.picks[o]]); G.surprise[pid] = true; prefetchCat(G.picks[pid]); } });
+  saveG(); renderHost(); pub();
 }
 
 function repid(a, b) {
@@ -454,7 +472,7 @@ function endMatch() {
   // Winner stays at the front, the loser goes to the back of the line, both choose again
   const m = M(), w = m.winner, l = other(w);
   G.queue = [w, ...G.queue.filter(x => x !== w && x !== l), l];
-  delete G.picks[w]; delete G.picks[l];
+  delete G.picks[w]; delete G.picks[l]; delete G.surprise[w]; delete G.surprise[l];
   const [na, nb] = G.queue; if (na && nb && G.picks[na] && G.picks[na] === G.picks[nb]) delete G.picks[nb];   // the new pair can't share a category
   G.match = null; saveG(); renderHost(); pub();
 }
@@ -478,7 +496,7 @@ function pub() {
   if (!G) return;
   const m = M();
   const state = {
-    players: G.players.map(p => ({ pid: p.pid, name: p.name, g: p.g, stars: G.stars[p.pid] || 0, pick: G.picks[p.pid] || null })),
+    players: G.players.map(p => ({ pid: p.pid, name: p.name, g: p.g, stars: G.stars[p.pid] || 0, pick: G.surprise[p.pid] ? "random" : (G.picks[p.pid] || null) })),
     queue: G.queue, phase: m ? m.phase : "lobby"
   };
   if (m) {
@@ -501,6 +519,9 @@ function renderHost() {
 function catCard(pid, label) {
   if (!pid) return `<div class="pcard empty"><span class="lbl">${label}</span><span class="who" style="color: rgba(17,17,17,.35);">…</span><span class="lbl">بنستنى لاعب</span></div>`;
   const c = catById(G.picks[pid]), g = gOf(pid);
+  if (c && G.surprise[pid]) return `<div class="pcard"><span class="lbl">${label}</span><span class="who">${esc(nm(pid))}</span>
+    <div class="cat"><span class="pthumb" style="font-size: 26px;">؟</span><div><div style="font-weight: 700; font-size: 14px; color: var(--paper);">${gx(g, "فئته", "فئتها")}</div><div class="cn">مفاجأة</div></div></div>
+    <span style="font-weight: 700; font-size: 16px; color: var(--green);">✓ ${gx(g, "جاهز", "جاهزة")} · فئة عشوائية بتنكشف بجولتها</span></div>`;
   return `<div class="pcard"><span class="lbl">${label}</span><span class="who">${esc(nm(pid))}</span>
     ${c ? `<div class="cat">${catThumb(c)}<div><div style="font-weight: 700; font-size: 14px; color: var(--paper);">${gx(g, "فئته", "فئتها")}</div><div class="cn">${esc(c.name)}</div></div></div>
           <span style="font-weight: 700; font-size: 16px; color: var(--green);">✓ ${gx(g, "جاهز", "جاهزة")}</span>`
@@ -521,7 +542,7 @@ function renderLobby() {
     </div>
     <div class="row" style="justify-content: space-between;">
       <div class="queue">${wait.length ? `<span style="font-weight: 900; font-size: 20px;">بالدور:</span>` + wait.map(p => `<span class="chip">${esc(nm(p))}${G.stars[p] ? `<span class="stars">★${G.stars[p]}</span>` : ""}<button type="button" class="x" data-rm="${p}" aria-label="شيل ${esc(nm(p))}">✕</button></span>`).join("") + `<span style="font-weight: 500; font-size: 16px;">اللي بيربح بيضل، والجاي بالدور بيتحدّاه</span>` : ""}</div>
-      <div class="row"><button type="button" class="btn" data-act="reset">ابدأ من جديد</button><button type="button" class="btn dark big" data-act="start" ${ready ? "" : "disabled"}>يلا نتبارز</button></div>
+      <div class="row"><button type="button" class="btn" data-act="reset">ابدأ من جديد</button>${a && b && (!G.picks[a] || !G.picks[b]) ? `<button type="button" class="btn" data-act="randomize">اختيار عشوائي</button>` : ""}<button type="button" class="btn dark big" data-act="start" ${ready ? "" : "disabled"}>يلا نتبارز</button></div>
     </div>
     <div class="credits" style="color: var(--deep);">${esc(DUEL_CREDITS)}</div>
   </div></div>`;
@@ -616,10 +637,11 @@ function hostClick(e) {
       setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.textContent = was; } }, 3000); return;
     }
     if (a === "restart") { G.match = null; }   // players, line and categories stay
-    else { G.players = []; G.queue = []; G.picks = {}; G.match = null; G.streak = {}; G.stars = {}; }
+    else { G.players = []; G.queue = []; G.picks = {}; G.surprise = {}; G.match = null; G.streak = {}; G.stars = {}; }
     saveG(); renderHost(); return pub();
   }
   if (a === "start") return startMatch();
+  if (a === "randomize") return randomizePicks();
   if (a === "next") return nextRound();
   if (a === "done") return endMatch();
   if (!m || m.phase !== "duel") return;
@@ -716,8 +738,8 @@ function catPicker(locked) {
   const mine = (me() || {}).pick, g = myG();
   return `<div class="card"><h2>${gx(g, "اختار فئتك", "اختاري فئتك")}</h2>
     <div class="sub">جولة كاملة رح تكون بفئتك، والصور بتصعب مع الوقت.</div>
-    <div class="cats">${DUEL_CATS.map(c => `<button type="button" class="btn ${mine === c.id ? "sel" : ""}" data-cat="${c.id}" ${(oppPick === c.id || locked) ? "disabled" : ""}>${catThumb(c)}${esc(c.name)}</button>`).join("")}</div>
-    ${oppPick ? `<div class="sub" style="font-weight: 700;">${gx(g, "ما بتقدر تختار", "ما بتقدري تختاري")} فئة ${esc(spName(oppId))} (${esc(catById(oppPick).name)})</div>` : ""}
+    <div class="cats"><button type="button" class="btn ${mine === "random" ? "sel" : ""}" data-cat="random" style="grid-column: 1 / -1;"><span class="pthumb" style="font-size: 22px;">؟</span>${gx(g, "فاجئني: فئة عشوائية", "فاجئيني: فئة عشوائية")}</button>${DUEL_CATS.map(c => `<button type="button" class="btn ${mine === c.id ? "sel" : ""}" data-cat="${c.id}" ${(oppPick === c.id || locked) ? "disabled" : ""}>${catThumb(c)}${esc(c.name)}</button>`).join("")}</div>
+    ${oppPick && oppPick !== "random" ? `<div class="sub" style="font-weight: 700;">${gx(g, "ما بتقدر تختار", "ما بتقدري تختاري")} فئة ${esc(spName(oppId))} (${esc(catById(oppPick).name)})</div>` : ""}
   </div>`;
 }
 
