@@ -512,7 +512,7 @@ function renderLobby() {
     </div>
     <div class="row" style="justify-content: space-between;">
       <div class="queue">${wait.length ? `<span style="font-weight: 900; font-size: 20px;">بالدور:</span>` + wait.map(p => `<span class="chip">${esc(nm(p))}${G.stars[p] ? `<span class="stars">★${G.stars[p]}</span>` : ""}<button type="button" class="x" data-rm="${p}" aria-label="شيل ${esc(nm(p))}">✕</button></span>`).join("") + `<span style="font-weight: 500; font-size: 16px;">اللي بيربح بيضل، والجاي بالدور بيتحدّاه</span>` : ""}</div>
-      <button type="button" class="btn dark big" data-act="start" ${ready ? "" : "disabled"}>يلا نتبارز</button>
+      <div class="row"><button type="button" class="btn" data-act="reset">ابدأ من جديد</button><button type="button" class="btn dark big" data-act="start" ${ready ? "" : "disabled"}>يلا نتبارز</button></div>
     </div>
     <div class="credits" style="color: var(--deep);">${esc(DUEL_CREDITS)}</div>
   </div></div>`;
@@ -556,6 +556,7 @@ function renderDuel() {
         <button type="button" class="btn ok" data-act="right">صح</button>
         <button type="button" class="btn" data-act="pass">مرّر</button>
         <button type="button" class="btn ghost" data-act="pause">${m.running ? "وقّف" : "كمّل"}</button>
+        <button type="button" class="btn ghost" data-act="restart">إعادة المبارزة</button>
       </div>
     </div>
     ${m.phase === "count" ? `<div class="count" role="status"><div><span id="countN">3</span><small>${esc(nm(m.turn))} ${gx(gOf(m.turn), "بيبلّش", "بتبلّش")} · ${esc(c.name)}</small></div></div>` : ""}
@@ -580,13 +581,13 @@ function renderResult() {
     const nr = m.round + 1;
     const nextTxt = nr === 2 ? `الجولة 2 بفئة ${esc(nm(m.b))}: <b>${esc(catById(G.picks[m.b]).name)}</b>` : `تعادل! الجولة الحاسمة بفئة عشوائية`;
     next = `<div class="row" style="gap: 20px;"><span style="font-weight: 700; font-size: 24px; line-height: 1.6;">${nextTxt}</span></div>
-      <div class="row"><button type="button" class="btn dark big" data-act="next">${nr === 3 ? "الجولة الحاسمة" : "الجولة الجاية"}</button></div>`;
+      <div class="row"><button type="button" class="btn dark big" data-act="next">${nr === 3 ? "الجولة الحاسمة" : "الجولة الجاية"}</button><button type="button" class="btn" data-act="restart">إعادة المبارزة</button></div>`;
   } else {
     const after = G.queue.filter(x => x !== m.a && x !== m.b)[0];
     const st = G.streak[w] || 0;
     next = `<div class="row" style="gap: 16px;">${st > 1 ? `<span class="chip" style="background: var(--ink); color: var(--saffron);">${st} انتصارات ورا بعض</span>` : ""}
         ${after ? `<span style="font-weight: 700; font-size: 24px;">${esc(nm(w))} ${gx(wg, "بيضل", "بتضل")}، و${esc(nm(after))} ${gx(gOf(after), "جاي يتحدّى", "جاية تتحدّى")}</span>` : ""}</div>
-      <div class="row"><button type="button" class="btn dark big" data-act="done">المبارزة الجاية</button></div>`;
+      <div class="row"><button type="button" class="btn dark big" data-act="done">المبارزة الجاية</button><button type="button" class="btn" data-act="restart">إعادة المبارزة</button></div>`;
   }
   $("#app").innerHTML = `<div class="tv dots"><div class="pad res">
     <span class="tag">خلص وقت ${esc(nm(m.lastOut))}${m.reveal ? ` · الجواب كان «${esc(m.reveal)}»` : ""}</span>
@@ -600,6 +601,15 @@ function hostClick(e) {
   if (rm) { const p = rm.dataset.rm; G.players = G.players.filter(x => x.pid !== p); G.queue = G.queue.filter(x => x !== p); delete G.picks[p]; saveG(); renderHost(); return pub(); }
   const b = e.target.closest("[data-act]"); if (!b) return;
   const a = b.dataset.act, m = M();
+  if (a === "restart" || a === "reset") {
+    if (!b.dataset.sure) {
+      b.dataset.sure = "1"; const was = b.textContent; b.textContent = a === "reset" ? "بتمسح كل شي؟ اضغط كمان مرة" : "متأكد؟ اضغط كمان مرة";
+      setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.textContent = was; } }, 3000); return;
+    }
+    if (a === "restart") { G.match = null; }   // players, line and categories stay
+    else { G.players = []; G.queue = []; G.picks = {}; G.match = null; G.streak = {}; G.stars = {}; }
+    saveG(); renderHost(); return pub();
+  }
   if (a === "start") return startMatch();
   if (a === "next") return nextRound();
   if (a === "done") return endMatch();
