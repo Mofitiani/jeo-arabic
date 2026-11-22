@@ -274,17 +274,22 @@ function picHTML(kind, key) {
   if (kind === "url") return key ? `<img class="pic photo" src="${esc(key)}" alt="صورة">` : `<span class="emo" style="font-size: 32px;">…</span>`;
   return `<img class="pic emoji" src="${TWEMOJI_URL(key)}" alt="صورة" data-e="${esc(key)}" onerror="this.outerHTML='<span class=&quot;emo&quot;>'+this.dataset.e+'</span>'">`;
 }
-const isPhoto = c => c && (c.kind === "item" || c.kind === "wikipage" || c.kind === "wiki");
-const catThumb = c => c.kind === "icon" ? `<span class="pthumb" aria-hidden="true">LOGO</span>` : isPhoto(c) ? `<span class="pthumb" aria-hidden="true">${c.prop === "P154" ? "LOGO" : c.kind === "wikipage" ? "كرتون" : "صور"}</span>` : picHTML(c.kind, c.items[0][0]);
+const isPhoto = c => c && (c.kind === "item" || c.kind === "file" || c.kind === "wikipage" || c.kind === "wiki");
+const catThumb = c => c.kind === "icon" ? `<span class="pthumb" aria-hidden="true">LOGO</span>` : isPhoto(c) ? `<span class="pthumb" aria-hidden="true">${c.prop === "P154" ? "LOGO" : c.kind === "wikipage" || c.kind === "file" ? "كرتون" : "صور"}</span>` : picHTML(c.kind, c.items[0][0]);
 
 // ---- Photos from Wikimedia Commons (looked up once, then remembered on this device) ----
 // "item": the Wikipedia article's Wikidata item → its curated photo (P18), logo (P154) or map (P242).
 // "wikipage": the picture at the top of the Wikipedia article (used for cartoon characters).
 const WKEY = "mbz-wiki-v1", WIKI = store.get(WKEY) || {};
-const wk = (c, name) => (c.kind === "item" ? c.prop + ":" : "") + name;
+const wk = (c, name) => (c.kind === "item" ? c.prop + ":" : c.kind === "file" ? "F:" : "") + name;
 // older saved pictures were 800 px: ask for the sharper size instead
 const sharp = r => r && r.url ? { ...r, url: r.url.replace("width=800", "width=1280").replace("/800px-", "/1280px-") } : (r || {});
-const wrec = (c, name) => sharp(WIKI[wk(c, name)]);
+// "file": a picture checked by eye and pinned in DUEL_FILES (title → exact Wikipedia file name)
+const FILE_URL = f => "https://en.wikipedia.org/wiki/Special:FilePath/" + encodeURIComponent(f) + "?width=1280";
+const wrec = (c, name) => {
+  if (c.kind === "file") { const r = WIKI[wk(c, name)]; return r && r.bad ? r : (DUEL_FILES[name] ? { url: FILE_URL(DUEL_FILES[name]), credit: "ويكيبيديا" } : {}); }
+  return sharp(WIKI[wk(c, name)]);
+};
 const photoOK = (c, name) => !isPhoto(c) || !!wrec(c, name).url;
 const itemPic = (c, name) => isPhoto(c) ? picHTML("url", wrec(c, name).url) : picHTML(c.kind, name);
 const stripTags = h => String(h || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
@@ -328,6 +333,7 @@ async function wikiLookup(c, name) {
 // Look up every photo in a category, a few at a time; also warms the browser's image cache
 async function prefetchCat(catId) {
   const c = catById(catId); if (!isPhoto(c)) return;
+  if (c.kind === "file") { c.items.forEach(it => { const u = wrec(c, it[0]).url; if (u) new Image().src = u; }); return; }
   const list = c.items.map(i => i[0]); let k = 0;
   await Promise.all(Array.from({ length: 6 }, async () => { while (k < list.length) { const r = await wikiLookup(c, list[k++]); if (r.url) new Image().src = r.url; } }));
 }

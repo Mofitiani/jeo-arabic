@@ -643,3 +643,6 @@ const DUEL_EN = {
   home: { "🛏": "bed", "🛋": "sofa|couch", "🚪": "door", "🪑": "chair", "🚿": "shower", "🛁": "bathtub|bath", "🧹": "broom", "🧺": "basket", "🧼": "soap", "🪥": "toothbrush", "🔑": "key", "🕯": "candle", "💡": "light bulb|bulb", "📺": "tv|television", "📻": "radio", "⏰": "alarm clock|clock", "🧸": "teddy bear|teddy", "🪞": "mirror", "🪟": "window", "🔨": "hammer", "✂": "scissors", "📚": "books", "☂": "umbrella", "🧦": "socks", "👓": "glasses", "🪴": "plant", "🔦": "flashlight|torch", "🧲": "magnet", "🪣": "bucket" }
 };
 const PEOPLE_CATS = ["egyptcinema", "syriandrama", "lebsingers", "gulfstars", "palart", "hollywood", "popstars", "creators", "arabplayers", "footballnow", "legends", "coaches", "athletes"];
+
+// Pinned character pictures (English title → Wikipedia file name), each checked by eye
+var DUEL_FILES = {};
