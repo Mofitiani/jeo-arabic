@@ -646,3 +646,74 @@ const PEOPLE_CATS = ["egyptcinema", "syriandrama", "lebsingers", "gulfstars", "p
 
 // Pinned character pictures (English title → Wikipedia file name), each checked by eye
 var DUEL_FILES = {};
+
+// ======================================================================
+// Character categories, back with pictures checked by eye and pinned to exact Wikipedia files
+// ======================================================================
+Object.assign(DUEL_FILES, {"Jimmy Kudo":"Shinichi Kudo.png",
+  "Doraemon (character)":"Doraemon character.png",
+  "Popeye":"Popeye transparent.png",
+  "Tom Cat":"Tom Tom and Jerry.png",
+  "Jerry Mouse":"Jerry Mouse.png",
+  "The Smurfs":"2020-09-20-Papa Smurf (cropped).jpg",
+  "Pinocchio":"Pinocchio.jpg",
+  "Alice (Alice's Adventures in Wonderland)":"Alice par John Tenniel 04.png",
+  "Mickey Mouse":"Mickey-Mouse.png",
+  "SpongeBob SquarePants (character)":"SpongeBob character.svg",
+  "Bugs Bunny":"Bugs Bunny.svg",
+  "Homer Simpson":"Homer Simpson 2006.png",
+  "Bart Simpson":"Bart Simpson 200px.png",
+  "Scooby-Doo (character)":"Scooby-Doo.png",
+  "Shrek (character)":"Shrek (character).png",
+  "Elsa (Frozen)":"Elsa from Disney's Frozen.png",
+  "Buzz Lightyear":"Buzz Lightyear sculpture of Toy Story Hotel Shanghai (cropped).jpg",
+  "Sheriff Woody":"Woody at Toy Story Land, Hong Kong.jpg",
+  "Simba":"Simba(TheLionKing).png",
+  "Garfield (character)":"Garfield the Cat.svg",
+  "Donald Duck":"Donald Duck angry transparent background.png",
+  "Goofy":"Goofy Duckipedia.png",
+  "Olaf (Frozen)":"Olaf from Disney's Frozen.png",
+  "Stitch (Lilo & Stitch)":"Stitch (Lilo & Stitch).svg",
+  "Minions (Despicable Me)":"Minion sculpture in Brisbane, 2024.jpg",
+  "Aladdin (Disney character)":"Aladdin Disney pose.png",
+  "Peppa Pig":"Peppa Pig and George in Peppa Pig World at Paultons Park.jpg",
+  "Pikachu":"Pokémon Pikachu art.png",
+  "Tanjiro Kamado":"Tanjirou manga.png",
+  "Goku":"GokumangaToriyama.png",
+  "Naruto Uzumaki":"NarutoUzumaki.png",
+  "Monkey D. Luffy":"Monkey D Luffy.png",
+  "Ash Ketchum":"Ash Ketchum Journeys.png",
+  "Sailor Moon (character)":"Sailor Moon 01.jpg",
+  "Astro Boy (character)":"Astro Boy anime version.png",
+  "Hello Kitty":"Hello kitty character portrait.png",
+  "Light Yagami":"Raitoindeepthought.PNG",
+  "Vegeta":"Vegeta Dragon Ball.jpg",
+  "Mewtwo":"Pokémon Mewtwo art.png",
+  "Edward Elric":"Edward85as.JPG",
+  "Spider-Man":"Web of Spider-Man Vol 1 129-1.png",
+  "Batman":"Batman Infobox.jpg",
+  "Superman":"Supermanflying.png",
+  "Iron Man":"Iron Man (circa 2018).png",
+  "Captain America":"Captain America.png",
+  "Hulk":"Hulk (circa 2019).png",
+  "Wonder Woman":"Wonder Woman 750.jpg",
+  "Joker (character)":"Batman Three Jokers.jpg",
+  "Harry Potter (character)":"Daniel Radcliffe as Harry Potter.jpg",
+  "Hermione Granger":"Hermione Granger poster.jpg",
+  "Darth Vader":"Darth Vader in The Empire Strikes Back.jpg",
+  "Yoda":"Yoda Empire Strikes Back.png",
+  "Jack Sparrow":"Johnny Depp as Captain Jack Sparrow in Queensland, Australia.jpg",
+  "Thanos":"Thanos (Infobox image).png",
+  "Black Panther (character)":"Black Panther (T'Challa).png",
+  "Wolverine (character)":"Wolverine (circa 2024).jpg",
+  "Mario":"Mario by Shigehisa Nakaue.png",
+  "Sonic the Hedgehog (character)":"Sonic modern and classic designs.png",
+  "Lara Croft":"LaraCroftInfobox.png"});
+(function () {
+  DUEL_CATS.push({ id: "cartoons", name: "شخصيات كرتون", kind: "file", prompt: "مين هالشخصية؟", themes: ["screen","kids","arab"], items: [["Jimmy Kudo","كونان",["المحقق كونان","شينيتشي","كودو"]],["Doraemon (character)","دورايمون",["دوريمون","doraemon"]],["Popeye","باباي",["بوباي","popeye"]],["Tom Cat","توم",["توم وجيري","tom"]],["Jerry Mouse","جيري",["توم وجيري","jerry"]],["The Smurfs","السنافر",["سنافر","سنفور","smurfs","بابا سنفور","سنفور","papa smurf","smurf"]],["Pinocchio","بينوكيو",["pinocchio"]],["Alice (Alice's Adventures in Wonderland)","أليس",["اليس","أليس في بلاد العجائب","alice"]],["Mickey Mouse","ميكي ماوس",["ميكي","mickey"]],["SpongeBob SquarePants (character)","سبونج بوب",["سبونج بوب","spongebob"]],["Bugs Bunny","باغز باني",["بقز باني","bugs bunny"]],["Homer Simpson","هومر سيمبسون",["هومر","homer"]],["Bart Simpson","بارت سيمبسون",["بارت","bart"]],["Scooby-Doo (character)","سكوبي دو",["سكوبي","scooby"]],["Shrek (character)","شريك",["شريك","shrek"]],["Elsa (Frozen)","إلسا",["السا","elsa"]],["Buzz Lightyear","باز",["باز لايتيير","buzz"]],["Sheriff Woody","وودي",["woody"]],["Simba","سيمبا",["simba"]],["Garfield (character)","غارفيلد",["جارفيلد","garfield"]],["Donald Duck","دونالد داك",["البطوط","بطوط","donald"]],["Goofy","غوفي",["بندق","goofy"]],["Olaf (Frozen)","أولاف",["اولاف","olaf"]],["Stitch (Lilo & Stitch)","ستيتش",["stitch"]],["Minions (Despicable Me)","المينيونز",["مينيونز","minions"]],["Aladdin (Disney character)","علاء الدين",["علاء الدين","aladdin"]],["Peppa Pig","بيبا",["بيبا بيغ","peppa"]]] });
+  DUEL_LEVELS.cartoons = { mid: "Scooby-Doo (character)|Buzz Lightyear|Sheriff Woody|Garfield (character)|Goofy|Olaf (Frozen)|Stitch (Lilo & Stitch)|Doraemon (character)|The Smurfs", hard: "Aladdin (Disney character)|Peppa Pig|Minions (Despicable Me)|Alice (Alice's Adventures in Wonderland)|Jimmy Kudo|Pinocchio" };
+  DUEL_CATS.push({ id: "anime", name: "أنمي", kind: "file", prompt: "مين هالشخصية؟", themes: ["screen"], items: [["Pikachu","بيكاتشو",["pikachu"]],["Tanjiro Kamado","تانجيرو",["tanjiro"]],["Goku","غوكو",["جوكو","goku"]],["Naruto Uzumaki","ناروتو",["naruto"]],["Monkey D. Luffy","لوفي",["luffy"]],["Ash Ketchum","آش",["اش","ساتوشي","ash"]],["Sailor Moon (character)","سيلر مون",["sailor moon"]],["Astro Boy (character)","أسترو بوي",["استرو","astro boy"]],["Hello Kitty","هالو كيتي",["hello kitty"]],["Light Yagami","لايت ياغامي",["لايت","light"]],["Vegeta","فيجيتا",["vegeta"]],["Mewtwo","ميوتو",["mewtwo"]],["Edward Elric","إدوارد إلريك",["ادوارد","edward"]]] });
+  DUEL_LEVELS.anime = { mid: "Ash Ketchum|Sailor Moon (character)|Hello Kitty|Vegeta|Mewtwo", hard: "Astro Boy (character)|Light Yagami|Edward Elric|Tanjiro Kamado" };
+  DUEL_CATS.push({ id: "heroes", name: "أبطال وشخصيات أفلام", kind: "file", prompt: "مين هالشخصية؟", themes: ["screen"], items: [["Spider-Man","سبايدرمان",["الرجل العنكبوت","spiderman"]],["Batman","باتمان",["الرجل الوطواط","batman"]],["Superman","سوبرمان",["superman"]],["Iron Man","آيرون مان",["ايرون مان","الرجل الحديدي","iron man"]],["Captain America","كابتن أمريكا",["كابتن امريكا","captain america"]],["Hulk","هالك",["hulk"]],["Wonder Woman","وندر وومان",["المرأة الخارقة","wonder woman"]],["Joker (character)","الجوكر",["جوكر","joker"]],["Harry Potter (character)","هاري بوتر",["هاري","harry potter"]],["Hermione Granger","هيرميون",["هرمايني","hermione"]],["Darth Vader","دارث فيدر",["darth vader"]],["Yoda","يودا",["yoda"]],["Jack Sparrow","جاك سبارو",["jack sparrow"]],["Thanos","ثانوس",["thanos"]],["Black Panther (character)","بلاك بانثر",["النمر الأسود","black panther"]],["Wolverine (character)","وولفرين",["wolverine"]],["Mario","ماريو",["mario"]],["Sonic the Hedgehog (character)","سونيك",["sonic"]],["Lara Croft","لارا كروفت",["lara croft"]]] });
+  DUEL_LEVELS.heroes = { mid: "Captain America|Wonder Woman|Joker (character)|Hermione Granger|Darth Vader|Yoda|Jack Sparrow|Thanos", hard: "Black Panther (character)|Wolverine (character)|Lara Croft" };
+})();
