@@ -1,0 +1,20 @@
+/* Main screen: the two games, same saffron-poster look */
+:root { --saffron: #F2B705; --deep: #6B5200; --ink: #111111; --paper: #FFFFFF; --focus: #1F4FB3; --font: "Alexandria", Tahoma, "Noto Sans Arabic", sans-serif; color-scheme: light; }
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { background: var(--ink); color: var(--ink); font-family: var(--font); line-height: 1.6; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+.menu { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: 48px; padding: 48px max(32px, env(safe-area-inset-right, 0px)) 48px max(32px, env(safe-area-inset-left, 0px));
+  background-color: var(--saffron); background-image: radial-gradient(rgba(17,17,17,.13) 1.3px, transparent 1.8px); background-size: 9px 9px; }
+.menu h1 { margin: 0; font-weight: 900; font-size: clamp(40px, 6vw, 72px); line-height: 1.3; text-shadow: 5px 5px 0 var(--paper), 10px 10px 0 var(--ink); }
+.games { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; }
+.game { display: flex; flex-direction: column; justify-content: space-between; gap: 24px; min-height: 320px; padding: 36px 40px; text-decoration: none; color: var(--ink); background: var(--paper); border: 4px solid var(--ink); box-shadow: 14px 14px 0 var(--ink); transition: transform .08s, box-shadow .08s; }
+.game:hover { transform: translate(-3px, -3px); box-shadow: 17px 17px 0 var(--ink); }
+.game:active { transform: translate(6px, 6px); box-shadow: 8px 8px 0 var(--ink); }
+.game.dark { background: var(--ink); color: var(--saffron); box-shadow: 14px 14px 0 var(--paper); }
+.game.dark:hover { box-shadow: 17px 17px 0 var(--paper); }
+.game b { font-weight: 900; font-size: clamp(64px, 9vw, 128px); line-height: 1.2; }
+.game span { font-weight: 700; font-size: clamp(18px, 1.8vw, 24px); line-height: 1.6; }
+.game.dark span { color: var(--paper); }
+@media (max-width: 760px) { .games { grid-template-columns: 1fr; gap: 28px; } .game { min-height: 200px; } }
+@media (prefers-reduced-motion: reduce) { .game { transition: none; } }

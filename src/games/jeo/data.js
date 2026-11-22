@@ -496,3 +496,5 @@ const CAT_DESC = {
   missing: "كلمة ناقصها حرف، شو هو؟",
   numbers: "ألغاز بالأرقام وحساب سريع"
 };
+
+export { TOPICS, FINALS, CAT_DESC };
