@@ -192,6 +192,26 @@ button { cursor: pointer; }
 .pass { padding: 14px; background: var(--paper); color: var(--ink); border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); font-weight: 900; font-size: 20px; }
 .pfoot { display: flex; justify-content: center; padding: 8px 16px calc(14px + env(safe-area-inset-bottom, 0px)); }
 .linkbtn { background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: 14px; padding: 6px; }
+/* no-phone mode */
+.modebar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.modebar .lab { font-weight: 900; }
+.addp { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 14px 16px; background: var(--ink); color: var(--paper); box-shadow: 6px 6px 0 var(--paper); }
+.addp input { font-weight: 700; font-size: 22px; padding: 8px 12px; border: 3px solid var(--paper); background: var(--paper); color: var(--ink); width: 220px; }
+.addp .btn.sel { background: var(--saffron); color: var(--ink); }
+.tvpick { display: flex; flex-direction: column; gap: 12px; padding: 18px; background: var(--paper); border: 4px solid var(--ink); box-shadow: 10px 10px 0 var(--ink); }
+.tvpick h3 { margin: 0; font-weight: 900; font-size: 30px; line-height: 1.4; }
+.tvpick .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.tvpick .grid .btn { font-size: 20px; font-weight: 900; padding: 14px 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.tvpick .grid .btn .pic.flag { width: 40px; height: 30px; border-width: 2px; box-shadow: none; }
+.tvpick .grid .btn img.pic:not(.flag) { width: 32px; height: 32px; }
+.peek { position: absolute; top: 56px; inset-inline-end: 16px; z-index: 3; padding: 6px 14px; background: var(--ink); color: var(--saffron); border: 2px solid var(--saffron); font-weight: 900; font-size: 22px; }
+.bigreveal { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: #1B1B1B; }
+.bigreveal b { font-weight: 900; font-size: clamp(48px, 7vw, 96px); line-height: 1.3; color: var(--saffron); text-align: center; }
+.bigreveal span { font-weight: 700; font-size: 22px; color: var(--paper); }
+.dbot .btn.huge { font-size: 26px; font-weight: 900; padding: 12px 28px; }
+.dbot .btn.no { background: var(--wine); color: var(--paper); }
+.keys { font-weight: 700; font-size: 14px; color: var(--muted); }
+.keys kbd { font: inherit; padding: 0 6px; border: 1px solid var(--muted); margin: 0 2px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -383,11 +403,15 @@ function initHost() {
   if (!G.surprise) G.surprise = {};
   if (!G.setup) G.setup = {};
   if (G.clockMs !== 60000) G.clockMs = CLOCK_MS;
+  if (G.judge !== "reveal") G.judge = "host";
   if (G.match && G.match.phase === "duel") G.match.running = false;   // a reload pauses the duel
   saveG(); renderHost();
   connect(G.room, "host", { msg: hostMsg, presence: ps => { G.online = Object.keys(ps); if (!M() || M().phase !== "duel") renderHost(); }, status: st => { if (st === "SUBSCRIBED") pub(); } });
   document.addEventListener("visibilitychange", () => { if (!document.hidden && !connOK) reconnect(); });
   document.addEventListener("click", hostClick);
+  document.addEventListener("submit", hostSubmit);
+  document.addEventListener("keydown", hostKey);
+  document.addEventListener("keyup", e => { if (e.key === "h" || e.key === "H" || e.key === "ه") setPeek(false); });
   timer = setInterval(tick, 100);
   setInterval(pub, 1000);
 }
@@ -406,28 +430,8 @@ function hostMsg(ev, p) {
   if (!pf(pid)) return;
   const m = M();
   const front = G.queue.slice(0, 2), lobby = !m || m.phase === "lobby";
-  if (ev === "setup") {
-    if (!lobby || G.offer || !front.includes(pid)) return;
-    const theme = DUEL_THEMES.some(t => t.id === p.theme) ? p.theme : null, diff = ["e", "m", "h"].includes(p.diff) ? p.diff : null;
-    G.setup[pid] = { theme, diff, ok: !!(p.ok && theme && diff) };
-    resolveSetup(); saveG(); renderHost(); return pub();
-  }
-  if (ev === "pick") {
-    if (!lobby || !G.offer || !front.includes(pid)) return;                      // pick only after the theme is settled, and before the match
-    const [a, b] = front;
-    const opp = pid === a ? b : a;
-    let id;
-    if (p.cat === "random") { id = randomCat([G.picks[opp]]); G.surprise[pid] = true; }
-    else {
-      const cat = catById(p.cat); if (!cat || !G.offer.includes(cat.id)) return;
-      if (opp && G.picks[opp] === cat.id) {
-        if (!G.surprise[opp]) return;                                             // can't take the opponent's category
-        G.picks[opp] = randomCat([cat.id]); prefetchCat(G.picks[opp]);            // their hidden random pick moves aside
-      }
-      id = cat.id; G.surprise[pid] = false;
-    }
-    G.picks[pid] = id; saveG(); renderHost(); prefetchCat(id); return pub();
-  }
+  if (ev === "setup") return doSetup(pid, p.theme, p.diff, p.ok);
+  if (ev === "pick") return doPick(pid, p.cat);
   if (ev === "pred") {
     if (!m || pid === m.a || pid === m.b || m.phase === "matchEnd") return;
     if (p.who === m.a || p.who === m.b) { m.preds[pid] = p.who; saveG(); pub(); }
@@ -436,6 +440,31 @@ function hostMsg(ev, p) {
   if (!m || m.phase !== "duel" || !m.running || pid !== m.turn) return;
   if (ev === "ans") answer(String(p.text || "").slice(0, 60), false);
   if (ev === "pass") doPass();
+}
+
+// A player's theme/difficulty choice and category pick: from a phone, or tapped on the TV in no-phone mode
+function doSetup(pid, th, df, ok) {
+  const m = M(), lobby = !m || m.phase === "lobby";
+  if (!lobby || G.offer || !G.queue.slice(0, 2).includes(pid)) return;
+  const theme = DUEL_THEMES.some(t => t.id === th) ? th : null, diff = ["e", "m", "h"].includes(df) ? df : null;
+  G.setup[pid] = { theme, diff, ok: !!(ok && theme && diff) };
+  resolveSetup(); saveG(); renderHost(); pub();
+}
+function doPick(pid, catId) {
+  const m = M(), lobby = !m || m.phase === "lobby", front = G.queue.slice(0, 2);
+  if (!lobby || !G.offer || !front.includes(pid)) return;                      // pick only after the theme is settled, and before the match
+  const [a, b] = front, opp = pid === a ? b : a;
+  let id;
+  if (catId === "random") { id = randomCat([G.picks[opp]]); G.surprise[pid] = true; }
+  else {
+    const cat = catById(catId); if (!cat || !G.offer.includes(cat.id)) return;
+    if (opp && G.picks[opp] === cat.id) {
+      if (!G.surprise[opp]) return;                                             // can't take the opponent's category
+      G.picks[opp] = randomCat([cat.id]); prefetchCat(G.picks[opp]);            // their hidden random pick moves aside
+    }
+    id = cat.id; G.surprise[pid] = false;
+  }
+  G.picks[pid] = id; saveG(); renderHost(); prefetchCat(id); pub();
 }
 
 // Theme and difficulty: once both players are ready, settle them (a draw when they chose differently) and offer 8 random categories
@@ -611,7 +640,7 @@ function catCard(pid, label) {
   if (!G.offer) {                                    // step 1: theme and difficulty
     const st = G.setup[pid];
     if (st && st.ok) return `<div class="pcard">${head}<div class="cat"><div><div style="font-weight: 700; font-size: 14px; color: var(--paper);">${gx(g, "اختار", "اختارت")}</div><div class="cn">${esc(THEME_NAME(st.theme))} · ${DIFF_NAME[st.diff]}</div></div></div>${ok}</span></div>`;
-    return `<div class="pcard">${head}<div class="cat wait"><div class="cn">${gx(g, "عم يختار الموضوع والصعوبة…", "عم تختار الموضوع والصعوبة…")}</div></div><span class="lbl">على التلفون</span></div>`;
+    return `<div class="pcard">${head}<div class="cat wait"><div class="cn">${gx(g, "عم يختار الموضوع والصعوبة…", "عم تختار الموضوع والصعوبة…")}</div></div><span class="lbl">${G.noPhones ? "على الشاشة" : "على التلفون"}</span></div>`;
   }
   if (c && G.surprise[pid]) return `<div class="pcard">${head}
     <div class="cat"><span class="pthumb" style="font-size: 26px;">؟</span><div><div style="font-weight: 700; font-size: 14px; color: var(--paper);">${gx(g, "فئته", "فئتها")}</div><div class="cn">مفاجأة</div></div></div>
@@ -621,7 +650,7 @@ function catCard(pid, label) {
         : `<div class="cat wait"><div class="cn">${gx(g, "عم يختار فئته…", "عم تختار فئتها…")}</div></div><span class="lbl">${gx(g, "بيختار", "بتختار")} من ${G.offer.length} فئات</span>`}</div>`;
 }
 function setupBar() {
-  if (!G.offer) return `<div class="setupbar"><span style="font-weight: 700;">كل لاعب بيختار موضوع وصعوبة على تلفونه. إذا اختلفوا، القرعة بتقرّر.</span></div>`;
+  if (!G.offer) return `<div class="setupbar"><span style="font-weight: 700;">كل لاعب بيختار موضوع وصعوبة${G.noPhones ? "" : " على تلفونه"}. إذا اختلفوا، القرعة بتقرّر.</span></div>`;
   const d = G.draw, who = pid => pid ? `قرعة: ${esc(nm(pid))}` : "";
   return `<div class="setupbar"><span>الموضوع</span><b>${esc(THEME_NAME(G.theme))}</b>${d && d.tBy ? `<span class="chip">${who(d.tBy)}</span>` : ""}
     <span style="margin-inline-start: 12px;">الصعوبة</span><b>${DIFF_NAME[G.diff]}</b>${d && d.dBy ? `<span class="chip">${who(d.dBy)}</span>` : ""}
@@ -633,10 +662,13 @@ function renderLobby() {
   $("#app").innerHTML = `<div class="tv dots"><div class="pad lobby">
     <div class="lhead">
       <h1 class="extrude">مبارزة</h1>
-      <div class="codebox"><div class="qr" id="qr"></div><div><div style="font-weight: 700; font-size: 14px; color: var(--paper);">رمز الغرفة</div><div class="code ltr">${G.room}</div>
-        <div style="font-weight: 500; font-size: 13px; color: var(--paper);">امسح الرمز بتلفونك</div></div></div>
+      ${G.noPhones ? addPlayerForm() : `<div class="codebox"><div class="qr" id="qr"></div><div><div style="font-weight: 700; font-size: 14px; color: var(--paper);">رمز الغرفة</div><div class="code ltr">${G.room}</div>
+        <div style="font-weight: 500; font-size: 13px; color: var(--paper);">امسح الرمز بتلفونك</div></div></div>`}
     </div>
+    <div class="modebar"><span class="lab">اللعب:</span>${[[false, "بالتلفونات"], [true, "بدون تلفونات"]].map(([v, t]) => `<button type="button" class="btn ${!!G.noPhones === v ? "sel" : ""}" data-act="phones" data-v="${v ? 1 : 0}" aria-pressed="${!!G.noPhones === v}">${t}</button>`).join("")}
+      ${G.noPhones ? `<span class="lab" style="margin-inline-start: 16px;">الحكم:</span>${[["host", "المضيف بيعرف الجواب"], ["reveal", "كشف وتأكيد"]].map(([v, t]) => `<button type="button" class="btn ${G.judge === v ? "sel" : ""}" data-act="judge" data-v="${v}" aria-pressed="${G.judge === v}">${t}</button>`).join("")}` : ""}</div>
     ${a && b ? setupBar() : ""}
+    ${G.noPhones && a && b ? tvPicker() : ""}
     <div class="versus">
       ${catCard(a, "اللاعب الأول")}
       <div class="vs"><b>ضد</b><span style="font-weight: 700; font-size: 15px; line-height: 1.6;">أفضل من 3 جولات<br>والأسئلة بتصعب<br>${TIME_NAME(G.clockMs)} لكل لاعب</span></div>
@@ -648,7 +680,69 @@ function renderLobby() {
     </div>
     <div class="credits" style="color: var(--deep);">${esc(DUEL_CREDITS)}</div>
   </div></div>`;
-  try { new QRCode($("#qr"), { text: location.origin + location.pathname + "?room=" + G.room, width: 300, height: 300, correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
+  const ni = document.getElementById("np-name"); if (ni && G.noPhones && G.queue.length < 2) ni.focus();
+  if (!G.noPhones) try { new QRCode($("#qr"), { text: location.origin + location.pathname + "?room=" + G.room, width: 300, height: 300, correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
+}
+// ---- no-phone mode: players, choices and judging all on the TV ----
+let newG = "m", tvSel = { theme: null, diff: null }, peeking = false;
+function addPlayerForm() {
+  return `<form class="addp" data-f="addp" autocomplete="off"><label for="np-name" style="font-weight: 900;">لاعب جديد</label><input id="np-name" maxlength="24" placeholder="الاسم">
+    ${[["m", "لاعب"], ["f", "لاعبة"]].map(([v, t]) => `<button type="button" class="btn sm ${newG === v ? "sel" : ""}" data-act="newg" data-v="${v}" aria-pressed="${newG === v}">${t}</button>`).join("")}
+    <button type="submit" class="btn">إضافة</button></form>`;
+}
+function hostSubmit(e) {
+  const f = e.target.closest("form[data-f=addp]"); if (!f) return; e.preventDefault();
+  const name = f.querySelector("input").value.trim().slice(0, 24); if (!name) return;
+  if (G.players.some(x => norm(x.name) === norm(name))) { f.querySelector("input").select(); return; }
+  const pid = "tv" + rid(); G.players.push({ pid, name, g: newG }); G.queue.push(pid);
+  saveG(); renderHost(); pub();
+}
+// Who chooses next on the TV: player 1 then player 2 pick a theme and level, then a category each
+function tvPicker() {
+  const [a, b] = G.queue;
+  if (!G.offer) {
+    const pid = [a, b].find(x => !(G.setup[x] && G.setup[x].ok)); if (!pid) return "";
+    const g = gOf(pid);
+    return `<div class="tvpick"><h3>${esc(nm(pid))}، ${gx(g, "اختار الموضوع والصعوبة", "اختاري الموضوع والصعوبة")}</h3>
+      <div class="grid">${DUEL_THEMES.map(t => `<button type="button" class="btn ${tvSel.theme === t.id ? "sel" : ""}" data-act="tvtheme" data-v="${t.id}" aria-pressed="${tvSel.theme === t.id}">${esc(t.name)}</button>`).join("")}</div>
+      <div class="row"><span style="font-weight: 900;">الصعوبة:</span>${["e", "m", "h"].map(d => `<button type="button" class="btn ${tvSel.diff === d ? "sel" : ""}" data-act="tvdiff" data-v="${d}" aria-pressed="${tvSel.diff === d}">${DIFF_NAME[d]}</button>`).join("")}
+        <button type="button" class="btn dark" data-act="tvok" data-p="${pid}" ${tvSel.theme && tvSel.diff ? "" : "disabled"}>تمام</button></div></div>`;
+  }
+  const pid = [a, b].find(x => !G.picks[x]); if (!pid) return "";
+  const opp = pid === a ? b : a, g = gOf(pid);
+  return `<div class="tvpick"><h3>${esc(nm(pid))}، ${gx(g, "اختار فئتك", "اختاري فئتك")}</h3>
+    <div class="grid"><button type="button" class="btn" data-act="tvpick" data-p="${pid}" data-v="random"><span class="pthumb" style="font-size: 20px;">؟</span>${gx(g, "فاجئني", "فاجئيني")}</button>${G.offer.map(catById).map(c => `<button type="button" class="btn" data-act="tvpick" data-p="${pid}" data-v="${c.id}" ${G.picks[opp] === c.id && !G.surprise[opp] ? "disabled" : ""}>${catThumb(c)}${esc(c.name)}</button>`).join("")}</div></div>`;
+}
+// Hold H: the host peeks at the answer
+function setPeek(on) {
+  const m = M(); if (peeking === on) return; peeking = on;
+  const el = document.getElementById("peek"); if (!el) return;
+  el.hidden = !(on && m && m.phase === "duel");
+}
+// Reveal mode: show the answer and stop the clock until the room says right or wrong
+function revealNow() { const m = M(); if (!m || m.phase !== "duel" || m.revealing) return; m.revealing = true; m.running = false; saveG(); renderDuel(); pub(); }
+function judgeReveal(right) {
+  const m = M(); if (!m || !m.revealing) return;
+  m.revealing = false; m.running = true; m.lastTick = Date.now();
+  if (right) answer("", true); else doPass();
+}
+function hostKey(e) {
+  if (e.target.closest && e.target.closest("input, textarea")) return;
+  const m = M(), k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  if (k === "Enter") {
+    const b = document.querySelector('[data-act="start"]:not([disabled]), [data-act="next"], [data-act="done"]');
+    if (b && (!m || m.phase !== "duel")) { e.preventDefault(); b.click(); }
+    return;
+  }
+  if (!m || m.phase !== "duel") return;
+  const act = a => { const b = document.querySelector(`[data-act="${a}"]`); if (b) { e.preventDefault(); b.click(); } };
+  if (k === "Escape") return act("pause");
+  if (k === "h" || k === "ه") { if (G.judge !== "reveal") { e.preventDefault(); setPeek(true); } return; }
+  if (m.revealing) { if (k === " " || k === "y") return act("right"); if (k === "n") return act("wrong"); return; }
+  if (k === " ") return act("right");
+  if (k === "p") return act("pass");
+  if (k === "b") return act("badpic");
+  if (k === "r" && G.judge === "reveal") return act("reveal");
 }
 function clockHTML(pid) {
   const m = M(), on = m.turn === pid && m.phase === "duel", g = gOf(pid);
@@ -673,15 +767,19 @@ function renderDuel() {
         <div class="fhead"><span class="q">${esc(c.prompt)}</span><span class="lvl">${["سهل", "متوسط", "صعب"][lvl]} ${[0, 1, 2].map(i => `<i class="${i <= lvl ? "on" : ""}"></i>`).join("")}</span></div>
         <div class="pbox"><div class="sq">${m.phase === "duel" ? itemPic(c, it[0]) : ""}</div></div>
         ${credit ? `<div class="ffoot"><span class="pcredit">الصورة: ${esc(credit)}</span></div>` : ""}
-        ${m.reveal ? `<span class="reveal">كان: ${esc(m.reveal)}</span>` : ""}
-        ${m.phase === "duel" && !m.running ? `<div class="paused">واقف</div>` : ""}
+        ${m.reveal && !m.revealing ? `<span class="reveal">كان: ${esc(m.reveal)}</span>` : ""}
+        ${m.revealing ? `<div class="bigreveal"><b>${esc(it[1])}</b><span>صح؟ <kbd>Y</kbd> أو المسافة إذا صح، <kbd>N</kbd> إذا غلط</span></div>` : ""}
+        ${G.noPhones && G.judge !== "reveal" && m.phase === "duel" ? `<span class="peek" id="peek" ${peeking ? "" : "hidden"}>${esc(it[1])}</span>` : ""}
+        ${m.phase === "duel" && !m.running && !m.revealing ? `<div class="paused">واقف</div>` : ""}
       </div>
       <div class="log">${log}</div>
     </div>
     <div class="dbot">
-      <span class="hint">الجواب الصح بيقلب الدور. التمرير بيكلّف 3 ثواني. اللي بيخلص وقته بيخسر الجولة.</span>
+      ${G.noPhones ? `<span class="keys">${G.judge === "reveal" ? "<kbd>R</kbd> كشف · <kbd>Y</kbd>/مسافة صح · <kbd>N</kbd> غلط" : "<kbd>مسافة</kbd> صح · اضغط مطوّل <kbd>H</kbd> لتشوف الجواب"} · <kbd>P</kbd> مرّر · <kbd>B</kbd> صورة غلط · <kbd>Esc</kbd> وقّف</span>`
+        : `<span class="hint">الجواب الصح بيقلب الدور. التمرير بيكلّف 3 ثواني. اللي بيخلص وقته بيخسر الجولة.</span>`}
       <div class="row">
-        <button type="button" class="btn ok" data-act="right">صح</button>
+        ${m.revealing ? `<button type="button" class="btn ok huge" data-act="right">✓ صح</button><button type="button" class="btn no huge" data-act="wrong">✗ غلط</button>`
+          : `${G.noPhones && G.judge === "reveal" ? `<button type="button" class="btn dark huge" data-act="reveal">كشف الجواب</button>` : ""}<button type="button" class="btn ok ${G.noPhones ? "huge" : ""}" data-act="right">صح</button>`}
         <button type="button" class="btn" data-act="pass">مرّر</button>
         <button type="button" class="btn ghost" data-act="badpic" title="بتتخطّى الصورة بدون خصم، وما بترجع تطلع">صورة غلط</button>
         <button type="button" class="btn ghost" data-act="pause">${m.running ? "وقّف" : "كمّل"}</button>
@@ -735,10 +833,17 @@ function hostClick(e) {
       b.dataset.sure = "1"; const was = b.textContent; b.textContent = a === "reset" ? "بتمسح كل شي؟ اضغط كمان مرة" : "متأكد؟ اضغط كمان مرة";
       setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.textContent = was; } }, 3000); return;
     }
+    tvSel = { theme: null, diff: null };
     if (a === "restart") { G.match = null; }   // players, line, theme and categories stay
     else { G.players = []; G.queue = []; clearSetup(); G.match = null; G.streak = {}; G.stars = {}; }
     saveG(); renderHost(); return pub();
   }
+  if (a === "phones") { if (!m || m.phase === "lobby") { G.noPhones = b.dataset.v === "1"; saveG(); renderHost(); pub(); } return; }
+  if (a === "judge") { G.judge = b.dataset.v === "reveal" ? "reveal" : "host"; saveG(); renderHost(); return; }
+  if (a === "newg") { newG = b.dataset.v === "f" ? "f" : "m"; document.querySelectorAll('[data-act="newg"]').forEach(x => { x.classList.toggle("sel", x === b); x.setAttribute("aria-pressed", String(x === b)); }); const i = document.getElementById("np-name"); if (i) i.focus(); return; }
+  if (a === "tvtheme" || a === "tvdiff") { tvSel[a === "tvtheme" ? "theme" : "diff"] = b.dataset.v; return renderLobby(); }
+  if (a === "tvok") { const t = tvSel; tvSel = { theme: null, diff: null }; return doSetup(b.dataset.p, t.theme, t.diff, true); }
+  if (a === "tvpick") return doPick(b.dataset.p, b.dataset.v);
   if (a === "clock") { if (!m || m.phase === "lobby") { G.clockMs = b.dataset.ms === "60000" ? 60000 : 30000; saveG(); renderHost(); pub(); } return; }
   if (a === "start") return startMatch();
   if (a === "randomize") return G.offer ? randomizePicks() : randomizeSetup();
@@ -746,6 +851,8 @@ function hostClick(e) {
   if (a === "next") return nextRound();
   if (a === "done") return endMatch();
   if (!m || m.phase !== "duel") return;
+  if (m.revealing) { if (a === "right") judgeReveal(true); if (a === "wrong") judgeReveal(false); return; }
+  if (a === "reveal") { if (m.running) revealNow(); return; }
   if (a === "pause") { m.running = !m.running; m.lastTick = Date.now(); saveG(); renderDuel(); return pub(); }
   if (!m.running) return;
   if (a === "right") answer("", true);

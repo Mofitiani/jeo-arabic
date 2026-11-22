@@ -25,6 +25,10 @@ A second game on the same site: a 1v1 picture duel, played in one room with the 
 - If a picture is wrong or gives the answer away, the host taps صورة غلط: it's skipped with no penalty and never shown again on that TV.
 - Answer by typing, in Arabic or English; the host can also mark صح or مرّر.
 - Anyone else waits in line, predicts the winner for stars, and the winner stays to face the next challenger.
+- **No-phone mode** (lobby toggle بدون تلفونات): players are added by name on the TV, choose theme, level and categories on the TV, and shout their answers. Two ways to judge:
+  - المضيف بيعرف الجواب: the host presses Space for right; holding H shows the answer in a corner while held.
+  - كشف وتأكيد: R reveals the answer and pauses the clock; Y or Space if it was right (turn passes), N if wrong (counts as a pass, −3 s).
+  - Both: P pass, B wrong picture, Esc pause, Enter for start / next round / next match. Every key also has an on-screen button.
 
 `duel-data.js` holds the categories, items and difficulty levels. Flags come from flag-icons (MIT) and other pictures from Twemoji (CC BY 4.0); credits are shown in the lobby.
 
