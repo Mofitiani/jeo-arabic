@@ -103,7 +103,7 @@ const DUEL_CATS = [
 // The flags list has Canada twice; keep each picture once
 DUEL_CATS.forEach(c => { const seen = new Set(); c.items = c.items.filter(it => !seen.has(it[0]) && seen.add(it[0])); });
 
-const DUEL_CREDITS = "الأعلام: flag-icons (MIT) · الصور: Twemoji (CC BY 4.0) وويكيميديا كومنز (المصوّر والرخصة تحت كل صورة)";
+const DUEL_CREDITS = "الأعلام: flag-icons (MIT) · الشعارات: Simple Icons (CC0) · الصور: Twemoji (CC BY 4.0) وويكيميديا كومنز (المصوّر والرخصة تحت كل صورة)";
 
 // Difficulty: items not listed are easy. A round deals easy → medium → hard (shuffled within each level).
 const DUEL_LEVELS = {
@@ -585,3 +585,61 @@ const themeCats = themeId => DUEL_CATS.filter(c => themeId === "mix" ? !(c.theme
   const more = { landmarks: ["culture"], arablandmarks: ["culture"], lebsingers: ["culture"], egyptcinema: ["culture"], transport: ["brands"], home: ["brands"] };
   DUEL_CATS.forEach(c => (more[c.id] || []).forEach(t => c.themes.includes(t) || c.themes.push(t)));
 })();
+
+// ======================================================================
+// Logos as checked symbols (duel-icons.js), no wordmarks. Character categories removed: their
+// pictures came unchecked from Wikipedia and were often wrong.
+// ======================================================================
+(function () {
+  ["oldcartoons", "worldcartoons", "anime", "heroes", "clubs", "foodbrands", "fashion", "applogos", "carlogos"].forEach(id => {
+    const i = DUEL_CATS.findIndex(c => c.id === id); if (i >= 0) DUEL_CATS.splice(i, 1);
+  });
+  const add = (c, themes, mid, hard) => { c.kind = "icon"; c.themes = themes; DUEL_CATS.push(c); DUEL_LEVELS[c.id] = { mid: mid.join("|"), hard: hard.join("|") }; };
+  add({ id: "applogos", name: "شعارات تطبيقات", prompt: "شعار أي تطبيق؟", items: [
+    ["whatsapp", "واتساب", ["واتس"]], ["instagram", "إنستغرام", ["انستا", "انستغرام"]], ["tiktok", "تيك توك", []], ["snapchat", "سناب شات", ["سناب"]],
+    ["telegram", "تلغرام", ["تيليجرام"]], ["youtube", "يوتيوب", []], ["spotify", "سبوتيفاي", []], ["netflix", "نتفليكس", []],
+    ["facebook", "فيسبوك", []], ["discord", "ديسكورد", []], ["pinterest", "بنترست", []], ["googlemaps", "خرائط جوجل", ["خرائط غوغل", "جوجل ماب", "maps"]],
+    ["gmail", "جيميل", []], ["shazam", "شازام", []], ["duolingo", "دولينجو", ["دوولينغو"]], ["airbnb", "إير بي إن بي", ["اير بي ان بي"]],
+    ["paypal", "باي بال", []], ["apple", "أبل", ["ابل", "آبل"]], ["android", "أندرويد", ["اندرويد"]], ["googlechrome", "كروم", ["جوجل كروم", "chrome"]],
+    ["firefox", "فايرفوكس", []], ["safari", "سفاري", []], ["twitch", "تويتش", []], ["reddit", "ريديت", []],
+    ["waze", "ويز", []], ["messenger", "ماسنجر", []], ["dropbox", "دروب بوكس", []], ["threads", "ثريدز", []],
+    ["signal", "سيغنال", ["سجنال"]], ["wechat", "وي تشات", []], ["tinder", "تيندر", []], ["googledrive", "جوجل درايف", ["درايف", "drive"]],
+    ["googlephotos", "صور جوجل", ["جوجل فوتوز", "photos"]], ["applemusic", "أبل ميوزك", ["ابل ميوزك"]], ["soundcloud", "ساوند كلاود", []], ["vimeo", "فيميو", []],
+    ["tumblr", "تمبلر", []], ["quora", "كورا", []], ["wikipedia", "ويكيبيديا", []], ["github", "جيت هب", ["غيت هب"]],
+    ["steam", "ستيم", []], ["playstation", "بلايستيشن", ["بلاي ستيشن", "سوني"]], ["bluetooth", "بلوتوث", []], ["googleplay", "جوجل بلاي", ["بلاي ستور", "play store"]],
+    ["appstore", "آب ستور", ["اب ستور", "app store"]], ["icloud", "آي كلاود", ["اي كلاود"]], ["trello", "تريلو", []], ["notion", "نوشن", []]
+  ]}, ["brands"], ["telegram", "spotify", "netflix", "discord", "pinterest", "googlemaps", "gmail", "shazam", "duolingo", "android", "googlechrome", "firefox", "safari", "messenger", "playstation", "bluetooth", "googleplay", "appstore"],
+     ["airbnb", "paypal", "twitch", "reddit", "waze", "dropbox", "threads", "signal", "wechat", "tinder", "googledrive", "googlephotos", "applemusic", "soundcloud", "vimeo", "tumblr", "quora", "wikipedia", "github", "steam", "icloud", "trello", "notion"]);
+
+  add({ id: "carlogos", name: "شعارات سيارات", prompt: "شعار أي سيارة؟", items: [
+    ["toyota", "تويوتا", []], ["volkswagen", "فولكس فاغن", ["فولكس", "فولكس واجن"]], ["audi", "أودي", ["اودي"]], ["ferrari", "فيراري", []],
+    ["lamborghini", "لامبورغيني", ["لامبورجيني"]], ["hyundai", "هيونداي", ["هونداي"]], ["honda", "هوندا", []], ["mitsubishi", "ميتسوبيشي", []],
+    ["subaru", "سوبارو", []], ["renault", "رينو", []], ["chevrolet", "شفروليه", ["شيفروليه", "شفر"]], ["tesla", "تيسلا", ["تسلا"]],
+    ["maserati", "مازيراتي", []], ["mazda", "مازدا", []], ["citroen", "ستروين", ["سيتروين"]], ["bugatti", "بوغاتي", ["بوجاتي"]],
+    ["bentley", "بنتلي", []], ["skoda", "سكودا", []], ["seat", "سيات", []], ["opel", "أوبل", ["اوبل"]],
+    ["cadillac", "كاديلاك", []], ["infiniti", "إنفينيتي", ["انفينيتي"]], ["suzuki", "سوزوكي", []], ["dacia", "داتشيا", ["داسيا"]], ["polestar", "بولستار", []]
+  ]}, ["brands"], ["lamborghini", "hyundai", "mitsubishi", "subaru", "renault", "chevrolet", "maserati", "mazda"],
+     ["citroen", "bugatti", "bentley", "skoda", "seat", "opel", "cadillac", "infiniti", "suzuki", "dacia", "polestar"]);
+
+  add({ id: "brandlogos", name: "شعارات ماركات", prompt: "شعار أي ماركة؟", items: [
+    ["nike", "نايكي", ["نايك"]], ["adidas", "أديداس", ["اديداس"]], ["puma", "بوما", []], ["jordan", "جوردان", ["اير جوردان"]],
+    ["newbalance", "نيو بالانس", []], ["underarmour", "أندر آرمر", ["اندر ارمر"]], ["reebok", "ريبوك", []], ["mcdonalds", "ماكدونالدز", ["ماك"]],
+    ["starbucks", "ستاربكس", []], ["redbull", "ريد بول", []], ["shell", "شل", []], ["mastercard", "ماستركارد", ["ماستر كارد"]],
+    ["target", "تارغت", ["تارجت"]], ["linux", "لينكس", []], ["ubuntu", "أوبونتو", ["اوبونتو"]], ["nvidia", "إنفيديا", ["انفيديا"]],
+    ["huawei", "هواوي", []], ["xiaomi", "شاومي", []], ["nba", "إن بي إيه", ["ان بي ايه", "دوري السلة الأمريكي"]], ["beats", "بيتس", []]
+  ]}, ["brands"], ["puma", "jordan", "newbalance", "underarmour", "reebok", "shell", "mastercard", "huawei"],
+     ["target", "linux", "ubuntu", "nvidia", "xiaomi", "nba", "beats"]);
+})();
+
+// English answers for the categories whose keys aren't English names (emoji and capitals); "|" separates alternatives
+const DUEL_EN = {
+  capitals: { ps: "Jerusalem|Al Quds", jo: "Amman", lb: "Beirut", sy: "Damascus", eg: "Cairo", sa: "Riyadh", ae: "Abu Dhabi", qa: "Doha", kw: "Kuwait City|Kuwait", iq: "Baghdad", ma: "Rabat", dz: "Algiers", tn: "Tunis", ly: "Tripoli", sd: "Khartoum", om: "Muscat", ye: "Sanaa", bh: "Manama", tr: "Ankara", ir: "Tehran", jp: "Tokyo", cn: "Beijing", in: "New Delhi|Delhi", fr: "Paris", de: "Berlin", it: "Rome", es: "Madrid", gb: "London", ru: "Moscow", us: "Washington|Washington DC", ca: "Ottawa", br: "Brasilia", ar: "Buenos Aires", au: "Canberra", gr: "Athens", pt: "Lisbon", nl: "Amsterdam", se: "Stockholm", no: "Oslo", kr: "Seoul" },
+  animals: { "🦁": "lion", "🐯": "tiger", "🐘": "elephant", "🦒": "giraffe", "🦓": "zebra", "🐪": "camel", "🐒": "monkey", "🦍": "gorilla", "🐻": "bear", "🐼": "panda", "🐨": "koala", "🦘": "kangaroo", "🐺": "wolf", "🦊": "fox", "🐰": "rabbit|bunny", "🐢": "turtle|tortoise", "🐍": "snake", "🐊": "crocodile|alligator", "🦈": "shark", "🐬": "dolphin", "🐳": "whale", "🐙": "octopus", "🦀": "crab", "🦉": "owl", "🦅": "eagle", "🦜": "parrot", "🐧": "penguin", "🦩": "flamingo", "🐓": "rooster", "🐄": "cow", "🐑": "sheep", "🐐": "goat", "🐴": "horse", "🐱": "cat", "🐶": "dog", "🐭": "mouse", "🦔": "hedgehog", "🦇": "bat", "🐝": "bee", "🦋": "butterfly", "🐜": "ant", "🦂": "scorpion", "🐌": "snail", "🦎": "lizard", "🦛": "hippo|hippopotamus", "🦏": "rhino|rhinoceros", "🦌": "deer" },
+  fruitveg: { "🍎": "apple", "🍐": "pear", "🍊": "orange", "🍋": "lemon", "🍌": "banana", "🍉": "watermelon", "🍇": "grapes|grape", "🍓": "strawberry", "🍒": "cherry|cherries", "🍑": "peach", "🥭": "mango", "🍍": "pineapple", "🥥": "coconut", "🥝": "kiwi", "🍅": "tomato", "🍆": "eggplant|aubergine", "🥑": "avocado", "🥦": "broccoli", "🥕": "carrot", "🌽": "corn", "🌶": "chili|hot pepper", "🫑": "bell pepper|pepper", "🥒": "cucumber", "🧄": "garlic", "🧅": "onion", "🥔": "potato", "🍄": "mushroom", "🫒": "olive|olives", "🥜": "peanut|peanuts", "🌰": "chestnut", "🫐": "blueberry|blueberries", "🍈": "melon" },
+  food: { "🍕": "pizza", "🍔": "burger|hamburger", "🌭": "hot dog", "🍟": "fries|french fries", "🧆": "falafel", "🥙": "shawarma|wrap", "🥗": "salad", "🍝": "pasta|spaghetti", "🍜": "noodles|ramen", "🍣": "sushi", "🍤": "shrimp|prawn", "🍩": "donut|doughnut", "🍪": "cookie|cookies", "🎂": "birthday cake|cake", "🍫": "chocolate", "🍭": "lollipop", "🍿": "popcorn", "🍦": "ice cream", "☕": "coffee", "🍵": "tea", "🧃": "juice", "🥛": "milk", "🍯": "honey", "🥐": "croissant", "🥖": "baguette", "🧀": "cheese", "🥚": "egg", "🍳": "fried egg", "🥞": "pancakes|pancake", "🌮": "taco", "🫓": "bread|flatbread", "🍬": "candy|sweets" },
+  sports: { "⚽": "football|soccer", "🏀": "basketball", "🏈": "american football", "⚾": "baseball", "🎾": "tennis", "🏐": "volleyball", "🏉": "rugby", "🎱": "billiards|pool|snooker", "🏓": "table tennis|ping pong", "🏸": "badminton", "🥊": "boxing", "🥋": "karate|martial arts|judo", "⛳": "golf", "🏒": "hockey|ice hockey", "🤿": "diving|scuba", "🏹": "archery", "⛷": "skiing", "🏄": "surfing", "🏊": "swimming", "🚴": "cycling", "🏇": "horse riding|horse racing", "🤺": "fencing", "🏋": "weightlifting", "🧗": "climbing", "⛸": "ice skating|skating", "🛹": "skateboarding|skateboard", "🎳": "bowling", "🏏": "cricket" },
+  transport: { "🚗": "car", "🚕": "taxi|cab", "🚌": "bus", "🚑": "ambulance", "🚒": "fire truck|fire engine", "🚓": "police car", "🚚": "truck|lorry", "🚜": "tractor", "🏍": "motorcycle|motorbike", "🚲": "bicycle|bike", "🛴": "scooter", "🚂": "train", "🚇": "metro|subway|underground", "✈": "airplane|plane", "🚁": "helicopter", "🚀": "rocket", "🛸": "ufo|flying saucer", "⛵": "sailboat", "🚢": "ship", "🛶": "kayak|canoe", "🚡": "cable car", "🛺": "tuk tuk|rickshaw", "🚤": "speedboat|motorboat", "🛻": "pickup|pickup truck", "🏎": "race car|racing car", "🚐": "van|minibus", "🪂": "parachute" },
+  nature: { "☀": "sun", "🌙": "crescent|moon", "⭐": "star", "🌈": "rainbow", "☁": "cloud", "⛈": "storm|thunderstorm", "❄": "snow|snowflake", "🌪": "tornado", "🌊": "wave", "🔥": "fire", "🌋": "volcano", "🏔": "mountain", "🏜": "desert", "🏝": "island", "🌵": "cactus", "🌳": "tree", "🌴": "palm tree|palm", "🍁": "leaf|maple leaf", "🌻": "sunflower", "🌹": "rose", "🌷": "tulip", "💧": "water drop|drop", "⚡": "lightning", "🌍": "earth|globe", "🌧": "rain", "🌕": "full moon|moon" },
+  home: { "🛏": "bed", "🛋": "sofa|couch", "🚪": "door", "🪑": "chair", "🚿": "shower", "🛁": "bathtub|bath", "🧹": "broom", "🧺": "basket", "🧼": "soap", "🪥": "toothbrush", "🔑": "key", "🕯": "candle", "💡": "light bulb|bulb", "📺": "tv|television", "📻": "radio", "⏰": "alarm clock|clock", "🧸": "teddy bear|teddy", "🪞": "mirror", "🪟": "window", "🔨": "hammer", "✂": "scissors", "📚": "books", "☂": "umbrella", "🧦": "socks", "👓": "glasses", "🪴": "plant", "🔦": "flashlight|torch", "🧲": "magnet", "🪣": "bucket" }
+};
+const PEOPLE_CATS = ["egyptcinema", "syriandrama", "lebsingers", "gulfstars", "palart", "hollywood", "popstars", "creators", "arabplayers", "footballnow", "legends", "coaches", "athletes"];

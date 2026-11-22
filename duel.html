@@ -46,6 +46,8 @@ button { cursor: pointer; }
 /* The picture box: fills its parent; the picture is scaled to fit inside it */
 .pbox { position: relative; flex: 1; min-height: 0; width: 100%; container-type: size; }
 /* the picture sits in the largest square that fits the box */
+.sq > .pic.icon { display: grid; place-items: center; }
+.sq > .pic.icon svg { width: 72%; height: 72%; }
 .pbox > .sq { position: absolute; inset: 0; margin: auto; width: min(100cqw, 100cqh); height: min(100cqw, 100cqh); }
 .sq > .pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; border: 0; box-shadow: none; }
 .sq > .pic.photo { background: var(--paper); }
@@ -198,6 +200,7 @@ button { cursor: pointer; }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="duel-icons.js"></script>
 <script src="duel-data.js"></script>
 <script>
 // ======================= shared =======================
@@ -242,12 +245,17 @@ const IS_PLAYER = params.has("room") || params.has("join");
 const FLAG_URL = c => "https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/flags/4x3/" + c + ".svg";
 const TWEMOJI_URL = e => "https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/" + Array.from(e).map(ch => ch.codePointAt(0).toString(16)).filter(h => h !== "fe0f").join("-") + ".svg";
 function picHTML(kind, key) {
+  if (kind === "icon") {                                   // brand symbol in its colour; very light colours sit on a dark square
+    const i = DUEL_ICONS[key]; if (!i) return "";
+    const n = parseInt(i.c, 16), light = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) > 200;
+    return `<div class="pic icon" style="background: ${light ? "var(--ink)" : "var(--paper)"};" role="img" aria-label="شعار"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#${i.c}" d="${i.d}"/></svg></div>`;
+  }
   if (kind === "flag") return `<img class="pic flag" src="${FLAG_URL(key)}" alt="علم">`;
   if (kind === "url") return key ? `<img class="pic photo" src="${esc(key)}" alt="صورة">` : `<span class="emo" style="font-size: 32px;">…</span>`;
   return `<img class="pic emoji" src="${TWEMOJI_URL(key)}" alt="صورة" data-e="${esc(key)}" onerror="this.outerHTML='<span class=&quot;emo&quot;>'+this.dataset.e+'</span>'">`;
 }
 const isPhoto = c => c && (c.kind === "item" || c.kind === "wikipage" || c.kind === "wiki");
-const catThumb = c => isPhoto(c) ? `<span class="pthumb" aria-hidden="true">${c.prop === "P154" ? "LOGO" : c.kind === "wikipage" ? "كرتون" : "صور"}</span>` : picHTML(c.kind, c.items[0][0]);
+const catThumb = c => c.kind === "icon" ? `<span class="pthumb" aria-hidden="true">LOGO</span>` : isPhoto(c) ? `<span class="pthumb" aria-hidden="true">${c.prop === "P154" ? "LOGO" : c.kind === "wikipage" ? "كرتون" : "صور"}</span>` : picHTML(c.kind, c.items[0][0]);
 
 // ---- Photos from Wikimedia Commons (looked up once, then remembered on this device) ----
 // "item": the Wikipedia article's Wikidata item → its curated photo (P18), logo (P154) or map (P242).
@@ -306,11 +314,27 @@ async function prefetchCat(catId) {
 
 // Fuzzy matching (same rules as جيو!)
 function norm(s) {
-  s = String(s || "").toLowerCase().replace(/[ً-ٰٟـ]/g, "")
+  s = String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").normalize("NFC").replace(/[ً-ٰٟـ]/g, "")
     .replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").replace(/ؤ/g, "و").replace(/ئ/g, "ي")
     .replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim()
     .replace(/^(هاد|هذا|هذه|هاي|هيدا|هيدي|هو|هي)\s+/, "");
   return s.split(" ").map(w => (/^(وال|ال)../.test(w) ? w.replace(/^(وال|ال)/, "") : w)).filter(w => w && !["the", "a", "an"].includes(w)).join(" ");
+}
+// English names that also count as right: the Wikipedia title for photos, the brand name for logos,
+// the country name for flags, and the DUEL_EN list for emoji and capitals
+const EN_EXTRA = { us: "USA|US|America|United States", gb: "UK|Britain|England|United Kingdom", ae: "UAE|Emirates", sa: "KSA|Saudi|Saudi Arabia", ps: "Palestine", kr: "Korea|South Korea", kp: "North Korea", nl: "Holland|Netherlands", cz: "Czechia|Czech Republic", tr: "Turkey|Turkiye", ci: "Ivory Coast" };
+let regionEN = null; try { regionEN = new Intl.DisplayNames(["en"], { type: "region" }); } catch (e) {}
+function enAlts(c, it) {
+  const key = it[0], out = [];
+  if (DUEL_EN[c.id] && DUEL_EN[c.id][key]) out.push(...DUEL_EN[c.id][key].split("|"));
+  else if (c.kind === "flag") { if (regionEN) try { out.push(regionEN.of(key.toUpperCase())); } catch (e) {} if (EN_EXTRA[key]) out.push(...EN_EXTRA[key].split("|")); }
+  else if (c.kind === "icon") { if (DUEL_ICONS[key]) out.push(DUEL_ICONS[key].t); }
+  else if (c.kind !== "emoji") {
+    const base = key.replace(/\s*\(.*?\)\s*/g, " ").replace(/,.*$/, "").trim(); out.push(base);
+    const last = base.split(" ").pop();
+    if (PEOPLE_CATS.includes(c.id) && base.includes(" ") && norm(last).length >= 4) out.push(last);   // surname alone
+  }
+  return out.filter(Boolean);
 }
 function lev(a, b) {
   if (a === b) return 0; if (!a.length) return b.length; if (!b.length) return a.length;
@@ -323,7 +347,7 @@ function isRight(text, answer, alts) {
   return [answer, ...(alts || [])].some(v => {
     const b = norm(v).replace(/\s/g, ""); if (!b) return false;
     if (b.length >= 3 && a.includes(b) && a.length <= b.length + 8) return true;   // spoken answers often carry extra words
-    return 1 - lev(a, b) / Math.max(a.length, b.length) >= (b.length <= 3 ? 0.99 : 0.75);
+    return 1 - lev(a, b) / Math.max(a.length, b.length) >= (b.length <= 3 ? 0.99 : b.length <= 5 && /[a-z]/.test(b) ? 0.8 : 0.75);   // stricter for short English words (Iran ≠ Iraq)
   });
 }
 
@@ -510,7 +534,7 @@ function addLog(pid, text, v) { const m = M(); m.log.push({ pid, text, v }); if 
 
 function answer(text, byHost) {
   const m = M(), it = curItem();
-  if (byHost || isRight(text, it[1], it[2])) {
+  if (byHost || isRight(text, it[1], [...(it[2] || []), ...enAlts(catById(m.cat), it)])) {
     addLog(m.turn, byHost ? it[1] : text, "ok"); sfx.right();
     m.reveal = null; advance(); m.turn = other(m.turn); m.lastTick = Date.now();
   } else { addLog(m.turn, text, "no"); sfx.wrong(); }
@@ -863,7 +887,7 @@ function render() {
         html = `<div class="turn"><div class="top" data-clock="${P.pid}"><span style="font-weight: 700;">دورك!</span><span class="t ltr"></span><div class="bar"><i></i></div></div>
           <div class="body">
             <div class="picwrap"><div class="pbox"><div class="sq">${picHTML(S.kind, S.pic)}</div></div><span>${esc(S.prompt)}</span></div>
-            <form class="ansrow" data-f="ans" autocomplete="off"><label for="f-ans" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">الجواب</label><input id="f-ans" placeholder="اكتب الجواب"><button type="submit">إبعت</button></form>
+            <form class="ansrow" data-f="ans" autocomplete="off"><label for="f-ans" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">الجواب</label><input id="f-ans" placeholder="اكتب الجواب (عربي أو English)"><button type="submit">إبعت</button></form>
             <div class="flash ${S.last && S.last.pid === P.pid ? S.last.v : ""}">${S.last && S.last.pid === P.pid && S.last.v === "no" ? "✗ «" + esc(S.last.text) + "» غلط، جرّب كمان" : ""}</div>
             <button type="button" class="pass" id="passBtn">مرّر · −3 ثواني</button>
           </div></div>`;
