@@ -28,4 +28,4 @@ A second game on the same site: a 1v1 picture duel, played in one room with the 
 
 `duel-data.js` holds the categories, items and difficulty levels. Flags come from flag-icons (MIT) and other pictures from Twemoji (CC BY 4.0); credits are shown in the lobby.
 
-Logo categories (`kind: "icon"`) use brand symbols from Simple Icons (CC0), bundled in `duel-icons.js`; each was checked by eye to show no brand name. Photo categories store only English Wikipedia article titles: for `kind: "item"` the TV looks up the article's Wikidata item and uses its Commons photo (P18) or map (P242). Pictures are fetched at game time and remembered in the TV's browser storage; no images are stored in this repo or on the site.
+Logo categories (`kind: "icon"`) use brand symbols from Simple Icons (CC0), bundled in `duel-icons.js`; each was checked by eye to show no brand name. Photo categories store only English Wikipedia article titles: for `kind: "item"` the TV looks up the article's Wikidata item and uses its Commons photo (P18) or map (P242). Photos are fetched at game time and remembered in the TV's browser storage; no photos are stored in this repo or on the site.
